@@ -25,7 +25,7 @@ class UserModel extends BaseModel {
     }
 
     public function add(array $data): int {
-        $data['id'] = $this->getMax() + 1;
+        $data['id'] = $this->getMax("user", "id") + 1;
         $this->db->table('user')->insert($data);
         return $this->db->insertID();
     }
@@ -40,9 +40,5 @@ class UserModel extends BaseModel {
 
     public function updateLastLogout(int $id): void {
         $this->db->table('user')->update(['lastLogout' => date('Y-m-d H:i:s')], ['id' => $id]);
-    }
-
-    private function getMax(): int {
-        return $this->db->table('user')->selectMax('id')->get()->getRowArray()['id'];
     }
 }

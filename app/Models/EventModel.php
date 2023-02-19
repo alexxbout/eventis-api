@@ -25,12 +25,8 @@ class EventModel extends BaseModel {
     }
 
     public function add(array $data): int {
-        $data['id'] = $this->getMax() + 1;
+        $data['id'] = $this->getMax("event", "id") + 1;
         $this->db->table('event')->insert($data);
         return $this->db->insertID();
-    }
-
-    private function getMax(): int {
-        return $this->db->table('event')->selectMax('id')->get()->getRowArray()['id'];
     }
 }
