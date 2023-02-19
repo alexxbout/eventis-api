@@ -8,6 +8,7 @@ use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use stdClass;
 
 /**
  * Class BaseController
@@ -19,8 +20,7 @@ use Psr\Log\LoggerInterface;
  *
  * For security be sure to declare any new methods as protected or private.
  */
-abstract class BaseController extends Controller
-{
+abstract class BaseController extends Controller {
     /**
      * Instance of the main Request object.
      *
@@ -46,13 +46,29 @@ abstract class BaseController extends Controller
     /**
      * Constructor.
      */
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
-    {
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         // Do Not Edit This Line
         parent::initController($request, $response, $logger);
 
         // Preload any models, libraries, etc, here.
 
         // E.g.: $this->session = \Config\Services::session();
+    }
+
+    protected function send(int $status_code, array|string $json = "", array $header = []): void {
+        foreach ($header as $h) {
+            header($h);
+        }
+
+        $this->response
+            ->setContentType("application/json")
+            ->setStatusCode($status_code)
+            ->setJson($json);
+
+        $this->response->send();
+    }
+
+    protected function stdClassToArray(stdClass $stdClass): array {
+        return json_decode(json_encode($stdClass), true);
     }
 }
