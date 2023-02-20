@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Utils\HTTPCodes;
+use App\Utils\Regex;
+
 class UserController extends BaseController {
     private $userModel;
 
@@ -10,23 +13,48 @@ class UserController extends BaseController {
     }
 
     public function getAll(): void {
-        $this->send(200, $this->userModel->getAll());
+        $data = $this->userModel->getAll();
+        if ($data != null) {
+            $this->send(HTTPCodes::OK, $data);
+        } else {
+            $this->send(HTTPCodes::NO_CONTENT, []);
+        }
     }
 
     public function getById(int $id): void {
-        $this->send(200, $this->userModel->getById($id));
+        $data = $this->userModel->getById($id);
+        if ($data != null) {
+            $this->send(HTTPCodes::OK, $data);
+        } else {
+            $this->send(HTTPCodes::NOTFOUND, []);
+        }
     }
 
     public function getByIdFoyer(int $idFoyer): void {
-        $this->send(200, $this->userModel->getByIdFoyer($idFoyer));
+        $data = $this->userModel->getByIdFoyer($idFoyer);
+        if ($data != null) {
+            $this->send(HTTPCodes::OK, $data);
+        } else {
+            $this->send(HTTPCodes::NOTFOUND, []);
+        }
     }
 
     public function getByIdRole(int $idRole): void {
-        $this->send(200, $this->userModel->getByIdRole($idRole));
+        $data = $this->userModel->getByIdRole($idRole);
+        if ($data != null) {
+            $this->send(HTTPCodes::OK, $data);
+        } else {
+            $this->send(HTTPCodes::NOTFOUND, []);
+        }
     }
 
     public function getByIdRef(int $idRef): void {
-        $this->send(200, $this->userModel->getByIdRef($idRef));
+        $data = $this->userModel->getByIdRef($idRef);
+        if ($data != null) {
+            $this->send(HTTPCodes::OK, $data);
+        } else {
+            $this->send(HTTPCodes::NOTFOUND, []);
+        }
     }
 
     public function add(): void {
@@ -36,21 +64,21 @@ class UserController extends BaseController {
             "nom" => "required|max_length[30]",
             "prenom" => "required|max_length[30]",
             "login" => "required|max_length[30]",
-            "password" => "required|regex_match[/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,100}$/]",
+            "password" => "required|regex_match[" . Regex::PASSWORD ."]",
             "idFoyer" => "required|integer",
             "idRole" => "required|integer"
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
         } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
+            $data = $this->request->getJSON(true);
 
             $data["password"] = $this->encodePassword($data["password"]);
 
             $id = $this->userModel->add($data);
 
-            $this->send(200, ["message" => "User added", "id" => $id, "data" => $data]);
+            $this->send(HTTPCodes::OK, ["message" => "User added", "id" => $id, "data" => $data]);
         }
     }
 
@@ -62,13 +90,13 @@ class UserController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
         } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
+            $data = $this->request->getJSON(true);
 
             $this->userModel->updateLastLogin($data["id"]);
 
-            $this->send(200, ["message" => "Last login updated"]);
+            $this->send(HTTPCodes::OK, ["message" => "Last login updated"]);
         }
     }
 
@@ -80,13 +108,13 @@ class UserController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
         } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
+            $data = $this->request->getJSON(true);
 
             $this->userModel->updateLastLogout($data["id"]);
 
-            $this->send(200, ["message" => "Last logout updated"]);
+            $this->send(HTTPCodes::OK, ["message" => "Last logout updated"]);
         }
     }
 
@@ -101,9 +129,9 @@ class UserController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
         } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
+            $data = $this->request->getJSON(true);
 
             if (isset($data["password"])) {
                 unset($data["password"]); // We don't want to update the password with this method
@@ -111,7 +139,7 @@ class UserController extends BaseController {
 
             $this->userModel->updateData($data);
 
-            $this->send(200, ["message" => "User updated", "data" => $data]);
+            $this->send(HTTPCodes::OK, ["message" => "User updated", "data" => $data]);
         }
     }
 

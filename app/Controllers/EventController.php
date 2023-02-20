@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Utils\HTTPCodes;
+
 class EventController extends BaseController {
     private $eventModel;
 
@@ -10,15 +12,30 @@ class EventController extends BaseController {
     }
 
     public function getAll(): void {
-        $this->send(200, $this->eventModel->getAll());
+        $data = $this->eventModel->getAll();
+        if ($data != null) {
+            $this->send(HTTPCodes::OK, $data);
+        } else {
+            $this->send(HTTPCodes::NO_CONTENT, []);
+        }
     }
     
     public function getById(int $id): void {
-        $this->send(200, $this->eventModel->getById($id));
+        $data = $this->eventModel->getById($id);
+        if ($data != null) {
+            $this->send(HTTPCodes::OK, $data);
+        } else {
+            $this->send(HTTPCodes::NO_CONTENT, []);
+        }
     }
 
     public function getByZip(string $zip): void {
-        $this->send(200, $this->eventModel->getByZip($zip));
+        $data = $this->eventModel->getByZip($zip);
+        if ($data != null) {
+            $this->send(HTTPCodes::OK, $data);
+        } else {
+            $this->send(HTTPCodes::NO_CONTENT, []);
+        }
     }
 
     public function cancel(): void {
@@ -30,13 +47,13 @@ class EventController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
         } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
+            $data = $this->request->getJSON(true);
 
             $this->eventModel->cancel($data["id"], $data["reason"]);
 
-            $this->send(200, ["message" => "Event canceled", "data" => $data]);
+            $this->send(HTTPCodes::OK, ["message" => "Event canceled", "data" => $data]);
         }
     }
 
@@ -53,17 +70,17 @@ class EventController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
         } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
+            $data = $this->request->getJSON(true);
 
-            if (isset($data["canceled"])) {
+            if (isset($data["canceled"])) { // We don't want to update the canceled status with this method
                 unset($data["canceled"]);
             }
 
             $this->eventModel->updateData($data);
 
-            $this->send(200, ["message" => "Event updated", "data" => $data]);
+            $this->send(HTTPCodes::OK, ["message" => "Event updated", "data" => $data]);
         }
     }
 
@@ -80,13 +97,13 @@ class EventController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
         } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
+            $data = $this->request->getJSON(true);
 
             $id = $this->eventModel->add($data);
 
-            $this->send(200, ["message" => "Event added", "id" => $id, "data" => $data]);
+            $this->send(HTTPCodes::OK, ["message" => "Event added", "id" => $id, "data" => $data]);
         }
     }
 }

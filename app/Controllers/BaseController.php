@@ -67,8 +67,4 @@ abstract class BaseController extends Controller {
 
         $this->response->send();
     }
-
-    protected function stdClassToArray(stdClass $stdClass): array {
-        return json_decode(json_encode($stdClass), true);
-    }
 }

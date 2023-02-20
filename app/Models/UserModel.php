@@ -4,23 +4,23 @@ namespace App\Models;
 
 class UserModel extends BaseModel {
 
-    public function getAll(): array {
+    public function getAll(): array|null {
         return $this->db->table('user')->get()->getResultArray();
     }
 
-    public function getById(int $id): array {
+    public function getById(int $id): array|null {
         return $this->db->table('user')->getWhere(['id' => $id])->getRowArray();
     }
 
-    public function getByIdFoyer(int $idFoyer): array {
+    public function getByIdFoyer(int $idFoyer): array|null {
         return $this->db->table('user')->getWhere(['idFoyer' => $idFoyer])->getResultArray();
     }
 
-    public function getByIdRole(int $idRole): array {
+    public function getByIdRole(int $idRole): array|null {
         return $this->db->table('user')->getWhere(['idRole' => $idRole])->getResultArray();
     }
 
-    public function getByIdRef(int $idRef): array {
+    public function getByIdRef(int $idRef): array|null {
         return $this->db->table('user')->getWhere(['idRef' => $idRef])->getResultArray();
     }
 

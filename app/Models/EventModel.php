@@ -4,15 +4,15 @@ namespace App\Models;
 
 class EventModel extends BaseModel {
 
-    public function getAll(): array {
+    public function getAll(): array|null {
         return $this->db->table('event')->get()->getResultArray();
     }
 
-    public function getById(int $id): array {
+    public function getById(int $id): array|null {
         return $this->db->table('event')->getWhere(['id' => $id])->getRowArray();
     }
 
-    public function getByZip(string $zip): array {
+    public function getByZip(string $zip): array|null {
         return $this->db->table('event')->getWhere(['zip' => $zip])->getResultArray();
     }
 
