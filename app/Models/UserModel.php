@@ -24,10 +24,9 @@ class UserModel extends BaseModel {
         return $this->db->table('user')->getWhere(['idRef' => $idRef])->getResultArray();
     }
 
-    public function add(array $data): int {
+    public function add(array $data): void {
         $data['id'] = $this->getMax("user", "id") + 1;
         $this->db->table('user')->insert($data);
-        return $this->db->insertID();
     }
 
     public function updateData(array $data): void {

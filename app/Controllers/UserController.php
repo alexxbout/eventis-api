@@ -48,9 +48,9 @@ class UserController extends BaseController {
 
             $data["password"] = $this->encodePassword($data["password"]);
 
-            $id = $this->userModel->add($data);
+            $this->userModel->add($data);
 
-            $this->send(200, ["message" => "User added", "id" => $id, "data" => $data]);
+            $this->send(200, ["message" => "User added"]);
         }
     }
 
