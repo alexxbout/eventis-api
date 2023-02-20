@@ -143,6 +143,47 @@ class UserController extends BaseController {
         }
     }
 
+    /**
+     * It updates the password of a user
+     * 
+     * Verfications:
+     * - The old password is correct
+     * - The new password is different from the old one
+     * - The new password is valid
+     */
+    public function updatePassword(): void {
+        $validation =  \Config\Services::validation();
+
+        $validation->setRules([
+            "id" => "required|integer",
+            "oldPassword" => "required|regex_match[" . Regex::PASSWORD ."]",
+            "newPassword" => "required|regex_match[" . Regex::PASSWORD ."]"
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+        } else {
+            $data = $this->request->getJSON(true);
+
+            if ($data["oldPassword"] == $data["newPassword"]) {
+                $this->send(HTTPCodes::BAD_REQUEST, ["message" => "New password is the same as the old one"]);
+                return;
+            }
+
+            $user = $this->userModel->getById($data["id"]);
+
+            if (password_verify($data["oldPassword"], $user["password"])) {
+                $data["newPassword"] = $this->encodePassword($data["newPassword"]);
+
+                $this->userModel->updatePassword($data["id"], $data["newPassword"]);
+
+                $this->send(HTTPCodes::OK, ["message" => "Password updated"]);
+            } else {
+                $this->send(HTTPCodes::BAD_REQUEST, ["message" => "Old password is incorrect"]);
+            }
+        }
+    }
+
     private function encodePassword(string $password): string {
         return password_hash($password, PASSWORD_DEFAULT);
     }

@@ -41,4 +41,8 @@ class UserModel extends BaseModel {
     public function updateLastLogout(int $id): void {
         $this->db->table('user')->update(['lastLogout' => date('Y-m-d H:i:s')], ['id' => $id]);
     }
+
+    public function updatePassword(int $id, string $password): void {
+        $this->db->table('user')->update(['password' => $password], ['id' => $id]);
+    }
 }

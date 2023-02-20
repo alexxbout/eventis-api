@@ -53,6 +53,7 @@ $routes->group("api", static function ($routes) {
             $routes->put("updateData", "UserController::updateData"); // Met à jour un utilisateur
             $routes->put("updateLastLogin", "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
             $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
+            $routes->put("updatePassword", "UserController::updatePassword"); // Met à jour le mot de passe d'un utilisateur
         });
 
         $routes->group("foyer", static function ($routes) {
