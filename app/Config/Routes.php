@@ -78,6 +78,7 @@ $routes->group("api", static function ($routes) {
 
             // Les paramètres sont dans le body
             $routes->post("add", "EventController::add"); // Ajoute un événement
+            $routes->post("(:num)/image", "EventController::addImage/$1"); // Ajoute une image à un événement
             $routes->put("updateData", "EventController::updateData"); // Met à jour un événement
             $routes->put("cancel", "EventController::cancel"); // Annule un événement par son id
         });

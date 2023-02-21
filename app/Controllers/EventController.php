@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Utils\HTTPCodes;
+use CodeIgniter\Files\File;
 
 class EventController extends BaseController {
     private $eventModel;
@@ -19,7 +20,7 @@ class EventController extends BaseController {
             $this->send(HTTPCodes::NO_CONTENT, []);
         }
     }
-    
+
     public function getById(int $id): void {
         $data = $this->eventModel->getById($id);
         if ($data != null) {
@@ -92,8 +93,7 @@ class EventController extends BaseController {
             "dateDebut" => "required|valid_date[Y-m-d H:i:s]",
             "dateFin" => "required|valid_date[Y-m-d H:i:s]",
             "title" => "required|max_length[20]",
-            "description" => "required|max_length[1000]",
-            "pic" => "permit_empty|max_length[50]"
+            "description" => "required|max_length[1000]"
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
@@ -104,6 +104,50 @@ class EventController extends BaseController {
             $id = $this->eventModel->add($data);
 
             $this->send(HTTPCodes::OK, ["message" => "Event added", "id" => $id, "data" => $data]);
+        }
+    }
+
+    public function addImage(int $id): void {
+        if ($this->eventModel->getById($id) == null) {
+            $this->send(HTTPCodes::NO_CONTENT, ["message" => "Event with id $id does not exist"]);
+            return;
+        }
+
+        $validation =  \Config\Services::validation();
+
+        $validation->setRules([
+            "image" => [
+                "label" => "Image",
+                "rules" => [
+                    "uploaded[image]",
+                    "is_image[image]",
+                    "ext_in[image,jpg,jpeg,png]"
+                ]
+            ]
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+        } else {
+            $file = $this->request->getFile("image");
+
+            if (!$file->hasMoved()) {
+                // generate random name
+                $newName = $file->getRandomName();
+                $file->move(WRITEPATH . "uploads/images", $newName);
+
+                // optimize image
+                \Config\Services::image()
+                    ->withFile(WRITEPATH . "uploads/images/" . $newName)
+                    ->save(WRITEPATH . "uploads/images/" . $newName, 30);
+
+                // save image name in database
+                $this->eventModel->addImage($id, $newName);
+
+                $this->send(HTTPCodes::OK, ["message" => "Image uploaded"]);
+            } else {
+                $this->send(HTTPCodes::BAD_REQUEST, ["message" => "The file has already been moved"]);
+            }
         }
     }
 }
