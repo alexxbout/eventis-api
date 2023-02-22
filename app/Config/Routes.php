@@ -94,13 +94,10 @@ $routes->group("api", static function ($routes) {
         $routes->group("code", static function ($routes) {
             $routes->get("", "CodeController::getAll"); // Tous les codes
             $routes->get("(:num)", "CodeController::getById/$1"); // Un code par son id
-            $routes->get("check/(:alpha)", "CodeController::checkExist/$1"); // Vérifie si un code existe
-            $routes->get("valid/(:alpha)", "CodeController::isValid/$1"); // Vérifie si un code est valide
+            $routes->get("(:alpha)", "CodeController::checkExists/$1"); // Vérifie si un code est valide
             
             // Les paramètres sont dans le body
-            $routes->post("add", "CodeController::add"); // Ajoute un code
-            $routes->delete("delete", "CodeController::delete"); // Supprime un code
-            $routes->put("use", "CodeController::use"); // Utilise un code
+            $routes->post("generate", "CodeController::generate"); // Génère un code
         });
 
         $routes->group("friend", static function ($routes) {
