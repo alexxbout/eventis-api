@@ -17,6 +17,10 @@ class FoyerController extends BaseController {
         $this->send(200, $this->foyerModel->getById($id));
     }
 
+    public function getByZip(int $zip): void {
+        $this->send(200, $this->foyerModel->getByZip($zip));
+    }
+
     public function add(): void {
         $validation =  \Config\Services::validation();
 
@@ -43,9 +47,10 @@ class FoyerController extends BaseController {
 
         $validation->setRules([
             "id" => "required|integer",
-            "nom" => "permit_empty|max_length[30]",
-            "prenom" => "permit_empty|max_length[30]",
-            "login" => "permit_empty|max_length[30]"
+            "city" => "permit_empty|max_length[10]",
+            "zip" => "permit_empty|max_length[5]",
+            "address" => "permit_empty|max_length[50]",
+            "street" => "permit_empty|max_length[10]"
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {

@@ -9,7 +9,7 @@ class FoyerModel extends BaseModel {
     }
 
     public function getById(int $id): array {
-        return $this->db->table('foyer')->getWhere(['id' => $id])->getRowArray();
+        return $this->db->table('foyer')->getWhere(['id' => $id])->getRowArray(); //devrait pas etre tableau
     }
 
     public function add(array $data): void {
