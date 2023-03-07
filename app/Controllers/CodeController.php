@@ -16,35 +16,27 @@ class CodeController extends BaseController {
     public function getAll(): void {
         $data = $this->codeModel->getAll();
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, []);
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
     public function getById(int $id): void {
         $data = $this->codeModel->getById($id);
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NOTFOUND, []);
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
     public function getByIdFoyer(int $idFoyer): void {
         $data = $this->codeModel->getByIdFoyer($idFoyer);
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NOTFOUND, []);
-        }
-    }
-
-    public function checkExists(string $code): void {
-        if ($this->codeModel->checkExists($code)) {
-            $this->send(HTTPCodes::OK, ["message" => "Code existant"]);
-        } else {
-            $this->send(HTTPCodes::NO_CONTENT, ["message" => "Code inexistant"]);
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
     
@@ -57,7 +49,7 @@ class CodeController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
 
@@ -71,7 +63,7 @@ class CodeController extends BaseController {
             $this->codeModel->add($code, $data["idFoyer"], $data["expire"]);
             // Ici on devrait vérifier que l'insertion s'est bien passée, et renvoyer une erreur si ce n'est pas le cas.
         
-            $this->send(HTTPCodes::OK, ["message" => "Code generated successfully", "code" => $code]);
+            $this->send(HTTPCodes::OK, ["code" => $code], "Code generated");
         }
     }
 
