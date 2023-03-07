@@ -55,7 +55,7 @@ abstract class BaseController extends Controller {
         // E.g.: $this->session = \Config\Services::session();
     }
 
-    protected function send(int $status_code, array|string $json = "", array $header = []): void {
+    protected function send(int $status_code, array $data, string $message, array $header = []): void {
         foreach ($header as $h) {
             header($h);
         }
@@ -63,12 +63,12 @@ abstract class BaseController extends Controller {
         $this->response
             ->setContentType("application/json")
             ->setStatusCode($status_code)
-            ->setJson($json);
+            ->setJson([
+                "status" => $status_code,
+                "message" => $message,
+                "data" => $data
+            ]);
 
         $this->response->send();
-    }
-
-    protected function stdClassToArray(stdClass $stdClass): array {
-        return json_decode(json_encode($stdClass), true);
     }
 }
