@@ -60,8 +60,8 @@ abstract class BaseController extends Controller {
      * 
      * @param int status_code The HTTP status code to send.
      * @param array|null data The data to be sent to the client.
-     * @param string|array|null message The message to be displayed to the user.
-     * @param string errors An array of errors.
+     * @param string message The message to be displayed to the user.
+     * @param string|array|null errors An array of errors.
      * @param array header An array of headers to be sent with the response.
      */
     protected function send(int $status_code, array|null $data = null, string $message = "", string|array|null $errors = null, array $header = []): void {
