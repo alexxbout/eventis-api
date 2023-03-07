@@ -17,7 +17,7 @@ class UserController extends BaseController {
         if ($data != null) {
             $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
@@ -26,7 +26,7 @@ class UserController extends BaseController {
         if ($data != null) {
             $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
@@ -35,7 +35,7 @@ class UserController extends BaseController {
         if ($data != null) {
             $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
@@ -44,7 +44,7 @@ class UserController extends BaseController {
         if ($data != null) {
             $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
@@ -53,7 +53,7 @@ class UserController extends BaseController {
         if ($data != null) {
             $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
@@ -70,15 +70,14 @@ class UserController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
-
             $data["password"] = $this->encodePassword($data["password"]);
 
-            $id = $this->userModel->add($data);
+            $this->userModel->add($data);
 
-            $this->send(HTTPCodes::OK, ["message" => "User added", "id" => $id, "data" => $data]);
+            $this->send(HTTPCodes::OK, $data, "User added");
         }
     }
 
@@ -90,13 +89,13 @@ class UserController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
 
             $this->userModel->updateLastLogin($data["id"]);
 
-            $this->send(HTTPCodes::OK, ["message" => "Last login updated"]);
+            $this->send(HTTPCodes::OK, $data, "Last login updated");
         }
     }
 
@@ -108,13 +107,14 @@ class UserController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
 
             $this->userModel->updateLastLogout($data["id"]);
 
-            $this->send(HTTPCodes::OK, ["message" => "Last logout updated"]);
+            $this->send(HTTPCodes::OK, $data, "Last logout updated");
+
         }
     }
 
@@ -129,7 +129,7 @@ class UserController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
 
@@ -139,7 +139,7 @@ class UserController extends BaseController {
 
             $this->userModel->updateData($data);
 
-            $this->send(HTTPCodes::OK, ["message" => "User updated", "data" => $data]);
+            $this->send(HTTPCodes::OK, $data, "User updated");
         }
     }
 
@@ -161,25 +161,27 @@ class UserController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
 
+            // Check if the new password is different from the old one
             if ($data["oldPassword"] == $data["newPassword"]) {
-                $this->send(HTTPCodes::BAD_REQUEST, ["message" => "New password is the same as the old one"]);
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "New password is the same as the old one");
                 return;
             }
 
             $user = $this->userModel->getById($data["id"]);
 
-            if (password_verify($data["oldPassword"], $user["password"])) {
+            // Check if the old password is correct
+            if (!password_verify($data["oldPassword"], $user["password"])) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "Old password is incorrect");
+            } else {
                 $data["newPassword"] = $this->encodePassword($data["newPassword"]);
 
                 $this->userModel->updatePassword($data["id"], $data["newPassword"]);
 
-                $this->send(HTTPCodes::OK, ["message" => "Password updated"]);
-            } else {
-                $this->send(HTTPCodes::BAD_REQUEST, ["message" => "Old password is incorrect"]);
+                $this->send(HTTPCodes::OK, null, "Password updated");
             }
         }
     }
