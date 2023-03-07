@@ -44,7 +44,15 @@
                 },
                 "id": "25a8673d-3d2d-4351-95a4-860ab4817065",
                 "name": "GET - getAll",
-                "headers": []
+                "headers": [],
+                "assertions": [
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseStatus",
+                    "path": "code",
+                    "value": "200"
+                  }
+                ]
               }
             },
             {
@@ -76,7 +84,15 @@
                 },
                 "id": "0f33f5fd-d5e1-45b6-9a1e-7e80279dc51d",
                 "name": "GET - getByCode",
-                "headers": []
+                "headers": [],
+                "assertions": [
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseStatus",
+                    "path": "code",
+                    "value": "204"
+                  }
+                ]
               }
             },
             {
@@ -104,11 +120,19 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/code/0"
+                  "path": "/api/v1/code/1"
                 },
                 "id": "3ebbafac-d58a-449e-aa85-003963686c57",
                 "name": "GET - getById",
-                "headers": []
+                "headers": [],
+                "assertions": [
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseStatus",
+                    "path": "code",
+                    "value": "200"
+                  }
+                ]
               }
             },
             {
@@ -152,6 +176,14 @@
                     "enabled": true,
                     "name": "Accept",
                     "value": "application/json"
+                  }
+                ],
+                "assertions": [
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseStatus",
+                    "path": "code",
+                    "value": "200"
                   }
                 ]
               }
@@ -1058,7 +1090,7 @@
                     "comparison": "Equals",
                     "subject": "ResponseStatus",
                     "path": "code",
-                    "value": "204"
+                    "value": "404"
                   }
                 ]
               }
