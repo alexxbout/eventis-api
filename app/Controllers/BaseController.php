@@ -64,7 +64,7 @@ abstract class BaseController extends Controller {
      * @param string errors An array of errors.
      * @param array header An array of headers to be sent with the response.
      */
-    protected function send(int $status_code, array|null $data, string $message, string|array|null $errors = null, array $header = []): void {
+    protected function send(int $status_code, array|null $data = null, string $message = "", string|array|null $errors = null, array $header = []): void {
         foreach ($header as $h) {
             header($h);
         }
