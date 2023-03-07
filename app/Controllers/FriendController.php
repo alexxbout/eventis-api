@@ -30,12 +30,9 @@ class FriendController extends BaseController {
             $data = $this->friendModel->isFriend($idUser, $idFriend);
 
             if($data == null){
-                $this->send(HTTPCodes::OK,[0]);
-            }elseif(empty($data)){
-                $this->send(HTTPCodes::NO_CONTENT,[0]);
-            }
-            else{
-                $this->send(HTTPCodes::OK,[1]);
+                $this->send(HTTPCodes::OK,["data" => false]);
+            }else{
+                $this->send(HTTPCodes::OK,["data" => true]);
             }
         }else{
             $err = ["message" => "Same arguments","data" => "Cannot ask if someone is friend with himself"];
