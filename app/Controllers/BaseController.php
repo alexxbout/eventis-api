@@ -55,7 +55,7 @@ abstract class BaseController extends Controller {
         // E.g.: $this->session = \Config\Services::session();
     }
 
-    protected function send(int $status_code, array $data, string $message, array $header = []): void {
+    protected function send(int $status_code, array|null $data, string $message, array $header = []): void {
         foreach ($header as $h) {
             header($h);
         }
