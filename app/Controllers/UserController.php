@@ -15,45 +15,45 @@ class UserController extends BaseController {
     public function getAll(): void {
         $data = $this->userModel->getAll();
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, []);
+            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
         }
     }
 
     public function getById(int $id): void {
         $data = $this->userModel->getById($id);
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NOTFOUND, []);
+            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
         }
     }
 
     public function getByIdFoyer(int $idFoyer): void {
         $data = $this->userModel->getByIdFoyer($idFoyer);
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NOTFOUND, []);
+            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
         }
     }
 
     public function getByIdRole(int $idRole): void {
         $data = $this->userModel->getByIdRole($idRole);
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NOTFOUND, []);
+            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
         }
     }
 
     public function getByIdRef(int $idRef): void {
         $data = $this->userModel->getByIdRef($idRef);
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NOTFOUND, []);
+            $this->send(HTTPCodes::NO_CONTENT, null, "No content");
         }
     }
 
