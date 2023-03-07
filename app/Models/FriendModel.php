@@ -10,23 +10,13 @@ class FriendModel extends BaseModel {
         $fdb = $this->db->table('friend');
         $dataIdUser1 = $fdb->where('idUser1', $idUser)->get()->getResultArray();
         $dataIdUser2 = $fdb->orWhere('idUser2', $idUser)->get()->getResultArray();
-        $combined = fusionner_tableaux($dataIdUser1, $dataIdUser2);
-        return $combined;
+        return array_merge($dataIdUser1, $dataIdUser2);
     }
 
-    public function isFriend(int $idUser, int $idFriend): bool {
+    public function isFriend(int $idUser, int $idFriend): array | null {
         $array = array('idUser1' => $idUser, 'idUser2' => $idFriend);
-        $data= $this->db->table('friend')->getWhere($array)->getRowArray();
+        $data= $this->db->table('friend')->where($array)->get()->getRowArray();
         return $data;
     }
     
 }
-
-
-
-function fusionner_tableaux($tableau1, $tableau2) {
-    for($i=0; $i<count($tableau2); $i++){
-        array_push($tableau1, $tableau2[$i]);      
-    }
-    return $tableau1;
-  }
