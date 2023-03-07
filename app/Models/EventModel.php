@@ -24,10 +24,10 @@ class EventModel extends BaseModel {
         $this->db->table("event")->update($data, ["id" => $data["id"]]);
     }
 
-    public function add(array $data): int {
+    public function add(array $data): void {
         $data["id"] = $this->getMax("event", "id") + 1;
         $this->db->table("event")->insert($data);
-        return $this->db->insertID();
+        $this->db->insertID();
     }
 
     public function addImage(int $id, string $image): void {

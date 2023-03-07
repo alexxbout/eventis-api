@@ -15,27 +15,27 @@ class EventController extends BaseController {
     public function getAll(): void {
         $data = $this->eventModel->getAll();
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, []);
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
     public function getById(int $id): void {
         $data = $this->eventModel->getById($id);
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, []);
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
     public function getByZip(string $zip): void {
         $data = $this->eventModel->getByZip($zip);
         if ($data != null) {
-            $this->send(HTTPCodes::OK, $data);
+            $this->send(HTTPCodes::OK, $data, "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT, []);
+            $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
@@ -48,13 +48,13 @@ class EventController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
 
             $this->eventModel->cancel($data["id"], $data["reason"]);
 
-            $this->send(HTTPCodes::OK, ["message" => "Event canceled", "data" => $data]);
+            $this->send(HTTPCodes::OK, $data, "Event canceled");
         }
     }
 
@@ -71,7 +71,7 @@ class EventController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
 
@@ -81,7 +81,7 @@ class EventController extends BaseController {
 
             $this->eventModel->updateData($data);
 
-            $this->send(HTTPCodes::OK, ["message" => "Event updated", "data" => $data]);
+            $this->send(HTTPCodes::OK, $data, "Event updated");
         }
     }
 
@@ -97,19 +97,19 @@ class EventController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $data = $this->request->getJSON(true);
 
-            $id = $this->eventModel->add($data);
+            $this->eventModel->add($data);
 
-            $this->send(HTTPCodes::OK, ["message" => "Event added", "id" => $id, "data" => $data]);
+            $this->send(HTTPCodes::OK, $data, "Event added");
         }
     }
 
     public function addImage(int $id): void {
         if ($this->eventModel->getById($id) == null) {
-            $this->send(HTTPCodes::NO_CONTENT, ["message" => "Event with id $id does not exist"]);
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Event with id $id does not exist");
             return;
         }
 
@@ -127,7 +127,7 @@ class EventController extends BaseController {
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, $validation->getErrors());
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         } else {
             $file = $this->request->getFile("image");
 
@@ -144,9 +144,10 @@ class EventController extends BaseController {
                 // save image name in database
                 $this->eventModel->addImage($id, $newName);
 
-                $this->send(HTTPCodes::OK, ["message" => "Image uploaded"]);
+                $this->send(HTTPCodes::OK, ["file" => $newName], "Image uploaded");
+
             } else {
-                $this->send(HTTPCodes::BAD_REQUEST, ["message" => "The file has already been moved"]);
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "The file has already been moved");
             }
         }
     }
