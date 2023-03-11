@@ -50,10 +50,10 @@ $routes->group("api", static function ($routes) {
 
             // Les paramètres sont dans le body
             $routes->post("add", "UserController::add"); // Ajoute un utilisateur
-            $routes->put("updateData", "UserController::updateData"); // Met à jour un utilisateur
-            $routes->put("updateLastLogin", "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
-            $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
-            $routes->put("updatePassword", "UserController::updatePassword"); // Met à jour le mot de passe d'un utilisateur
+            $routes->put("data", "UserController::updateData"); // Met à jour un utilisateur
+            $routes->put("login", "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
+            $routes->put("logout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
+            $routes->put("password", "UserController::updatePassword"); // Met à jour le mot de passe d'un utilisateur
         });
 
         $routes->group("foyer", static function ($routes) {
@@ -93,8 +93,7 @@ $routes->group("api", static function ($routes) {
 
         $routes->group("code", static function ($routes) {
             $routes->get("", "CodeController::getAll"); // Tous les codes
-            $routes->get("(:num)", "CodeController::getById/$1"); // Un code par son id
-            $routes->get("(:alpha)", "CodeController::checkExists/$1"); // Vérifie si un code est valide
+            $routes->get("(:alphanum)", "CodeController::checkExists/$1"); // Un code
             
             // Les paramètres sont dans le body
             $routes->post("generate", "CodeController::generate"); // Génère un code

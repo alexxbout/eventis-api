@@ -24,10 +24,23 @@ class UserModel extends BaseModel {
         return $this->db->table("user")->getWhere(["idRef" => $idRef])->getResultArray();
     }
 
-    public function add(array $data): void {
-        $data["id"] = $this->getMax("user", "id") + 1;
+    public function getByLogin(string $login): array|null {
+        return $this->db->table("user")->getWhere(["login" => $login])->getRowArray();
+    }
+
+    public function add(string $nom, string $prenom, string $login, string $password, int $idRole, int $idFoyer): int {
+        $data = [
+            "id" => $this->getMax("user", "id") + 1,
+            "nom" => $nom,
+            "prenom" => $prenom,
+            "login" => $login,
+            "password" => $password,
+            "idRole" => $idRole,
+            "idFoyer" => $idFoyer
+        ];
+
         $this->db->table("user")->insert($data);
-        $this->db->insertID();
+        return $data["id"];
     }
 
     public function updateData(array $data): void {

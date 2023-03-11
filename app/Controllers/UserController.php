@@ -2,13 +2,30 @@
 
 namespace App\Controllers;
 
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
+use Psr\Log\LoggerInterface;
 use App\Utils\Regex;
 
 class UserController extends BaseController {
     private $userModel;
 
-    public function __construct() {
+    // Pas de new xxxController
+    // Pour appeler le constructeur de la classe, on appel initController(...) et on oublie pas d'appeler la méthode parent
+    //
+    // Changer la méthode suivante par public function initController(...)
+    // public function __construct() {
+    //     $this->userModel = new \App\Models\UserModel();
+    // }
+    //
+    // Et ne pas oublier d'importer ces trois lignes :
+    // use CodeIgniter\HTTP\RequestInterface;
+    // use CodeIgniter\HTTP\ResponseInterface;
+    // use Psr\Log\LoggerInterface;
+
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
+        parent::initController($request, $response, $logger);
         $this->userModel = new \App\Models\UserModel();
     }
 
@@ -63,8 +80,7 @@ class UserController extends BaseController {
         $validation->setRules([
             "nom" => "required|max_length[30]",
             "prenom" => "required|max_length[30]",
-            "login" => "required|max_length[30]",
-            "password" => "required|regex_match[" . Regex::PASSWORD ."]",
+            "password" => "required|regex_match[" . Regex::PASSWORD . "]",
             "idFoyer" => "required|integer",
             "idRole" => "required|integer"
         ]);
@@ -75,7 +91,11 @@ class UserController extends BaseController {
             $data = $this->request->getJSON(true);
             $data["password"] = $this->encodePassword($data["password"]);
 
-            $this->userModel->add($data);
+            $data["login"] = $this->randomLogin($data["nom"], $data["prenom"]);
+            
+            $id = $this->userModel->add($data["nom"], $data["prenom"], $data["login"], $data["password"], $data["idRole"], $data["idFoyer"]);
+
+            $data["id"] = $id;
 
             $this->send(HTTPCodes::OK, $data, "User added");
         }
@@ -114,7 +134,6 @@ class UserController extends BaseController {
             $this->userModel->updateLastLogout($data["id"]);
 
             $this->send(HTTPCodes::OK, $data, "Last logout updated");
-
         }
     }
 
@@ -124,8 +143,7 @@ class UserController extends BaseController {
         $validation->setRules([
             "id" => "required|integer",
             "nom" => "permit_empty|max_length[30]",
-            "prenom" => "permit_empty|max_length[30]",
-            "login" => "permit_empty|max_length[30]"
+            "prenom" => "permit_empty|max_length[30]"
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
@@ -135,6 +153,10 @@ class UserController extends BaseController {
 
             if (isset($data["password"])) {
                 unset($data["password"]); // We don't want to update the password with this method
+            }
+
+            if (isset($data["login"])) {
+                unset($data["login"]); // We don't want to update the login
             }
 
             $this->userModel->updateData($data);
@@ -156,8 +178,8 @@ class UserController extends BaseController {
 
         $validation->setRules([
             "id" => "required|integer",
-            "oldPassword" => "required|regex_match[" . Regex::PASSWORD ."]",
-            "newPassword" => "required|regex_match[" . Regex::PASSWORD ."]"
+            "oldPassword" => "required|regex_match[" . Regex::PASSWORD . "]",
+            "newPassword" => "required|regex_match[" . Regex::PASSWORD . "]"
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
@@ -188,5 +210,17 @@ class UserController extends BaseController {
 
     private function encodePassword(string $password): string {
         return password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    private function randomLogin(string $nom, string $prenom): string {
+        $login = strtolower($prenom[0] . $nom);
+
+        $i = 0;
+        while ($this->userModel->getByLogin($login) != null) {
+            $login = strtolower($prenom[0] . $nom . $i);
+            $i++;
+        }
+
+        return $login;
     }
 }

@@ -2,13 +2,16 @@
 
 namespace App\Controllers;
 
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
-use CodeIgniter\Files\File;
+use Psr\Log\LoggerInterface;
 
 class EventController extends BaseController {
     private $eventModel;
 
-    public function __construct() {
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
+        parent::initController($request, $response, $logger);
         $this->eventModel = new \App\Models\EventModel();
     }
 

@@ -2,41 +2,47 @@
 
 namespace App\Controllers;
 
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
+use CodeIgniter\Model;
+use Psr\Log\LoggerInterface;
+use DateTime;
 
 class CodeController extends BaseController {
 
     private const CODE_LENGTH = 6;
     private $codeModel;
 
-    public function __construct() {
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
+        parent::initController($request, $response, $logger);
         $this->codeModel = new \App\Models\CodeModel();
     }
 
     public function getAll(): void {
         $data = $this->codeModel->getAll();
         if ($data != null) {
+            // Ajouter l'information de validité pour chaque code
+            foreach ($data as &$code) {
+                $code["valid"] = $this->isValid($this->codeModel, $code["id"]);
+            }
             $this->send(HTTPCodes::OK, $data, "OK");
         } else {
             $this->send(HTTPCodes::NO_CONTENT);
         }
     }
 
-    public function getById(int $id): void {
-        $data = $this->codeModel->getById($id);
-        if ($data != null) {
-            $this->send(HTTPCodes::OK, $data, "OK");
-        } else {
-            $this->send(HTTPCodes::NO_CONTENT);
-        }
-    }
+    public function checkExists(string $code): void {
+        $exists = $this->codeModel->checkExists($code);
 
-    public function getByIdFoyer(int $idFoyer): void {
-        $data = $this->codeModel->getByIdFoyer($idFoyer);
-        if ($data != null) {
-            $this->send(HTTPCodes::OK, $data, "OK");
+        if ($exists) {
+            $data = $this->codeModel->getByCode($code);
+            
+            $valid = $this->isValid($this->codeModel, $data["id"]);
+
+            $this->send(HTTPCodes::OK, ["exists" => $exists, "valid" => $valid], "OK");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT);
+            $this->send(HTTPCodes::OK, ["exists" => $exists, "valid" => false], "OK");
         }
     }
     
@@ -55,15 +61,14 @@ class CodeController extends BaseController {
 
             $code = "";
 
-            // Generer un code unique
+            // Générer un code unique
             do {
-                $code = $this->generateCode();
+                $code = $this->randomCode();
             } while ($this->codeModel->checkExists($code));
 
-            $this->codeModel->add($code, $data["idFoyer"], $data["expire"]);
-            // Ici on devrait vérifier que l'insertion s'est bien passée, et renvoyer une erreur si ce n'est pas le cas.
+            $id = $this->codeModel->add($code, $data["idFoyer"], $data["expire"]);
         
-            $this->send(HTTPCodes::OK, ["code" => $code], "Code generated");
+            $this->send(HTTPCodes::OK, ["id" => $id, "code" => $code], "Code generated");
         }
     }
 
@@ -72,12 +77,28 @@ class CodeController extends BaseController {
      * 
      * @return string A string of CODE_LENGTH random characters.
      */
-    private function generateCode(): string {
+    private function randomCode(): string {
         $code = "";
         $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         for ($i = 0; $i < CodeController::CODE_LENGTH; $i++) {
             $code .= $chars[rand(0, strlen($chars) - 1)];
         }
         return $code;
+    }
+
+    /**
+     * This function checks if a code is valid by checking if it's not expired and not used
+     * 
+     * @param int id The id of the code to check
+     * 
+     * @return bool a boolean value.
+     */
+    public static function isValid(Model $codeModel, int $id): bool {
+        $data = $codeModel->getById($id);
+        if ($data == null) {
+            return false;
+        }
+        $expire = new DateTime($data["expire"]);
+        return $expire > new DateTime() && !boolval($data["used"]);
     }
 }
