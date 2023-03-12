@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\CodeModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
@@ -93,8 +94,8 @@ class CodeController extends BaseController {
      * 
      * @return bool a boolean value.
      */
-    public static function isValid(Model $codeModel, int $id): bool {
-        $data = $codeModel->getById($id);
+    public static function isValid(CodeModel $codeModel, int $idCode): bool {
+        $data = $codeModel->getById($idCode);
         if ($data == null) {
             return false;
         }
