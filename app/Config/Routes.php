@@ -116,6 +116,10 @@ $routes->group("api", static function ($routes) {
             $routes->post("add", "BlockedController::add"); // Ajoute un utilisateur bloqué
             $routes->delete("remove", "BlockedController::remove"); // Supprime un utilisateur bloqué
         });
+
+        $routes->group("registration", static function ($routes) {
+            $routes->post("register", "RegistrationController::register"); // Enregistre un utilisateur
+        });
     });
 });
 

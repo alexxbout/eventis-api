@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Utils\Regex;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
@@ -41,4 +42,12 @@ class Validation extends BaseConfig
     // --------------------------------------------------------------------
     // Rules
     // --------------------------------------------------------------------
+
+    public $user_add_validation = [
+        "nom" => "required|max_length[30]",
+        "prenom" => "required|max_length[30]",
+        "password" => "required|regex_match[" . Regex::PASSWORD . "]",
+        "idFoyer" => "required|integer",
+        "idRole" => "required|integer"
+    ];
 }

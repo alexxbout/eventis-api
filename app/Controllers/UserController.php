@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\UserModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
@@ -77,13 +78,15 @@ class UserController extends BaseController {
     public function add(): void {
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "nom" => "required|max_length[30]",
-            "prenom" => "required|max_length[30]",
-            "password" => "required|regex_match[" . Regex::PASSWORD . "]",
-            "idFoyer" => "required|integer",
-            "idRole" => "required|integer"
-        ]);
+        // $validation->setRules([
+        //     "nom" => "required|max_length[30]",
+        //     "prenom" => "required|max_length[30]",
+        //     "password" => "required|regex_match[" . Regex::PASSWORD . "]",
+        //     "idFoyer" => "required|integer",
+        //     "idRole" => "required|integer"
+        // ]);
+
+        $validation->setRuleGroup("user_add_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
@@ -91,7 +94,7 @@ class UserController extends BaseController {
             $data = $this->request->getJSON(true);
             $data["password"] = $this->encodePassword($data["password"]);
 
-            $data["login"] = $this->randomLogin($data["nom"], $data["prenom"]);
+            $data["login"] = $this->randomLogin($this->userModel, $data["nom"], $data["prenom"]);
             
             $id = $this->userModel->add($data["nom"], $data["prenom"], $data["login"], $data["password"], $data["idRole"], $data["idFoyer"]);
 
@@ -208,15 +211,15 @@ class UserController extends BaseController {
         }
     }
 
-    private function encodePassword(string $password): string {
+    public static function encodePassword(string $password): string {
         return password_hash($password, PASSWORD_DEFAULT);
     }
 
-    private function randomLogin(string $nom, string $prenom): string {
+    public static function randomLogin(UserModel $userModel, string $nom, string $prenom): string {
         $login = strtolower($prenom[0] . $nom);
 
         $i = 0;
-        while ($this->userModel->getByLogin($login) != null) {
+        while ($userModel->getByLogin($login) != null) {
             $login = strtolower($prenom[0] . $nom . $i);
             $i++;
         }

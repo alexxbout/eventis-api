@@ -80,17 +80,29 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/code/XXXXX"
+                  "path": "/api/v1/code/1234AZE"
                 },
-                "id": "0f33f5fd-d5e1-45b6-9a1e-7e80279dc51d",
-                "name": "GET - getByCode",
+                "id": "ee1b9d25-d3c2-4e56-a14e-8d7e4ef39132",
+                "name": "GET - getByCode - !exists and !valid",
                 "headers": [],
                 "assertions": [
                   {
                     "comparison": "Equals",
                     "subject": "ResponseStatus",
                     "path": "code",
-                    "value": "204"
+                    "value": "200"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.data.exists",
+                    "value": "false"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.data.valid",
+                    "value": "false"
                   }
                 ]
               }
@@ -120,10 +132,10 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/code/1"
+                  "path": "/api/v1/code/JPiMxU"
                 },
-                "id": "3ebbafac-d58a-449e-aa85-003963686c57",
-                "name": "GET - getById",
+                "id": "cbc0c343-3bc5-4603-a62f-8303e91e6f57",
+                "name": "GET - getByCode - exists and !valid",
                 "headers": [],
                 "assertions": [
                   {
@@ -131,6 +143,122 @@
                     "subject": "ResponseStatus",
                     "path": "code",
                     "value": "200"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.data.exists",
+                    "value": "true"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.data.valid",
+                    "value": "false"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/v1/code/qDHRaM"
+                },
+                "id": "0f33f5fd-d5e1-45b6-9a1e-7e80279dc51d",
+                "name": "GET - getByCode - exists and valid",
+                "headers": [],
+                "assertions": [
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseStatus",
+                    "path": "code",
+                    "value": "200"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.data.exists",
+                    "value": "true"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.data.valid",
+                    "value": "true"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/v1/code/S1mqYj"
+                },
+                "id": "29c635fa-95f6-4060-b8e5-10a62d38d376",
+                "name": "GET - getByCode - expired",
+                "headers": [],
+                "assertions": [
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseStatus",
+                    "path": "code",
+                    "value": "200"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.data.exists",
+                    "value": "true"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.data.valid",
+                    "value": "false"
                   }
                 ]
               }
@@ -150,7 +278,7 @@
                     "items": []
                   },
                   "bodyType": "Text",
-                  "textBody": "{\n  \"idFoyer\": 0,\n  \"expire\": \"2024-01-01 00:00:00\"\n}"
+                  "textBody": "{\n  \"idFoyer\": 1,\n  \"expire\": \"2024-01-01 00:00:00\"\n}"
                 },
                 "uri": {
                   "query": {
@@ -184,6 +312,12 @@
                     "subject": "ResponseStatus",
                     "path": "code",
                     "value": "200"
+                  },
+                  {
+                    "comparison": "Equals",
+                    "subject": "ResponseJsonBody",
+                    "path": "$.message",
+                    "value": "Code generated"
                   }
                 ]
               }
@@ -436,7 +570,7 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/event/0/image"
+                  "path": "/api/v1/event/999/image"
                 },
                 "id": "9f7595a2-5aec-4dd4-bed2-259233f22c71",
                 "name": "POST - image",
@@ -572,6 +706,195 @@
         },
         {
           "entity": {
+            "type": "Service",
+            "id": "9b63579b-9d37-4134-87cd-d0e0ddbe98d0",
+            "name": "registration"
+          },
+          "children": [
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"code\": \"W7SnhC\",\n  \"nom\": \"TEST\",\n  \"prenom\": \"TEST\",\n  \"password\": \"@A9aaaaaaa\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/v1/registration/register"
+                },
+                "id": "c586aeb7-6ab5-4e65-9d00-1bdeb9cff6d2",
+                "name": "POST - register",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Accept",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"code\": \"qURP71\",\n  \"nom\": \"TEST\",\n  \"password\": \"azerty\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/v1/registration/register"
+                },
+                "id": "942284bc-0590-41c0-a7bd-de6560eb874a",
+                "name": "POST - register - invalid user data",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Accept",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"code\": \"W7SnhC\",\n  \"nom\": \"TEST\",\n  \"prenom\": \"TEST\",\n  \"password\": \"@A9aaaaaaa\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/v1/registration/register"
+                },
+                "id": "6d990ec7-c545-4252-989f-64bf8e6801a6",
+                "name": "POST - register - used code",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Accept",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"code\": \"XXXXXX\",\n  \"nom\": \"TEST\",\n  \"prenom\": \"TEST\",\n  \"password\": \"@A9aaaaaaa\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/v1/registration/register"
+                },
+                "id": "eff6d2c5-4129-40c8-9227-70b2e5eb0c57",
+                "name": "POST - register - wrong code",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Accept",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "entity": {
             "type": "Scenario",
             "id": "ccdd14ff-1fa4-4d30-8cb7-47f45f9df6bb",
             "name": "user"
@@ -653,7 +976,7 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/user/0"
+                  "path": "/api/v1/user/1"
                 },
                 "id": "3c6aaa95-580f-455a-bf08-7054891d31d9",
                 "name": "GET - getById",
@@ -847,7 +1170,7 @@
                     "items": []
                   },
                   "bodyType": "Text",
-                  "textBody": "{\n  \"nom\": \"TEST\",\n  \"prenom\": \"TEST\",\n  \"login\": \"TEST3\",\n  \"password\": \"@A9aaaaaaa\",\n  \"idRole\": 0,\n  \"idFoyer\": 0\n}"
+                  "textBody": "{\n  \"nom\": \"Guillard\",\n  \"prenom\": \"Pierre\",\n  \"password\": \"@A9aaaaaaa\",\n  \"idRole\": 0,\n  \"idFoyer\": 1\n}"
                 },
                 "uri": {
                   "query": {
@@ -912,10 +1235,10 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/user/updateLastLogin"
+                  "path": "/api/v1/user/login"
                 },
                 "id": "9b7af8f7-e919-42d0-8aed-5b6abf7699a6",
-                "name": "PUT - updateLastLogin",
+                "name": "PUT - login",
                 "headers": [
                   {
                     "enabled": true,
@@ -965,10 +1288,10 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/user/updateLastLogout"
+                  "path": "/api/v1/user/logout"
                 },
                 "id": "fd8dd88c-00b0-4542-8b61-43f70e0f330b",
-                "name": "PUT - updateLastLogout",
+                "name": "PUT - logout",
                 "headers": [
                   {
                     "enabled": true,
@@ -1018,10 +1341,10 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/user/updateData"
+                  "path": "/api/v1/user/data"
                 },
                 "id": "c0fb8076-213e-4212-8be6-7042ed6b1a0a",
-                "name": "PUT - updateData",
+                "name": "PUT - data",
                 "headers": [
                   {
                     "enabled": true,
@@ -1110,7 +1433,7 @@
                     "items": []
                   },
                   "bodyType": "Text",
-                  "textBody": "{\n  \"id\": 6,\n  \"oldPassword\": \"@A9aaaaaaa\",\n  \"newPassword\": \"@A9aaaaaaa\"\n}"
+                  "textBody": "{\n  \"id\": 1,\n  \"oldPassword\": \"password123\",\n  \"newPassword\": \"@A9aaaaaaa\"\n}"
                 },
                 "uri": {
                   "query": {
@@ -1122,10 +1445,10 @@
                     "version": "V11"
                   },
                   "host": "localhost:8080",
-                  "path": "/api/v1/user/updatePassword"
+                  "path": "/api/v1/user/password"
                 },
                 "id": "d3edcf03-26ff-4e19-842d-d897eef8d23d",
-                "name": "PUT - updatePassword",
+                "name": "PUT - password",
                 "headers": [
                   {
                     "enabled": true,
