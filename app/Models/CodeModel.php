@@ -17,7 +17,7 @@ class CodeModel extends BaseModel {
     }
 
     public function checkExists(string $code): bool {
-        return $this->db->table("code")->getWhere(["code" => $code])->getRowArray() != null;
+        return $this->getByCode($code) != null;
     }
 
     public function setUsed(int $id): void {
