@@ -7,7 +7,6 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
 use Psr\Log\LoggerInterface;
-use App\Utils\Regex;
 
 class UserController extends BaseController {
     private $userModel;
@@ -78,94 +77,76 @@ class UserController extends BaseController {
     public function add(): void {
         $validation =  \Config\Services::validation();
 
-        // $validation->setRules([
-        //     "nom" => "required|max_length[30]",
-        //     "prenom" => "required|max_length[30]",
-        //     "password" => "required|regex_match[" . Regex::PASSWORD . "]",
-        //     "idFoyer" => "required|integer",
-        //     "idRole" => "required|integer"
-        // ]);
-
         $validation->setRuleGroup("user_add_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-            $data["password"] = $this->encodePassword($data["password"]);
-
-            $data["login"] = $this->randomLogin($this->userModel, $data["nom"], $data["prenom"]);
-            
-            $id = $this->userModel->add($data["nom"], $data["prenom"], $data["login"], $data["password"], $data["idRole"], $data["idFoyer"]);
-
-            $data["id"] = $id;
-
-            $this->send(HTTPCodes::OK, $data, "User added");
+            return;
         }
+        $data = $this->request->getJSON(true);
+
+        $id = self::addUser($this->userModel, $data["nom"], $data["prenom"], $data["password"], $data["idFoyer"], $data["idRole"]);
+
+        $data["id"] = $id;
+
+        $this->send(HTTPCodes::OK, $data, "User added");
     }
 
     public function updateLastLogin(): void {
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "id" => "required|integer"
-        ]);
+        $validation->setRuleGroup("user_update_login_logout_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-
-            $this->userModel->updateLastLogin($data["id"]);
-
-            $this->send(HTTPCodes::OK, $data, "Last login updated");
+            return;
         }
+        $data = $this->request->getJSON(true);
+
+        $this->userModel->updateLastLogin($data["id"]);
+
+        $this->send(HTTPCodes::OK, $data, "Last login updated");
     }
 
     public function updateLastLogout(): void {
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "id" => "required|integer"
-        ]);
+        $validation->setRuleGroup("user_update_login_logout_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-
-            $this->userModel->updateLastLogout($data["id"]);
-
-            $this->send(HTTPCodes::OK, $data, "Last logout updated");
+            return;
         }
+        $data = $this->request->getJSON(true);
+
+        $this->userModel->updateLastLogout($data["id"]);
+
+        $this->send(HTTPCodes::OK, $data, "Last logout updated");
     }
 
     public function updateData(): void {
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "id" => "required|integer",
-            "nom" => "permit_empty|max_length[30]",
-            "prenom" => "permit_empty|max_length[30]"
-        ]);
+        $validation->setRuleGroup("user_update_data_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-
-            if (isset($data["password"])) {
-                unset($data["password"]); // We don't want to update the password with this method
-            }
-
-            if (isset($data["login"])) {
-                unset($data["login"]); // We don't want to update the login
-            }
-
-            $this->userModel->updateData($data);
-
-            $this->send(HTTPCodes::OK, $data, "User updated");
+            return;
         }
+
+        $data = $this->request->getJSON(true);
+
+        if (isset($data["password"])) {
+            unset($data["password"]); // We don't want to update the password with this method
+        }
+
+        if (isset($data["login"])) {
+            unset($data["login"]); // We don't want to update the login
+        }
+
+        $this->userModel->updateData($data);
+
+        $this->send(HTTPCodes::OK, $data, "User updated");
     }
 
     /**
@@ -179,43 +160,65 @@ class UserController extends BaseController {
     public function updatePassword(): void {
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "id" => "required|integer",
-            "oldPassword" => "required|regex_match[" . Regex::PASSWORD . "]",
-            "newPassword" => "required|regex_match[" . Regex::PASSWORD . "]"
-        ]);
+        $validation->setRuleGroup("user_update_password_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-
-            // Check if the new password is different from the old one
-            if ($data["oldPassword"] == $data["newPassword"]) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "New password is the same as the old one");
-                return;
-            }
-
-            $user = $this->userModel->getById($data["id"]);
-
-            // Check if the old password is correct
-            if (!password_verify($data["oldPassword"], $user["password"])) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "Old password is incorrect");
-            } else {
-                $data["newPassword"] = $this->encodePassword($data["newPassword"]);
-
-                $this->userModel->updatePassword($data["id"], $data["newPassword"]);
-
-                $this->send(HTTPCodes::OK, null, "Password updated");
-            }
+            return;
         }
+
+        $data = $this->request->getJSON(true);
+
+        // Check if the new password is different from the old one
+        if ($data["oldPassword"] == $data["newPassword"]) {
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "New password is the same as the old one");
+            return;
+        }
+
+        $user = $this->userModel->getById($data["id"]);
+
+        // Check if the old password is correct
+        if (!password_verify($data["oldPassword"], $user["password"])) {
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "Old password is incorrect");
+            return;
+        }
+
+        $data["newPassword"] = password_hash($data["newPassword"], PASSWORD_DEFAULT);
+
+        $this->userModel->updatePassword($data["id"], $data["newPassword"]);
+
+        $this->send(HTTPCodes::OK, null, "Password updated");
     }
 
-    public static function encodePassword(string $password): string {
-        return password_hash($password, PASSWORD_DEFAULT);
+    /**
+     * It adds a user to the database with a unique login and a hashed password
+     * 
+     * @param UserModel userModel the user model
+     * @param string nom the user's last name
+     * @param string prenom first name
+     * @param string rawPassword the password that the user will enter and that will be hashed
+     * @param int idRole the id of the role
+     * @param int idFoyer the id of the household the user belongs to
+     * 
+     * @return int The id of the user that has been added.
+     */
+    public static function addUser(UserModel $userModel, string $nom, string $prenom, string $rawPassword, int $idRole, int $idFoyer): int {
+        $login = self::getValidRandomLogin($userModel, $nom, $prenom);
+        $hashedPassword = password_hash($rawPassword, PASSWORD_DEFAULT);
+
+        return $userModel->add($nom, $prenom, $login, $hashedPassword, $idRole, $idFoyer);
     }
 
-    public static function randomLogin(UserModel $userModel, string $nom, string $prenom): string {
+    /**
+     * It generates a valid random login for a user
+     * 
+     * @param UserModel userModel the user model
+     * @param string nom the user's last name
+     * @param string prenom first name
+     * 
+     * @return string the login
+     */
+    public static function getValidRandomLogin(UserModel $userModel, string $nom, string $prenom): string {
         $login = strtolower($prenom[0] . $nom);
 
         $i = 0;

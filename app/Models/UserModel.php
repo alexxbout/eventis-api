@@ -30,13 +30,13 @@ class UserModel extends BaseModel {
 
     public function add(string $nom, string $prenom, string $login, string $password, int $idRole, int $idFoyer): int {
         $data = [
-            "id" => $this->getMax("user", "id") + 1,
-            "nom" => $nom,
-            "prenom" => $prenom,
-            "login" => $login,
+            "id"       => $this->getMax("user", "id") + 1,
+            "nom"      => $nom,
+            "prenom"   => $prenom,
+            "login"    => $login,
             "password" => $password,
-            "idRole" => $idRole,
-            "idFoyer" => $idFoyer
+            "idRole"   => $idRole,
+            "idFoyer"  => $idFoyer
         ];
 
         $this->db->table("user")->insert($data);

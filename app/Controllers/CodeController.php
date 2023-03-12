@@ -6,7 +6,6 @@ use App\Models\CodeModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
-use CodeIgniter\Model;
 use Psr\Log\LoggerInterface;
 use DateTime;
 
@@ -38,7 +37,7 @@ class CodeController extends BaseController {
 
         if ($exists) {
             $data = $this->codeModel->getByCode($code);
-            
+
             $valid = $this->isValid($this->codeModel, $data["id"]);
 
             $this->send(HTTPCodes::OK, ["exists" => $exists, "valid" => $valid], "OK");
@@ -46,31 +45,32 @@ class CodeController extends BaseController {
             $this->send(HTTPCodes::OK, ["exists" => $exists, "valid" => false], "OK");
         }
     }
-    
+
     public function generate(): void {
         $validation =  \Config\Services::validation();
 
         $validation->setRules([
             "idFoyer" => "required|integer",
-            "expire" => "required|valid_date[Y-m-d H:i:s]" // On devrait limiter la date d'expiation dans le code, pour éviter que les gens ne mettent des dates trop lointaines.
+            "expire"  => "required|valid_date[Y-m-d H: i: s]" // On devrait limiter la date d'expiation dans le code, pour éviter que les gens ne mettent des dates trop lointaines.
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-
-            $code = "";
-
-            // Générer un code unique
-            do {
-                $code = $this->randomCode();
-            } while ($this->codeModel->checkExists($code));
-
-            $id = $this->codeModel->add($code, $data["idFoyer"], $data["expire"]);
-        
-            $this->send(HTTPCodes::OK, ["id" => $id, "code" => $code], "Code generated");
+            return;
         }
+
+        $data = $this->request->getJSON(true);
+
+        $code = "";
+
+        // Générer un code unique
+        do {
+            $code = $this->randomCode();
+        } while ($this->codeModel->checkExists($code));
+
+        $id = $this->codeModel->add($code, $data["idFoyer"], $data["expire"]);
+
+        $this->send(HTTPCodes::OK, ["id" => $id, "code" => $code], "Code generated");
     }
 
     /**

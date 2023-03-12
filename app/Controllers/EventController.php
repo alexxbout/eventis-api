@@ -45,69 +45,56 @@ class EventController extends BaseController {
     public function cancel(): void {
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "id" => "required|integer",
-            "reason" => "required|max_length[50]"
-        ]);
+        $validation->setRuleGroup("event_cancel_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-
-            $this->eventModel->cancel($data["id"], $data["reason"]);
-
-            $this->send(HTTPCodes::OK, $data, "Event canceled");
+            return;
         }
+
+        $data = $this->request->getJSON(true);
+
+        $this->eventModel->cancel($data["id"], $data["reason"]);
+
+        $this->send(HTTPCodes::OK, $data, "Event canceled");
     }
 
     public function updateData(): void {
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "id" => "required|integer",
-            "dateDebut" => "permit_empty|valid_date[Y-m-d H:i:s]",
-            "dateFin" => "permit_empty|valid_date[Y-m-d H:i:s]",
-            "title" => "permit_empty|max_length[20]",
-            "description" => "permit_empty|max_length[1000]",
-            "pic" => "permit_empty|max_length[50]"
-        ]);
+        $validation->setRuleGroup("event_update_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-
-            if (isset($data["canceled"])) { // We don't want to update the canceled status with this method
-                unset($data["canceled"]);
-            }
-
-            $this->eventModel->updateData($data);
-
-            $this->send(HTTPCodes::OK, $data, "Event updated");
+            return;
         }
+
+        $data = $this->request->getJSON(true);
+
+        if (isset($data["canceled"])) { // We don't want to update the canceled status with this method
+            unset($data["canceled"]);
+        }
+
+        $this->eventModel->updateData($data);
+
+        $this->send(HTTPCodes::OK, $data, "Event updated");
     }
 
     public function add(): void {
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "zip" => "required|max_length[5]",
-            "dateDebut" => "required|valid_date[Y-m-d H:i:s]",
-            "dateFin" => "required|valid_date[Y-m-d H:i:s]",
-            "title" => "required|max_length[20]",
-            "description" => "required|max_length[1000]"
-        ]);
+        $validation->setRuleGroup("event_add_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-        } else {
-            $data = $this->request->getJSON(true);
-
-            $this->eventModel->add($data);
-
-            $this->send(HTTPCodes::OK, $data, "Event added");
+            return;
         }
+
+        $data = $this->request->getJSON(true);
+
+        $this->eventModel->add($data);
+
+        $this->send(HTTPCodes::OK, $data, "Event added");
     }
 
     public function addImage(int $id): void {
@@ -118,40 +105,31 @@ class EventController extends BaseController {
 
         $validation =  \Config\Services::validation();
 
-        $validation->setRules([
-            "image" => [
-                "label" => "Image",
-                "rules" => [
-                    "uploaded[image]",
-                    "is_image[image]",
-                    "ext_in[image,jpg,jpeg,png]"
-                ]
-            ]
-        ]);
+        $validation->setRuleGroup("event_addImage_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
             $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+            return;
+        }
+
+        $file = $this->request->getFile("image");
+
+        if ($file->hasMoved()) {
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "The file has already been moved");
         } else {
-            $file = $this->request->getFile("image");
+            // Generate random name
+            $newName = $file->getRandomName();
+            $file->move(WRITEPATH . "uploads/images", $newName);
 
-            if (!$file->hasMoved()) {
-                // generate random name
-                $newName = $file->getRandomName();
-                $file->move(WRITEPATH . "uploads/images", $newName);
+            // Optimize image
+            \Config\Services::image()
+                ->withFile(WRITEPATH . "uploads/images/" . $newName)
+                ->save(WRITEPATH . "uploads/images/" . $newName, 30);
 
-                // optimize image
-                \Config\Services::image()
-                    ->withFile(WRITEPATH . "uploads/images/" . $newName)
-                    ->save(WRITEPATH . "uploads/images/" . $newName, 30);
+            // Save image name in database
+            $this->eventModel->addImage($id, $newName);
 
-                // save image name in database
-                $this->eventModel->addImage($id, $newName);
-
-                $this->send(HTTPCodes::OK, ["file" => $newName], "Image uploaded");
-
-            } else {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "The file has already been moved");
-            }
+            $this->send(HTTPCodes::OK, ["file" => $newName], "Image uploaded");
         }
     }
 }

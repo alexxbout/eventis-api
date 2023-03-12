@@ -26,10 +26,10 @@ class CodeModel extends BaseModel {
 
     public function add(string $code, int $idFoyer, string $expire): int {
         $data = [
-            "id" => $this->getMax("code", "id") + 1,
-            "code" => $code,
+            "id"      => $this->getMax("code", "id") + 1,
+            "code"    => $code,
             "idFoyer" => $idFoyer,
-            "expire" => $expire
+            "expire"  => $expire
         ];
         $this->db->table("code")->insert($data);
 
