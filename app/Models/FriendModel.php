@@ -15,7 +15,8 @@ class FriendModel extends BaseModel {
 
     public function isFriend(int $idUser, int $idFriend): array | null {
         $array = array('idUser1' => $idUser, 'idUser2' => $idFriend);
-        $data= $this->db->table('friend')->where($array)->get()->getRowArray();
+        $array2 = array('idUser1' => $idFriend, 'idUser2' => $idUser);
+        $data= $this->db->table('friend')->where($array)->orWhere($array2)->get()->getRowArray();
         return $data;
     }
     
