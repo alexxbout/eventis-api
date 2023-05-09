@@ -60,13 +60,13 @@ abstract class BaseController extends Controller {
      * 
      * @param int status_code The HTTP status code to send.
      * @param array|null data The data to be sent to the client.
-     * @param string message The message to be displayed to the user.
+     * @param string message The message to be displayed to the client.
      * @param string|array|null errors An array of errors.
      * @param array header An array of headers to be sent with the response.
      */
-    protected function send(int $status_code, array|null $data = null, string $message = "", string|array|null $errors = null, array $header = []): void {
-        foreach ($header as $h) {
-            header($h);
+    protected function send(int $status_code, array|null $data = null, string $message = "", string|array|null $errors = null, array $headers = []): void {
+        foreach ($headers as $header => $value) {
+            $this->response->setHeader($header, $value);
         }
 
         $json          = new stdClass();
@@ -82,7 +82,7 @@ abstract class BaseController extends Controller {
             ->setContentType("application/json")
             ->setStatusCode($status_code)
             ->setJson($json);
-
+            
         $this->response->send();
     }
 }
