@@ -17,7 +17,7 @@ class FriendController extends BaseController {
     public function getAll(int $idUser): void {
         $data = $this->friendModel->getAll($idUser);
         if(empty($data)){
-            $this->send(HTTPCodes::NO_CONTENT,"Bruh");
+            $this->send(HTTPCodes::NO_CONTENT,"Nobody has any friends");
         }
         else{
             $this->send(HTTPCodes::OK,$data);
