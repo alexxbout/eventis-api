@@ -1,0 +1,23 @@
+// REQUEST              : api/v1/users
+// RETURN               : array or empty array of all users
+// CHECKS
+// - authenticated user is developer
+// - password is hashed
+[
+    {
+        "id"            : 1,
+        "lastname"      : "Doe",
+        "firstname"     : "John",
+        "login"         : "jdoe",
+        "password"      : "$2y$10$zXGtq4ieKCCh1beCUUUQ6OEIoYpKSgz5tSTh0iBJJlY8MIBYziLue",
+        "idRole"        : 1,
+        "idRef"         : 1,
+        "idFoyer"       : 1,
+        "lastLogout"    : "2020-12-01 00: 00: 00",
+        "lastLogin"     : "2020-12-01 01: 00: 00",
+        "registration"  : {
+            "id"        : "1",
+            "registered": "2020-12-01 00: 00: 00"
+        }
+    }
+]

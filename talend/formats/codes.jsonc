@@ -1,0 +1,19 @@
+
+
+[
+    {
+        "id"     : 1,
+        "code"   : "8aD4fR",
+        "idFoyer": 1,
+        "expire" : "2020-12-31",
+        "used"   : "0"
+    },
+    {
+        "id"     : 2,
+        "code"   : "8aD4fR",
+        "idFoyer": 1,
+        "expire" : "2020-12-31",
+        "used"   : "0"
+    }
+    
+]

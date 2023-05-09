@@ -1,0 +1,29 @@
+// REQUEST             : api/v1/events/12345
+// RETURN              : array or empty array of events in zip 12345
+// FORMAT              : sorted by most recent event --> start
+// CHECKS
+// - authenticated user foyer zip is in event zip
+
+[
+    {
+        "id"           : 1,
+        "zip"          : "12345",
+        "canceled"     : "0",
+        "reason"       : "I'm sick",
+        "start"        : "2019-01-01T12: 00: 00",
+        "end"          : "2019-01-01T13: 00: 00",
+        "title"        : "Lunch",
+        "description"  : [
+            {
+                "title": "Lunch",
+                "text" : "We are going to have lunch together"
+            },
+            {
+                "title": "Location",
+                "text" : "We are going to have lunch together"
+            }
+        ],
+        "pic"          : "https//picsum.photos/200/300",
+        "participant"  : [1, 2, 3] // id of users
+    }
+]

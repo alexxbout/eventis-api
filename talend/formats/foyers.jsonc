@@ -1,0 +1,14 @@
+// REQUEST : api/v1/foyer
+// RETURN  : array or empty array of all foyers
+// CHECKS
+// - authenticated user is developer
+
+[
+    {
+        "id"     : 1,
+        "city"   : "Budapest",
+        "zip"    : "1111",
+        "address": "Kossuth Lajos utca 1.",
+        "street" : "Kossuth Lajos utca"
+    }
+]
