@@ -9,6 +9,7 @@ use App\Utils\HTTPCodes;
 use Psr\Log\LoggerInterface;
 
 class UserController extends BaseController {
+    
     private $userModel;
 
     // Pas de new xxxController
@@ -85,7 +86,7 @@ class UserController extends BaseController {
         }
         $data = $this->request->getJSON(true);
 
-        $id = self::addUser($this->userModel, $data["nom"], $data["prenom"], $data["password"], $data["idFoyer"], $data["idRole"]);
+        $id = self::addUser($this->userModel, $data["lastname"], $data["firstname"], $data["password"], $data["idFoyer"], $data["idRole"]);
 
         $data["id"] = $id;
 
@@ -194,36 +195,36 @@ class UserController extends BaseController {
      * It adds a user to the database with a unique login and a hashed password
      * 
      * @param UserModel userModel the user model
-     * @param string nom the user's last name
-     * @param string prenom first name
+     * @param string lastname
+     * @param string firstname
      * @param string rawPassword the password that the user will enter and that will be hashed
      * @param int idRole the id of the role
      * @param int idFoyer the id of the household the user belongs to
      * 
      * @return int The id of the user that has been added.
      */
-    public static function addUser(UserModel $userModel, string $nom, string $prenom, string $rawPassword, int $idRole, int $idFoyer): int {
-        $login = self::getValidRandomLogin($userModel, $nom, $prenom);
+    public static function addUser(UserModel $userModel, string $lastname, string $firstname, string $rawPassword, int $idRole, int $idFoyer): int {
+        $login = self::getValidRandomLogin($userModel, $lastname, $firstname);
         $hashedPassword = password_hash($rawPassword, PASSWORD_DEFAULT);
 
-        return $userModel->add($nom, $prenom, $login, $hashedPassword, $idRole, $idFoyer);
+        return $userModel->add($lastname, $firstname, $login, $hashedPassword, $idRole, $idFoyer);
     }
 
     /**
      * It generates a valid random login for a user
      * 
      * @param UserModel userModel the user model
-     * @param string nom the user's last name
-     * @param string prenom first name
+     * @param string lastname
+     * @param string firstname
      * 
      * @return string the login
      */
-    public static function getValidRandomLogin(UserModel $userModel, string $nom, string $prenom): string {
-        $login = strtolower($prenom[0] . $nom);
+    public static function getValidRandomLogin(UserModel $userModel, string $lastname, string $firstname): string {
+        $login = strtolower($firstname[0] . $lastname);
 
         $i = 0;
         while ($userModel->getByLogin($login) != null) {
-            $login = strtolower($prenom[0] . $nom . $i);
+            $login = strtolower($firstname[0] . $lastname . $i);
             $i++;
         }
 

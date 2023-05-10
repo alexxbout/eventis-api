@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use stdClass;
+
 class UserModel extends BaseModel {
 
     public function getAll(): array|null {
@@ -24,19 +26,19 @@ class UserModel extends BaseModel {
         return $this->db->table("user")->getWhere(["idRef" => $idRef])->getResultArray();
     }
 
-    public function getByLogin(string $login): array|null {
-        return $this->db->table("user")->getWhere(["login" => $login])->getRowArray();
+    public function getByLogin(string $login): stdClass|null {
+        return $this->db->table("user")->getWhere(["login" => $login])->getRowObject();
     }
 
-    public function add(string $nom, string $prenom, string $login, string $password, int $idRole, int $idFoyer): int {
+    public function add(string $lastname, string $firstname, string $login, string $password, int $idRole, int $idFoyer): int {
         $data = [
-            "id"       => $this->getMax("user", "id") + 1,
-            "nom"      => $nom,
-            "prenom"   => $prenom,
-            "login"    => $login,
-            "password" => $password,
-            "idRole"   => $idRole,
-            "idFoyer"  => $idFoyer
+            "id"        => $this->getMax("user", "id") + 1,
+            "lastname"  => $lastname,
+            "firstname" => $firstname,
+            "login"     => $login,
+            "password"  => $password,
+            "idRole"    => $idRole,
+            "idFoyer"   => $idFoyer
         ];
 
         $this->db->table("user")->insert($data);

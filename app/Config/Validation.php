@@ -42,19 +42,12 @@ class Validation extends BaseConfig {
     // Rules
     // --------------------------------------------------------------------
 
-    public $registration_add_validation = [
-        "code"     => "required|alpha_numeric",
-        "nom"      => "required|max_length[30]",
-        "prenom"   => "required|max_length[30]",
-        "password" => "required|regex_match[" . Regex::PASSWORD . "]"
-    ];
-
     public $user_add_validation = [
-        "nom"      => "required|max_length[30]",
-        "prenom"   => "required|max_length[30]",
-        "password" => "required|regex_match[" . Regex::PASSWORD . "]",
-        "idFoyer"  => "required|integer",
-        "idRole"   => "required|integer"
+        "lastname"  => "required|max_length[30]",
+        "firstname" => "required|max_length[30]",
+        "password"  => "required|regex_match[" . Regex::PASSWORD . "]",
+        "idFoyer"   => "required|integer",
+        "idRole"    => "required|integer"
     ];
 
     public $user_update_password_validation = [
@@ -64,9 +57,9 @@ class Validation extends BaseConfig {
     ];
 
     public $user_update_data_validation = [
-        "id"     => "required|integer",
-        "nom"    => "permit_empty|max_length[30]",
-        "prenom" => "permit_empty|max_length[30]"
+        "id"        => "required|integer",
+        "lastname"  => "permit_empty|max_length[30]",
+        "firstname" => "permit_empty|max_length[30]"
     ];
 
     public $user_update_login_logout_validation = [
