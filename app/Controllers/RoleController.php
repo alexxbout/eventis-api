@@ -2,6 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Utils\HTTPCodes;
+
+use function PHPUnit\Framework\isEmpty;
+
 class RoleController extends BaseController {
     private $roleModel;
 
@@ -10,7 +14,16 @@ class RoleController extends BaseController {
     }
 
     public function getAll(): void {
-        $this->send(200, $this->roleModel->getAll());
+        $tab = $this->roleModel->getAll();
+        if($tab == NULL){
+            $this->send(HTTPCodes::NOTFOUND,$tab);
+        }
+        else if($tab.isEmpty()){
+            $this->send(HTTPCodes::NO_CONTENT,$tab);
+        }
+        else{
+            $this->send(HTTPCodes::OK,$tab);
+        }  
     }
 
     public function getById(int $id): void {

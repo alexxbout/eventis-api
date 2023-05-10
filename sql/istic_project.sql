@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le : dim. 19 fév. 2023 à 21:01
+-- Généré le : mar. 09 mai 2023 à 21:10
 -- Version du serveur : 8.0.32
--- Version de PHP : 8.2.3
+-- Version de PHP : 8.2.5
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -31,8 +31,8 @@ CREATE TABLE `blocked` (
   `id` int NOT NULL,
   `idUser` int NOT NULL,
   `idBlocked` int NOT NULL,
-  `since` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `since` timestamp NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET= COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -42,33 +42,23 @@ CREATE TABLE `blocked` (
 
 CREATE TABLE `code` (
   `id` int NOT NULL,
-  `code` varchar(4) NOT NULL,
-  `idUser` int DEFAULT NULL,
+  `code` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `idFoyer` int NOT NULL,
-  `idRef` int NOT NULL,
-  `expire` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `expire` date NOT NULL,
+  `used` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
 --
--- Doublure de structure pour la vue `educators`
--- (Voir ci-dessous la vue réelle)
+-- Structure de la table `conversation`
 --
-CREATE TABLE `educators` (
-`id` int
-,`idFoyer` int
-,`idRef` int
-,`idRefSub` int
-,`idRole` int
-,`joined` datetime
-,`lastLogin` datetime
-,`lastLogout` datetime
-,`login` varchar(30)
-,`nom` varchar(30)
-,`password` varchar(100)
-,`prenom` varchar(30)
-);
+
+CREATE TABLE `conversation` (
+  `id` int NOT NULL,
+  `idUser1` int NOT NULL,
+  `idUser2` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -81,12 +71,21 @@ CREATE TABLE `event` (
   `zip` varchar(5) NOT NULL,
   `canceled` tinyint(1) NOT NULL DEFAULT '0',
   `reason` varchar(50) DEFAULT NULL,
-  `dateDebut` date NOT NULL,
-  `dateFin` date NOT NULL,
+  `start` date NOT NULL,
+  `end` date NOT NULL,
   `title` varchar(20) NOT NULL,
-  `description` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `pic` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `event`
+--
+
+INSERT INTO `event` (`id`, `zip`, `canceled`, `reason`, `start`, `end`, `title`, `description`, `pic`) VALUES
+(1, '12345', 0, NULL, '2023-04-01', '2023-04-02', 'Event 1', 'Description of event 1', 'pic1.jpg'),
+(2, '23456', 0, NULL, '2023-05-01', '2023-05-02', 'Event 2', 'Description of event 2', 'pic2.jpg'),
+(3, '34567', 1, 'Bad weather', '2023-06-01', '2023-06-02', 'Event 3', 'Description of event 3', NULL);
 
 -- --------------------------------------------------------
 
@@ -100,15 +99,16 @@ CREATE TABLE `foyer` (
   `zip` varchar(5) NOT NULL,
   `address` varchar(50) NOT NULL,
   `street` varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `foyer`
 --
 
 INSERT INTO `foyer` (`id`, `city`, `zip`, `address`, `street`) VALUES
-(0, 'rennes', '35000', 'Général Leclerc Bâtiment ', '12 Av.'),
-(1, 'paris', '75008', 'Pl. Charles de Gaulle', '');
+(1, 'Paris', '75001', '1 Rue de Rivoli', 'Rivoli'),
+(2, 'Lyon', '69001', '1 Place des Terreaux', 'Terreaux'),
+(3, 'Marseille', '13001', '1 Rue de la République', 'République');
 
 -- --------------------------------------------------------
 
@@ -117,19 +117,25 @@ INSERT INTO `foyer` (`id`, `city`, `zip`, `address`, `street`) VALUES
 --
 
 CREATE TABLE `friend` (
-  `id` int NOT NULL,
   `idUser1` int NOT NULL,
   `idUser2` int NOT NULL,
   `since` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
 
 --
--- Déchargement des données de la table `friend`
+-- Structure de la table `message`
 --
 
-INSERT INTO `friend` (`id`, `idUser1`, `idUser2`, `since`) VALUES
-(0, 2, 1, '2023-02-19 21:00:37'),
-(1, 0, 2, '2023-02-19 21:00:37');
+CREATE TABLE `message` (
+  `id` int NOT NULL,
+  `idConversation` int NOT NULL,
+  `idSender` int NOT NULL,
+  `idReceiver` int NOT NULL,
+  `content` varchar(255) NOT NULL,
+  `sentAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -141,7 +147,20 @@ CREATE TABLE `participant` (
   `id` int NOT NULL,
   `idEvent` int NOT NULL,
   `idUser` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `registration`
+--
+
+CREATE TABLE `registration` (
+  `id` int NOT NULL,
+  `idCode` int NOT NULL,
+  `idUser` int NOT NULL,
+  `at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -152,7 +171,7 @@ CREATE TABLE `participant` (
 CREATE TABLE `role` (
   `id` int NOT NULL,
   `libelle` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `role`
@@ -161,7 +180,8 @@ CREATE TABLE `role` (
 INSERT INTO `role` (`id`, `libelle`) VALUES
 (0, 'developer'),
 (1, 'educator'),
-(2, 'user');
+(2, 'user'),
+(3, 'admin');
 
 -- --------------------------------------------------------
 
@@ -171,37 +191,16 @@ INSERT INTO `role` (`id`, `libelle`) VALUES
 
 CREATE TABLE `user` (
   `id` int NOT NULL,
-  `nom` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `prenom` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `login` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lastname` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `firstname` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `login` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `idRole` int NOT NULL,
   `idRef` int DEFAULT NULL,
-  `idRefSub` int DEFAULT NULL,
   `idFoyer` int NOT NULL,
   `lastLogin` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `lastLogout` datetime DEFAULT NULL,
-  `joined` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Déchargement des données de la table `user`
---
-
-INSERT INTO `user` (`id`, `nom`, `prenom`, `login`, `password`, `idRole`, `idRef`, `idRefSub`, `idFoyer`, `lastLogin`, `lastLogout`, `joined`) VALUES
-(0, 'Dupont', 'Pierre', 'dpierre', '$2y$10$J2oRxcKyGAVYGbARti.gouHSpl7s/J/JsXR.uCjRy/fhgYW8mG9.y', 2, NULL, NULL, 0, '2023-02-19 21:53:11', NULL, '2023-02-19 21:53:11'),
-(1, 'Dupont', 'Marie', 'dmarie', '$2y$10$MN74UYbkMNZqJ3CKBYdZRuL.2IqHOWzZfqJrSiHooVnq2Zedb8H16', 2, NULL, NULL, 0, '2023-02-19 21:53:56', NULL, '2023-02-19 21:53:56'),
-(2, 'Dupont', 'Jean', 'djean', '$2y$10$BIzBVJiu2/5M9eci4m1rU.elCFo5jXhliRBH2Jb96H1HApTqReJwO', 2, NULL, NULL, 0, '2023-02-19 21:54:08', NULL, '2023-02-19 21:54:08'),
-(3, 'Paul', 'Guillard', 'gpaul', '$2y$10$mmuIxL4hMiL1z1XCWrDGDen4pEFhreAbvDFkzhOhOSCy22t04uQHK', 1, NULL, NULL, 0, '2023-02-19 21:54:59', NULL, '2023-02-19 21:54:59');
-
--- --------------------------------------------------------
-
---
--- Structure de la vue `educators`
---
-DROP TABLE IF EXISTS `educators`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `educators`  AS SELECT `user`.`id` AS `id`, `user`.`nom` AS `nom`, `user`.`prenom` AS `prenom`, `user`.`login` AS `login`, `user`.`password` AS `password`, `user`.`idRole` AS `idRole`, `user`.`idRef` AS `idRef`, `user`.`idRefSub` AS `idRefSub`, `user`.`idFoyer` AS `idFoyer`, `user`.`lastLogin` AS `lastLogin`, `user`.`lastLogout` AS `lastLogout`, `user`.`joined` AS `joined` FROM `user` WHERE (`user`.`idRole` = 1) ;
+  `lastLogout` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Index pour les tables déchargées
@@ -219,11 +218,17 @@ ALTER TABLE `blocked`
 -- Index pour la table `code`
 --
 ALTER TABLE `code`
-  ADD PRIMARY KEY (`id`,`code`),
+  ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`),
-  ADD KEY `fk_code_idFoyer` (`idFoyer`),
-  ADD KEY `fk_code_idRef` (`idRef`),
-  ADD KEY `fk_code_idUser` (`idUser`);
+  ADD KEY `fk_code_idFoyer` (`idFoyer`);
+
+--
+-- Index pour la table `conversation`
+--
+ALTER TABLE `conversation`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_conversation_idUser1` (`idUser1`),
+  ADD KEY `fk_conversation_idUser2` (`idUser2`);
 
 --
 -- Index pour la table `event`
@@ -241,9 +246,17 @@ ALTER TABLE `foyer`
 -- Index pour la table `friend`
 --
 ALTER TABLE `friend`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_friend_idUser1` (`idUser1`),
+  ADD PRIMARY KEY (`idUser1`,`idUser2`),
   ADD KEY `fk_friend_idUser2` (`idUser2`);
+
+--
+-- Index pour la table `message`
+--
+ALTER TABLE `message`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_message_idConversation` (`idConversation`),
+  ADD KEY `fk_message_idSender` (`idSender`),
+  ADD KEY `fk_message_idReceiver` (`idReceiver`);
 
 --
 -- Index pour la table `participant`
@@ -252,6 +265,14 @@ ALTER TABLE `participant`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_participant_idEvent` (`idEvent`),
   ADD KEY `fk_participant_idUser` (`idUser`);
+
+--
+-- Index pour la table `registration`
+--
+ALTER TABLE `registration`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_registration_idCode` (`idCode`),
+  ADD KEY `fk_registration_idUser` (`idUser`);
 
 --
 -- Index pour la table `role`
@@ -267,7 +288,6 @@ ALTER TABLE `user`
   ADD UNIQUE KEY `login` (`login`),
   ADD KEY `fk_user_idRole` (`idRole`),
   ADD KEY `fk_user_idRef` (`idRef`),
-  ADD KEY `fk_user_idRefSub` (`idRefSub`),
   ADD KEY `fk_user_idFoyer` (`idFoyer`);
 
 --
@@ -285,9 +305,14 @@ ALTER TABLE `blocked`
 -- Contraintes pour la table `code`
 --
 ALTER TABLE `code`
-  ADD CONSTRAINT `fk_code_idFoyer` FOREIGN KEY (`idFoyer`) REFERENCES `foyer` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `fk_code_idRef` FOREIGN KEY (`idRef`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `fk_code_idUser` FOREIGN KEY (`idUser`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `fk_code_idFoyer` FOREIGN KEY (`idFoyer`) REFERENCES `foyer` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `conversation`
+--
+ALTER TABLE `conversation`
+  ADD CONSTRAINT `fk_conversation_idUser1` FOREIGN KEY (`idUser1`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `fk_conversation_idUser2` FOREIGN KEY (`idUser2`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `friend`
@@ -297,6 +322,14 @@ ALTER TABLE `friend`
   ADD CONSTRAINT `fk_friend_idUser2` FOREIGN KEY (`idUser2`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
+-- Contraintes pour la table `message`
+--
+ALTER TABLE `message`
+  ADD CONSTRAINT `fk_message_idConversation` FOREIGN KEY (`idConversation`) REFERENCES `conversation` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `fk_message_idReceiver` FOREIGN KEY (`idReceiver`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `fk_message_idSender` FOREIGN KEY (`idSender`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
 -- Contraintes pour la table `participant`
 --
 ALTER TABLE `participant`
@@ -304,12 +337,18 @@ ALTER TABLE `participant`
   ADD CONSTRAINT `fk_participant_idUser` FOREIGN KEY (`idUser`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
+-- Contraintes pour la table `registration`
+--
+ALTER TABLE `registration`
+  ADD CONSTRAINT `fk_registration_idCode` FOREIGN KEY (`idCode`) REFERENCES `code` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `fk_registration_idUser` FOREIGN KEY (`idUser`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
 -- Contraintes pour la table `user`
 --
 ALTER TABLE `user`
   ADD CONSTRAINT `fk_user_idFoyer` FOREIGN KEY (`idFoyer`) REFERENCES `foyer` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `fk_user_idRef` FOREIGN KEY (`idRef`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `fk_user_idRefSub` FOREIGN KEY (`idRefSub`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `fk_user_idRole` FOREIGN KEY (`idRole`) REFERENCES `role` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 COMMIT;
 
