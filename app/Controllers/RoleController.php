@@ -16,7 +16,7 @@ class RoleController extends BaseController {
     public function getAll(): void {
         $tab = $this->roleModel->getAll();
         if($tab == NULL){
-            $this->send(HTTPCodes::NOTFOUND,$tab);
+            $this->send(HTTPCodes::NOT_FOUND,$tab);
         }
         else if($tab.isEmpty()){
             $this->send(HTTPCodes::NO_CONTENT,$tab);
