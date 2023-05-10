@@ -6,7 +6,7 @@ class FriendModel extends BaseModel
 {
 
 
-    public function getAll(int $idUser): array
+    public function getAll(int $idUser ): array
     {
 
         $fdb = $this->db->table('friend');

@@ -17,8 +17,9 @@ class FriendController extends BaseController
 
 
 
-    public function getAll(int $idUser): void
+    public function getAll(): void
     {
+        $idUser = $this->request->{'data'}->id;
         $data = $this->friendModel->getAll($idUser);
         if (empty($data)) {
             $this->send(HTTPCodes::NO_CONTENT, "Nobody has any friends");
@@ -27,24 +28,18 @@ class FriendController extends BaseController
         }
     }
 
-    public function isFriend(int $idUser, int $idFriend): void
+    public function isFriend(int $idFriend): void
     {
 
+        $idUser = $this->request->{'data'}->id;
 
         if ($idUser != $idFriend) {
             $data = $this->friendModel->isFriend($idUser, $idFriend);
 
-            if ($data == null) {
-                $this->send(HTTPCodes::OK, ["data" => false]);
-            } else {
-                $this->send(HTTPCodes::OK, ["data" => true]);
-            }
+            $this->send(HTTPCodes::OK, ["data" => $data == null]);
         } else {
             $err = ["message" => "Same arguments", "data" => "Cannot ask if someone is friend with himself"];
             $this->send(HTTPCodes::BAD_REQUEST, $err);
         }
     }
-
-
-
 }

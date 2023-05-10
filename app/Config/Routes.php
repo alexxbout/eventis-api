@@ -108,8 +108,8 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("friend", static function ($routes) {
-            $routes->get("(:num)", "FriendController::getAll/$1"); // Tous les amis d'un utilisateur
-            $routes->get("isFriend/(:num)/(:num)", "FriendController::isFriend/$1/$2"); // Vérifie si deux utilisateurs sont amis
+            $routes->get("", "FriendController::getAll"); // Tous les amis d'un utilisateur
+            $routes->get("isFriend/(:num)", "FriendController::isFriend/$1"); // Vérifie si deux utilisateurs sont amis
 
             // Les paramètres sont dans le body
             $routes->post("add", "FriendController::add"); // Ajoute un ami
