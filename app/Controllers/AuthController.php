@@ -11,7 +11,8 @@ use Psr\Log\LoggerInterface;
 
 class AuthController extends BaseController {
 
-    private $expiration = 60 * 60 * 24; // 24h
+    private $expiration_prod = 60 * 60 * 24; // 24h
+    private $expiration_dev = 60 * 60 * 24 * 7; // 1 week
     private $algorithm = "HS256";
 
     private $userModel;
@@ -48,7 +49,7 @@ class AuthController extends BaseController {
             return;
         }
 
-        // Décoder le token en base64
+        // Décoder le login et le mot de passe
         $decoded = base64_decode($token);
 
         // Récupérer le login et le mot de passe
@@ -69,15 +70,19 @@ class AuthController extends BaseController {
             return;
         }
 
+        // Expiration du token : 24h en production, 1 semaine en développement
+        $exp = getenv("CI_ENVIRONMENT") === "production" ? $this->expiration_prod : $this->expiration_dev;
+
         // Générer un token JWT
         $payload = [
             "iss" => base_url(),                 // Issuer : used by the recipient of a JWT to verify the issuer
             "aud" => base_url(),                 // Audience : used by the recipient of a JWT to identify the intended recipient
             "iat" => time(),                     // Issued at : contains the timestamp at which the token was issued
-            "exp" => time() + $this->expiration, // Expiration time : contains the timestamp at which the token will expire
+            "exp" => time() + $exp, // Expiration time : contains the timestamp at which the token will expire
             "data" => [ // Data : contains the claims. Don't put sensitive data here, it will be visible by anyone.
                 "id"        => $user->id,
-                "login"     => $user->login
+                "login"     => $user->login,
+                "idRole"    => $user->idRole
             ]
         ];
 
@@ -89,6 +94,6 @@ class AuthController extends BaseController {
         // Le client devra stocker le token dans le local storage
         // Le client devra envoyer le token dans le header Authorization pour chaque requête
         // Le token sera vérifié par le filtre JWTFilter pour chaque requête protégée
-        $this->send(HTTPCodes::OK, ["token" => $token, "user" => $user], "User logged in");
+        $this->send(HTTPCodes::OK, ["user" => $user, "token" => $token], "User logged in");
     }
 }
