@@ -55,20 +55,34 @@ abstract class BaseController extends Controller {
         // E.g.: $this->session = \Config\Services::session();
     }
 
-    protected function send(int $status_code, array|string $json = "", array $header = []): void {
-        foreach ($header as $h) {
-            header($h);
+    /**
+     * It sends a JSON response to the client
+     * 
+     * @param int status_code The HTTP status code to send.
+     * @param array|null data The data to be sent to the client.
+     * @param string message The message to be displayed to the client.
+     * @param string|array|null errors An array of errors.
+     * @param array header An array of headers to be sent with the response.
+     */
+    protected function send(int $status_code, array|null $data = null, string $message = "", string|array|null $errors = null, array $headers = []): void {
+        foreach ($headers as $header => $value) {
+            $this->response->setHeader($header, $value);
+        }
+
+        $json          = new stdClass();
+        $json->status  = $status_code;
+        $json->message = $message;
+        $json->data    = $data;
+
+        if ($errors !== null) {
+            $json->errors = $errors;
         }
 
         $this->response
             ->setContentType("application/json")
             ->setStatusCode($status_code)
             ->setJson($json);
-
+            
         $this->response->send();
-    }
-
-    protected function stdClassToArray(stdClass $stdClass): array {
-        return json_decode(json_encode($stdClass), true);
     }
 }

@@ -2,8 +2,15 @@
 
 namespace App\Controllers;
 
+use App\Utils\HTTPCodes;
+
 class Home extends BaseController {
+
     public function index(): void {
-        $this->send(200, ["message" => "API is working"]);
+        $this->send(HTTPCodes::OK, null, "API is working");
+    }
+
+    public function unauthorized(): void {
+        $this->send(HTTPCodes::UNAUTHORIZED, ["message" => "Authentication required"]);
     }
 }
