@@ -15,7 +15,7 @@ class FriendModel extends BaseModel
         return array_merge($dataIdUser1, $dataIdUser2);
     }
 
-    public function isFriend(int $idUser, int $idFriend): string |array | null
+    public function isFriend(int $idUser, int $idFriend): array | null
     {
         $db = $this->db->table('friend');
         $array = ['idUser1' => $idUser, 'idUser2' => $idFriend];
@@ -30,4 +30,8 @@ class FriendModel extends BaseModel
             ->get()->getRowArray();
         return $data;
     }
+
+
+
+
 }
