@@ -62,7 +62,7 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("foyer", static function ($routes) {
-            $routes->get("", "FoyerController::getAll"); // Tous les foyers
+            $routes->get("", "FoyerController::getAll", ['filter' => 'edu']); // Tous les foyers
             $routes->get("(:num)", "FoyerController::getById/$1"); // Un foyer par son id
 
             // Les paramètres sont dans le body
