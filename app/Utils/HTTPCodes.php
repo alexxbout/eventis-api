@@ -31,4 +31,9 @@ class HTTPCodes {
      * Le serveur n'a pas trouvé la ressource demandée. Ce code de réponse est principalement connu pour son apparition fréquente sur le web.
      */
     const NOT_FOUND = 404;
+
+    /**
+     * Le serveur a rencontré une situation qu'il ne sait pas traiter.
+     */
+    const INTERNAL_SERVER_ERROR = 500;
 }

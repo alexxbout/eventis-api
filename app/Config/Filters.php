@@ -3,12 +3,10 @@
 namespace Config;
 
 use App\Filters\AuthFilter;
+use App\Filters\EducatorFilter;
+use App\Filters\UserFilter;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
-use CodeIgniter\Filters\DebugToolbar;
-use CodeIgniter\Filters\Honeypot;
-use CodeIgniter\Filters\InvalidChars;
-use CodeIgniter\Filters\SecureHeaders;
 
 class Filters extends BaseConfig {
     /**
@@ -17,10 +15,6 @@ class Filters extends BaseConfig {
      */
     public array $aliases = [
         "csrf"          => CSRF::class,
-        "toolbar"       => DebugToolbar::class,
-        "honeypot"      => Honeypot::class,
-        "invalidchars"  => InvalidChars::class,
-        "secureheaders" => SecureHeaders::class,
         "auth"          => AuthFilter::class
     ];
 
@@ -29,19 +23,8 @@ class Filters extends BaseConfig {
      * applied before and after every request.
      */
     public array $globals = [
-        "before" => [
-            "auth" => [
-                "except" => [
-                    "",
-                    "unauthorized",
-                    "api/auth/login",
-                    "api/auth/register",
-                ]
-            ]
-        ],
-        "after" => [
-            "toolbar"
-        ],
+        "before" => [],
+        "after" => []
     ];
 
     /**
@@ -64,5 +47,11 @@ class Filters extends BaseConfig {
      * Example:
      * "isLoggedIn" => ["before" => ["account/*", "profiles/*"]]
      */
-    public array $filters = [];
+    public array $filters = [
+        "auth" => [
+            "before" => [
+                "api/v1/*"
+            ]
+        ]
+    ];
 }
