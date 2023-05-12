@@ -57,7 +57,6 @@ class Validation extends BaseConfig {
     ];
 
     public $user_update_data_validation = [
-        "id"        => "required|integer",
         "lastname"  => "permit_empty|max_length[30]",
         "firstname" => "permit_empty|max_length[30]"
     ];

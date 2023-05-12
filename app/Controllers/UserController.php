@@ -2,139 +2,184 @@
 
 namespace App\Controllers;
 
+use App\Models\FoyerModel;
 use App\Models\UserModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
 use Psr\Log\LoggerInterface;
 
-class UserController extends BaseController {
+class UserController extends BaseController
+{
 
-    private $userModel;
+    private UserModel $userModel;
+    private FoyerModel $foyerModel;
 
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    {
         parent::initController($request, $response, $logger);
         $this->userModel = new \App\Models\UserModel();
+
+        $this->foyerModel = new \App\Models\FoyerModel();
     }
 
-    public function getAll(): void {
-        $data = $this->userModel->getAll();
-        if ($data != null) {
-            $this->send(HTTPCodes::OK, $data, "OK");
+    public function getAll(): void
+    {
+        //reserver aux devs
+        if ($this->user->isDeveloper()) {
+            $data = $this->userModel->getAll();
+            if ($data != null) {
+                $this->send(HTTPCodes::OK, $data, "OK");
+            } else {
+                $this->send(HTTPCodes::NO_CONTENT);
+            }
         } else {
-            $this->send(HTTPCodes::NO_CONTENT);
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
 
-    public function getById(int $id): void {
-        $data = $this->userModel->getById($id);
-        if ($data != null) {
-            $this->send(HTTPCodes::OK, $data, "OK");
+    public function getById(int $id): void
+    {
+        if ($this->user->isDeveloper() || $this->user->isAdmin()) {
+            $data = $this->userModel->getById($id);
+            if ($data != null) {
+                $this->send(HTTPCodes::OK, $data, "OK");
+            } else {
+                $this->send(HTTPCodes::NO_CONTENT);
+            }
         } else {
-            $this->send(HTTPCodes::NO_CONTENT);
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
 
-    public function getByIdFoyer(int $idFoyer): void {
-        $data = $this->userModel->getByIdFoyer($idFoyer);
-        if ($data != null) {
-            $this->send(HTTPCodes::OK, $data, "OK");
+    public function getByIdFoyer(int $idFoyer): void
+    {
+        if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
+            $data = $this->userModel->getByIdFoyer($idFoyer);
+            if ($data != null) {
+                $this->send(HTTPCodes::OK, $data, "OK");
+            } else {
+                $this->send(HTTPCodes::NO_CONTENT);
+            }
         } else {
-            $this->send(HTTPCodes::NO_CONTENT);
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
 
-    public function getByIdRole(int $idRole): void {
-        $data = $this->userModel->getByIdRole($idRole);
-        if ($data != null) {
-            $this->send(HTTPCodes::OK, $data, "OK");
+    public function add(): void
+    {
+        if ($this->user->isDeveloper()) {
+            $validation =  \Config\Services::validation();
+
+            $validation->setRuleGroup("user_add_validation");
+
+            if (!$validation->withRequest($this->request)->run()) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return;
+            }
+            $data = $this->request->getJSON();
+
+            // Check if idFoyer exists
+            if ($this->foyerModel->getById($data->idFoyer) === null) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "idFoyer doesn't exists");
+                return;
+            }
+
+            $login = $this->getValidRandomLogin($data->lastname, $data->firstname);
+            $hashedPassword = password_hash($data->password, PASSWORD_DEFAULT);
+
+            // Update password field to new hashed password
+            $data->password = $hashedPassword;
+
+            $id = $this->userModel->add($data->lastname, $data->firstname, $login, $hashedPassword, $data->idRole, $data->idFoyer);
+
+            if (isset($id)) {
+                $data->id = $id;
+
+                $this->send(HTTPCodes::OK, $data, "User added");
+            } else {
+                $this->send(HTTPCodes::NO_CONTENT, null, "Unable to find retreive user id");
+            }
+
         } else {
-            $this->send(HTTPCodes::NO_CONTENT);
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
 
-    public function getByIdRef(int $idRef): void {
-        $data = $this->userModel->getByIdRef($idRef);
-        if ($data != null) {
-            $this->send(HTTPCodes::OK, $data, "OK");
+    public function update(int $idUser): void
+    {
+        //check idUser and if acc ID corresponds with id of user
+        if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
+            $validation =  \Config\Services::validation();
+
+            $validation->setRuleGroup("user_update_data_validation");
+
+            if (!$validation->withRequest($this->request)->run()) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return;
+            }
+
+            $data = $this->request->getJSON();
+
+            // Remove password/id from body
+
+            if (isset($data->password)) {
+                unset($data->password); // We don't want to update the password with this method
+            }
+
+            if (isset($data->id)) {
+                unset($data->id); // We don't want to update the password with this method
+            }
+
+            // Check if lastname and firstname are not empty
+            // TODO
+
+            $this->userModel->updateData($idUser, $data);
+
+            $this->send(HTTPCodes::OK, $data, "User updated");
+        }
+        //user tries to modify an account other than their own OR is not an admin/dev
+        else {
+            $this->send(HTTPCodes::UNAUTHORIZED);
+        }
+    }
+
+    /**
+     * Deactivates account: changes boolean value in USER table from 1 to 0 (active to inactive)
+     * 
+     * Verifications:
+     * - either the person is an dev/admin 
+     * - or the person is deactivating their own account
+     */
+    public function deactivateAccount(int $idUser): void
+    {
+        //check idUser and if acc ID corresponds with id of user
+        if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
+            $this->userModel->setActive($idUser, 0);
+
+            $this->send(HTTPCodes::OK, null, "User deactivated");
         } else {
-            $this->send(HTTPCodes::NO_CONTENT);
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
 
-    public function add(): void {
-        $validation =  \Config\Services::validation();
+    /**
+     * Deactivates account: changes boolean value in USER table from 1 to 0 (active to inactive)
+     * 
+     * Verifications:
+     * - either the person is an dev/admin 
+     * - or the person is deactivating their own account
+     */
+    public function reactivateAccount(int $idUser): void
+    {
+        //either account is dev/admin check idUser and if acc ID corresponds with id of user
+        if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
+            $this->userModel->setActive($idUser, 1);
 
-        $validation->setRuleGroup("user_add_validation");
-
-        if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-            return;
+            $this->send(HTTPCodes::OK, null, "User activated");
+        } else {
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
-        $data = $this->request->getJSON(true);
-
-        $id = self::addUser($this->userModel, $data["lastname"], $data["firstname"], $data["password"], $data["idFoyer"], $data["idRole"]);
-
-        $data["id"] = $id;
-
-        $this->send(HTTPCodes::OK, $data, "User added");
-    }
-
-    public function updateLastLogin(): void {
-        $validation =  \Config\Services::validation();
-
-        $validation->setRuleGroup("user_update_login_logout_validation");
-
-        if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-            return;
-        }
-        $data = $this->request->getJSON(true);
-
-        $this->userModel->updateLastLogin($data["id"]);
-
-        $this->send(HTTPCodes::OK, $data, "Last login updated");
-    }
-
-    public function updateLastLogout(): void {
-        $validation =  \Config\Services::validation();
-
-        $validation->setRuleGroup("user_update_login_logout_validation");
-
-        if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-            return;
-        }
-        $data = $this->request->getJSON(true);
-
-        $this->userModel->updateLastLogout($data["id"]);
-
-        $this->send(HTTPCodes::OK, $data, "Last logout updated");
-    }
-
-    public function updateData(): void {
-        $validation =  \Config\Services::validation();
-
-        $validation->setRuleGroup("user_update_data_validation");
-
-        if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-            return;
-        }
-
-        $data = $this->request->getJSON(true);
-
-        if (isset($data["password"])) {
-            unset($data["password"]); // We don't want to update the password with this method
-        }
-
-        if (isset($data["login"])) {
-            unset($data["login"]); // We don't want to update the login
-        }
-
-        $this->userModel->updateData($data);
-
-        $this->send(HTTPCodes::OK, $data, "User updated");
     }
 
     /**
@@ -145,56 +190,42 @@ class UserController extends BaseController {
      * - The new password is different from the old one
      * - The new password is valid
      */
-    public function updatePassword(): void {
-        $validation =  \Config\Services::validation();
+    public function updatePassword(int $idUser): void
+    {
+        if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
+            $validation =  \Config\Services::validation();
 
-        $validation->setRuleGroup("user_update_password_validation");
+            $validation->setRuleGroup("user_update_password_validation");
 
-        if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-            return;
+            if (!$validation->withRequest($this->request)->run()) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return;
+            }
+
+            $data = $this->request->getJSON(true);
+
+            // Check if the new password is different from the old one
+            if ($data["oldPassword"] == $data["newPassword"]) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "New password is the same as the old one");
+                return;
+            }
+
+            $user = $this->userModel->getById($data["id"]);
+
+            // Check if the old password is correct
+            if (!password_verify($data["oldPassword"], $user["password"])) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "Old password is incorrect");
+                return;
+            }
+
+            $data["newPassword"] = password_hash($data["newPassword"], PASSWORD_DEFAULT);
+
+            $this->userModel->updatePassword($data["id"], $data["newPassword"]);
+
+            $this->send(HTTPCodes::OK, null, "Password updated");
+        } else {
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
-
-        $data = $this->request->getJSON(true);
-
-        // Check if the new password is different from the old one
-        if ($data["oldPassword"] == $data["newPassword"]) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "New password is the same as the old one");
-            return;
-        }
-
-        $user = $this->userModel->getById($data["id"]);
-
-        // Check if the old password is correct
-        if (!password_verify($data["oldPassword"], $user["password"])) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "Old password is incorrect");
-            return;
-        }
-
-        $data["newPassword"] = password_hash($data["newPassword"], PASSWORD_DEFAULT);
-
-        $this->userModel->updatePassword($data["id"], $data["newPassword"]);
-
-        $this->send(HTTPCodes::OK, null, "Password updated");
-    }
-
-    /**
-     * It adds a user to the database with a unique login and a hashed password
-     * 
-     * @param UserModel userModel the user model
-     * @param string lastname
-     * @param string firstname
-     * @param string rawPassword the password that the user will enter and that will be hashed
-     * @param int idRole the id of the role
-     * @param int idFoyer the id of the household the user belongs to
-     * 
-     * @return int The id of the user that has been added.
-     */
-    public static function addUser(UserModel $userModel, string $lastname, string $firstname, string $rawPassword, int $idRole, int $idFoyer): int {
-        $login = self::getValidRandomLogin($userModel, $lastname, $firstname);
-        $hashedPassword = password_hash($rawPassword, PASSWORD_DEFAULT);
-
-        return $userModel->add($lastname, $firstname, $login, $hashedPassword, $idRole, $idFoyer);
     }
 
     /**
@@ -206,11 +237,15 @@ class UserController extends BaseController {
      * 
      * @return string the login
      */
-    public static function getValidRandomLogin(UserModel $userModel, string $lastname, string $firstname): string {
+    private function getValidRandomLogin(string $lastname, string $firstname): string
+    {
+        $lastname = str_replace(" ", "", $lastname);
+        $firstname = str_replace(" ", "", $firstname);
+
         $login = strtolower($firstname[0] . $lastname);
 
         $i = 0;
-        while ($userModel->getByLogin($login) != null) {
+        while ($this->userModel->getByLogin($login) != null) {
             $login = strtolower($firstname[0] . $lastname . $i);
             $i++;
         }

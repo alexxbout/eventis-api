@@ -48,16 +48,31 @@ $routes->group("api", static function ($routes) {
 
     $routes->group("v1", static function ($routes) {
         $routes->group("user", static function ($routes) {
-            $routes->get("",             "UserController::getAll"); // Tous les utilisateurs
-            $routes->get("(:num)",       "UserController::getById/$1"); // Un utilisateur par son id
-            $routes->get("foyer/(:num)", "UserController::getByIdFoyer/$1"); // Tous les utilisateurs d'un foyer
-            $routes->get("role/(:num)",  "UserController::getByIdRole/$1"); // Tous les utilisateurs d'un rôle
-            $routes->get("ref/(:num)",   "UserController::getByIdRef/$1"); // Tous les utilisateurs d'un référent
+            $routes->get("",                  "UserController::getAll");
 
-            $routes->post("add",             "UserController::add"); // Ajoute un utilisateur
-            $routes->put("updateData",       "UserController::updateData"); // Met à jour un utilisateur
-            $routes->put("updateLastLogin",  "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
-            $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
+            $routes->get("(:num)",            "UserController::getById/$1");
+            
+            $routes->post("",                 "UserController::add");
+            
+            $routes->put("(:num)",            "UserController::update/$1");
+            
+            $routes->put("deactivate/(:num)", "UserCcontroller::deactiveAccount");
+            $routes->put("reactivate/(:num)", "UserCcontroller::reactivateAccount");
+
+            $routes->put("password/(:num)",   "UserController::updatePassword");
+            $routes->put("login/(:num)",      "UserController::updateLogin");
+
+            $routes->get("foyer/(:num)",      "UserController::getByIdFoyer");
+
+            // $routes->get("(:num)",       "UserController::getById/$1"); // Un utilisateur par son id
+            // $routes->get("foyer/(:num)", "UserController::getByIdFoyer/$1"); // Tous les utilisateurs d'un foyer
+            // $routes->get("role/(:num)",  "UserController::getByIdRole/$1"); // Tous les utilisateurs d'un rôle
+            // $routes->get("ref/(:num)",   "UserController::getByIdRef/$1"); // Tous les utilisateurs d'un référent
+
+            // $routes->post("add",             "UserController::add"); // Ajoute un utilisateur
+            // $routes->put("updateData",       "UserController::updateData"); // Met à jour un utilisateur
+            // $routes->put("updateLastLogin",  "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
+            // $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
         });
 
         $routes->group("foyer", static function ($routes) {

@@ -75,7 +75,7 @@ abstract class BaseController extends Controller {
      * @param string|array|null errors An array of errors.
      * @param array header An array of headers to be sent with the response.
      */
-    protected function send(int $status_code, array|null $data = null, string $message = "", string|array|null $errors = null, array $headers = []): void {
+    protected function send(int $status_code, stdClass|array|null $data = null, string $message = "", string|array|null $errors = null, array $headers = []): void {
         foreach ($headers as $header => $value) {
             $this->response->setHeader($header, $value);
         }
@@ -102,7 +102,7 @@ abstract class BaseController extends Controller {
      * 
      * @return object data obtained from the JWT token.
      */
-    private function getJwtData(): object {
+    private function getJwtData(): object | null {
         return service("jwt")->getTokenData();
     }
 }

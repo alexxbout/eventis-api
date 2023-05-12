@@ -11,7 +11,7 @@ class UserModel extends BaseModel {
     }
 
     public function getById(int $id): array|null {
-        return $this->db->table("user")->getWhere(["id" => $id])->getRowArray();
+        return $this->db->table("user")->getWhere(["id" => $id])->getRowObject();
     }
 
     public function getByIdFoyer(int $idFoyer): array|null {
@@ -45,8 +45,8 @@ class UserModel extends BaseModel {
         return $data["id"];
     }
 
-    public function updateData(array $data): void {
-        $this->db->table("user")->update($data, ["id" => $data["id"]]);
+    public function updateData(int $idUser, object $data): void {
+        $this->db->table("user")->update($data, ["id" => $idUser]);
     }
 
     public function updateLastLogin(int $id): void {
@@ -59,5 +59,9 @@ class UserModel extends BaseModel {
 
     public function updatePassword(int $id, string $password): void {
         $this->db->table("user")->update(["password" => $password], ["id" => $id]);
+    }
+
+    public function setActive(int $id, int $value): void {
+        $this->db->table("user")->update(["active" => $value], ["id" => $id]);
     }
 }
