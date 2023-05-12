@@ -32,7 +32,11 @@ CREATE TABLE `blocked` (
   `idUser` int NOT NULL,
   `idBlocked` int NOT NULL,
   `since` timestamp NOT NULL
+<<<<<<< HEAD
+) ENGINE=InnoDB DEFAULT CHARSET= COLLATE=utf8mb4_0900_ai_ci;
+=======
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+>>>>>>> main
 
 -- --------------------------------------------------------
 

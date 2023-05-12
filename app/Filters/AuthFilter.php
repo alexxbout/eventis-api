@@ -2,6 +2,7 @@
 
 namespace App\Filters;
 
+use App\ThirdParty\TokenService;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -13,6 +14,8 @@ class AuthFilter implements FilterInterface {
     private $algorithm = "HS256";
 
     public function before(RequestInterface $request, $arguments = null) {
+        log_message("debug", "I am the AuthFilter before method");
+
         /**
          * Format du header : Authorization: Bearer <token>
          */
@@ -42,8 +45,8 @@ class AuthFilter implements FilterInterface {
                 return redirect()->to("/unauthorized");
             }
 
-            // Ajouter les informations de l'utilisateur dans la requête
-            $request->data = $decoded->data;
+            // Ajouter les informations de l'utilisateur dans le service jwt
+            service("jwt")->setTokenData($decoded->data);
         } catch (\Exception $e) {
             return redirect()->to("/unauthorized");
         }

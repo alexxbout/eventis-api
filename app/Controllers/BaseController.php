@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+use App\ThirdParty\TokenService;
+use App\Utils\HTTPCodes;
+use App\Utils\User;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\CLIRequest;
 use CodeIgniter\HTTP\IncomingRequest;
@@ -43,6 +46,8 @@ abstract class BaseController extends Controller {
      */
     // protected $session;
 
+    protected User $user;
+
     /**
      * Constructor.
      */
@@ -53,6 +58,12 @@ abstract class BaseController extends Controller {
         // Preload any models, libraries, etc, here.
 
         // E.g.: $this->session = \Config\Services::session();
+
+        $data = $this->getJwtData();
+
+        if (isset($data)) {
+            $this->user = new User($data->id, $data->idRole);
+        }
     }
 
     /**
@@ -64,7 +75,7 @@ abstract class BaseController extends Controller {
      * @param string|array|null errors An array of errors.
      * @param array header An array of headers to be sent with the response.
      */
-    protected function send(int $status_code, array|null $data = null, string $message = "", string|array|null $errors = null, array $headers = []): void {
+    protected function send(int $status_code, stdClass|array|null $data = null, string $message = "", string|array|null $errors = null, array $headers = []): void {
         foreach ($headers as $header => $value) {
             $this->response->setHeader($header, $value);
         }
@@ -82,7 +93,16 @@ abstract class BaseController extends Controller {
             ->setContentType("application/json")
             ->setStatusCode($status_code)
             ->setJson($json);
-            
+
         $this->response->send();
+    }
+
+    /**
+     * This function retrieves the JWT data and returns it.
+     * 
+     * @return object data obtained from the JWT token.
+     */
+    private function getJwtData(): object | null {
+        return service("jwt")->getTokenData();
     }
 }
