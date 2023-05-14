@@ -56,23 +56,12 @@ $routes->group("api", static function ($routes) {
             
             $routes->put("(:num)",            "UserController::update/$1");
             
-            $routes->put("deactivate/(:num)", "UserCcontroller::deactiveAccount");
+            $routes->put("deactivate/(:num)", "UserCcontroller::deactivateAccount");
             $routes->put("reactivate/(:num)", "UserCcontroller::reactivateAccount");
 
             $routes->put("password/(:num)",   "UserController::updatePassword");
-            $routes->put("login/(:num)",      "UserController::updateLogin");
 
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer");
-
-            // $routes->get("(:num)",       "UserController::getById/$1"); // Un utilisateur par son id
-            // $routes->get("foyer/(:num)", "UserController::getByIdFoyer/$1"); // Tous les utilisateurs d'un foyer
-            // $routes->get("role/(:num)",  "UserController::getByIdRole/$1"); // Tous les utilisateurs d'un rôle
-            // $routes->get("ref/(:num)",   "UserController::getByIdRef/$1"); // Tous les utilisateurs d'un référent
-
-            // $routes->post("add",             "UserController::add"); // Ajoute un utilisateur
-            // $routes->put("updateData",       "UserController::updateData"); // Met à jour un utilisateur
-            // $routes->put("updateLastLogin",  "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
-            // $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
         });
 
         $routes->group("foyer", static function ($routes) {
@@ -90,14 +79,19 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("event", static function ($routes) {
-            $routes->get("",                "EventController::getAll"); // Tous les événements
-            $routes->get("(:num)",          "EventController::getById/$1"); // Un événement par son id
-            $routes->get("zip/(:alphanum)", "EventController::getByZip/$1"); // Tous les événements par code postal
+            $routes->get("",                   "EventController::getAll");
+            $routes->get("zip/(:alphanum)",    "EventController::getByZip/$1");
 
-            $routes->post("add",       "EventController::add"); // Ajoute un événement
-            $routes->put("updateData", "EventController::updateData"); // Met à jour un événement
-            $routes->put("cancel",     "EventController::cancel"); // Annule un événement par son id
-        });
+            $routes->get("(:num)",             "EventController::getById/$1");
+
+            //$routes->post("add",               "EventController::add"); //old version
+            $routes->post("",                  "EventController::add"); 
+            //$routes->put("updateData",         "EventController::updateData"); //old version
+            $routes->put("edit/(:num)",        "EventController::updateData/$1"); //$1 = idEvent
+            //$routes->put("cancel",             "EventController::cancel"); //old version
+            $routes->put("(:num)",             "EventController::cancel/$1"); //$1 = idEvent
+            $routes->put("uncancel/(:num)",    "EventController::uncancel/$1"); //$1 = idEvent
+        });  
 
         $routes->group("participant", static function ($routes) {
             $routes->get("(:num)",                      "ParticipantController::getAll/$1"); // Tous les participants d'un événement

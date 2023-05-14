@@ -64,4 +64,8 @@ class Validation extends BaseConfig {
     public $user_update_login_logout_validation = [
         "id" => "required|integer"
     ];
+
+    public $event_cancel_validation = [
+        "id" => "required|integer"
+    ];
 }
