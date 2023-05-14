@@ -15,7 +15,7 @@ class AuthController extends BaseController {
     private $expiration_dev = 60 * 60 * 24 * 7; // 1 week
     private $algorithm = "HS256";
 
-    private $userModel;
+    private UserModel $userModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
@@ -71,7 +71,7 @@ class AuthController extends BaseController {
         }
 
         // Mettre à jour lastLogin
-        // XXX
+        $this->userModel->updateLastLogin($user->id);
 
         // Expiration du token : 24h en production, 1 semaine en développement
         $exp = getenv("CI_ENVIRONMENT") === "production" ? $this->expiration_prod : $this->expiration_dev;
