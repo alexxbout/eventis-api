@@ -42,6 +42,10 @@ class Validation extends BaseConfig {
     // Rules
     // --------------------------------------------------------------------
 
+    // --------------------------------------------------------------------
+    // USER
+    // --------------------------------------------------------------------
+
     public $user_add_validation = [
         "lastname"  => "required|max_length[30]",
         "firstname" => "required|max_length[30]",
@@ -65,10 +69,14 @@ class Validation extends BaseConfig {
         "id" => "required|integer"
     ];
 
+    // --------------------------------------------------------------------
+    // EVENT
+    // --------------------------------------------------------------------
+
     public $event_update_validation = [
         "id"          => "required|integer",
-        "dateDebut"   => "permit_empty|valid_date[Y-m-d H: i: s]",
-        "dateFin"     => "permit_empty|valid_date[Y-m-d H: i: s]",
+        "dateDebut"   => "permit_empty|valid_date[Y-m-d H:i:s]",
+        "dateFin"     => "permit_empty|valid_date[Y-m-d H:i:s]",
         "title"       => "permit_empty|max_length[20]",
         "description" => "permit_empty|max_length[1000]",
         "pic"         => "permit_empty|max_length[50]"
@@ -81,8 +89,8 @@ class Validation extends BaseConfig {
 
     public $event_add_validation = [
         "zip"         => "required|max_length[5]",
-        "dateDebut"   => "required|valid_date[Y-m-d H: i: s]",
-        "dateFin"     => "required|valid_date[Y-m-d H: i: s]",
+        "dateDebut"   => "required|valid_date[Y-m-d H:i:s]",
+        "dateFin"     => "required|valid_date[Y-m-d H:i:s]",
         "title"       => "required|max_length[20]",
         "description" => "required|max_length[1000]"
     ];
@@ -96,5 +104,14 @@ class Validation extends BaseConfig {
                 "ext_in[image,jpg,jpeg,png]"
             ]
         ]
+    ];
+
+    // --------------------------------------------------------------------
+    // CODE
+    // --------------------------------------------------------------------
+
+    public $code_add_validation = [
+        "idFoyer" => "required|integer",
+        "expire"  => "required|valid_date[Y-m-d H:i:s]"
     ];
 }

@@ -5,7 +5,7 @@ namespace App\Models;
 class FoyerModel extends BaseModel {
 
     public function getAll(): array {
-        return $this->db->table("foyer")->get()->getResultArray();
+        return $this->db->table("foyer")->get()->getResultObject();
     }
 
     public function getById(int $id): object|null {

@@ -14,8 +14,6 @@ class AuthFilter implements FilterInterface {
     private $algorithm = "HS256";
 
     public function before(RequestInterface $request, $arguments = null) {
-        log_message("debug", "I am the AuthFilter before method");
-
         /**
          * Format du header : Authorization: Bearer <token>
          */

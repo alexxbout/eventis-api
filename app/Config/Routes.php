@@ -63,16 +63,6 @@ $routes->group("api", static function ($routes) {
             $routes->put("login/(:num)",      "UserController::updateLogin");
 
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer");
-
-            // $routes->get("(:num)",       "UserController::getById/$1"); // Un utilisateur par son id
-            // $routes->get("foyer/(:num)", "UserController::getByIdFoyer/$1"); // Tous les utilisateurs d'un foyer
-            // $routes->get("role/(:num)",  "UserController::getByIdRole/$1"); // Tous les utilisateurs d'un rôle
-            // $routes->get("ref/(:num)",   "UserController::getByIdRef/$1"); // Tous les utilisateurs d'un référent
-
-            // $routes->post("add",             "UserController::add"); // Ajoute un utilisateur
-            // $routes->put("updateData",       "UserController::updateData"); // Met à jour un utilisateur
-            // $routes->put("updateLastLogin",  "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
-            // $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
         });
 
         $routes->group("foyer", static function ($routes) {
@@ -107,14 +97,10 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("code", static function ($routes) {
-            $routes->get("",               "CodeController::getAll"); // Tous les codes
-            $routes->get("(:num)",         "CodeController::getById/$1"); // Un code par son id
-            $routes->get("check/(:alpha)", "CodeController::checkExist/$1"); // Vérifie si un code existe
-            $routes->get("valid/(:alpha)", "CodeController::isValid/$1"); // Vérifie si un code est valide
-            
-            $routes->post("add",      "CodeController::add"); // Ajoute un code
-            $routes->delete("delete", "CodeController::delete"); // Supprime un code
-            $routes->put("use",       "CodeController::use"); // Utilise un code
+            $routes->get("",             "CodeController::getAll");
+            $routes->get("(:alphanum)",  "CodeController::getByCode/$1");
+            $routes->get("foyer/(:num)", "CodeController::getAllByFoyer/$1");
+            $routes->post("",            "CodeController::add");
         });
 
         $routes->group("friend", static function ($routes) {
