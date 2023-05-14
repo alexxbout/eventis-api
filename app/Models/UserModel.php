@@ -45,23 +45,23 @@ class UserModel extends BaseModel {
         return $data["id"];
     }
 
-    public function updateData(int $idUser, object $data): void {
-        $this->db->table("user")->update($data, ["id" => $idUser]);
+    public function updateData(int $idUser, object $data): bool {
+        return $this->db->table("user")->update($data, ["id" => $idUser]);
     }
 
-    public function updateLastLogin(int $id): void {
-        $this->db->table("user")->update(["lastLogin" => date("Y-m-d H:i:s")], ["id" => $id]);
+    public function updateLastLogin(int $id): bool {
+        return $this->db->table("user")->update(["lastLogin" => date("Y-m-d H:i:s")], ["id" => $id]);
     }
 
-    public function updateLastLogout(int $id): void {
-        $this->db->table("user")->update(["lastLogout" => date("Y-m-d H:i:s")], ["id" => $id]);
+    public function updateLastLogout(int $id): bool {
+        return $this->db->table("user")->update(["lastLogout" => date("Y-m-d H:i:s")], ["id" => $id]);
     }
 
-    public function updatePassword(int $id, string $password): void {
-        $this->db->table("user")->update(["password" => $password], ["id" => $id]);
+    public function updatePassword(int $id, string $password): bool {
+        return $this->db->table("user")->update(["password" => $password], ["id" => $id]);
     }
 
-    public function setActive(int $id, int $value): void {
-        $this->db->table("user")->update(["active" => $value], ["id" => $id]);
+    public function setActive(int $id, int $value): bool {
+        return $this->db->table("user")->update(["active" => $value], ["id" => $id]);
     }
 }

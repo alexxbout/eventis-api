@@ -16,21 +16,20 @@ class EventModel extends BaseModel {
         return $this->db->table("event")->getWhere(["zip" => $zip])->getResultArray();
     }
 
-    public function cancel(int $id, string $reason): void {
-        $this->db->table("event")->update(["canceled" => true, "reason" => $reason], ["id" => $id]);
+    public function cancel(int $id, string $reason): bool {
+        return $this->db->table("event")->update(["canceled" => true, "reason" => $reason], ["id" => $id]);
     }
 
-    public function updateData(array $data): void {
-        $this->db->table("event")->update($data, ["id" => $data["id"]]);
+    public function updateData(array $data): bool {
+        return $this->db->table("event")->update($data, ["id" => $data["id"]]);
     }
 
-    public function add(array $data): void {
+    public function add(array $data): bool {
         $data["id"] = $this->getMax("event", "id") + 1;
-        $this->db->table("event")->insert($data);
-        $this->db->insertID();
+        return $this->db->table("event")->insert($data);
     }
 
-    public function addImage(int $id, string $image): void {
-        $this->db->table("event")->update(["pic" => $image], ["id" => $id]);
+    public function addImage(int $id, string $image): bool {
+        return $this->db->table("event")->update(["pic" => $image], ["id" => $id]);
     }
 }

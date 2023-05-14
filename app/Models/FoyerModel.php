@@ -12,8 +12,8 @@ class FoyerModel extends BaseModel {
         return $this->db->table("foyer")->getWhere(["id" => $id])->getRowObject();
     }
 
-    public function add(array $data): void {
+    public function add(array $data): bool {
         $data["id"] = $this->getMax("foyer", "id") + 1;
-        $this->db->table("foyer")->insert($data);
+        return $this->db->table("foyer")->insert($data);
     }
 }

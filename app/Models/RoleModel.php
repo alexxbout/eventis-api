@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use PhpParser\Node\Expr\Cast\String_;
-
 class RoleModel extends BaseModel {
 
     public function getAll(): array {

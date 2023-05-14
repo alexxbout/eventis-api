@@ -16,8 +16,4 @@ class BaseModel extends Model {
         $max = $this->db->table($table)->selectMax($column)->get()->getRowArray()[$column];
         return $max === null ? -1 : $max;
     }
-
-    protected function wasSuccessful(): bool {
-        return $this->db->affectedRows() > 0;
-    }
 }

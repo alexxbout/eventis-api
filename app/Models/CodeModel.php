@@ -20,8 +20,8 @@ class CodeModel extends BaseModel {
         return $this->getByCode($code) != null;
     }
 
-    public function setUsed(int $id): void {
-        $this->db->table("code")->update(["used" => 1], ["id" => $id]);
+    public function setUsed(int $id): bool {
+        return $this->db->table("code")->update(["used" => 1], ["id" => $id]);
     }
 
     public function add(string $code, int $idFoyer, string $expire): int {

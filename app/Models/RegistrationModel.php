@@ -8,13 +8,13 @@ class RegistrationModel extends BaseModel {
         return $this->db->table("registration")->get()->getResultArray();
     }
 
-    public function add(int $idCode, int $idUser): void {
+    public function add(int $idCode, int $idUser): bool {
         $data = [
             "id"     => $this->getMax("registration", "id") + 1,
             "idCode" => $idCode,
             "idUser" => $idUser
         ];
 
-        $this->db->table("registration")->insert($data);
+        return $this->db->table("registration")->insert($data);
     }
 }
