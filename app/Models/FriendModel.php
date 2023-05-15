@@ -33,5 +33,4 @@ class FriendModel extends BaseModel
 
 
 
-
 }
