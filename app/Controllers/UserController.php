@@ -9,21 +9,8 @@ use App\Utils\HTTPCodes;
 use Psr\Log\LoggerInterface;
 
 class UserController extends BaseController {
-    
-    private $userModel;
 
-    // Pas de new xxxController
-    // Pour appeler le constructeur de la classe, on appel initController(...) et on oublie pas d'appeler la méthode parent
-    //
-    // Changer la méthode suivante par public function initController(...)
-    // public function __construct() {
-    //     $this->userModel = new \App\Models\UserModel();
-    // }
-    //
-    // Et ne pas oublier d'importer ces trois lignes :
-    // use CodeIgniter\HTTP\RequestInterface;
-    // use CodeIgniter\HTTP\ResponseInterface;
-    // use Psr\Log\LoggerInterface;
+    private $userModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
