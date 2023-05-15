@@ -87,13 +87,11 @@ $routes->group("api", static function ($routes) {
             $routes->put("cancel/(:num)",      "EventController::cancel/$1"); //$1 = idEvent
             $routes->put("uncancel/(:num)",    "EventController::uncancel/$1"); //$1 = idEvent
             $routes->put("image/(:num)",       "EventController::addImage/$1"); //$1 = idEvent
-        });  
 
-        $routes->group("participant", static function ($routes) {
-            $routes->get("(:num)",                      "ParticipantController::getAll/$1"); // Tous les participants d'un événement
-            $routes->get("isParticipant/(:num)/(:num)", "ParticipantController::isParticipant/$1/$2"); // Vérifie si un utilisateur participe à un événement
-
-            $routes->post("add", "ParticipantController::add"); // Ajoute un participant à un événement
+            // Participants
+            $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2"); //$1 = idEvent $2 = idUser
+            $routes->delete("(:num)/participant/(:num)", "ParticipantController::remove/$1/$2");
+            $routes->get("(:num)/participant",           "ParticipantController::getAll/$1");
         });
 
         $routes->group("code", static function ($routes) {
