@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-////////////////////////////////
 class FriendModel extends BaseModel
 {
     public function getAll(int $idUser): array |null
