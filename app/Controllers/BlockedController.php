@@ -14,8 +14,8 @@ class BlockedController extends BaseController {
     }
 
     public function getAll(int $idUser): void {
-        $exist = $this-> $this->blockedModel->getAll($idUser);
-        if (sizeof($exist)==0){ $this->send(HTTPCodes::NOT_FOUND);}
+        $exist =  $this->blockedModel->getAll($idUser);
+        if ($exist==null){ $this->send(HTTPCodes::NOT_FOUND);}
         else { $this->send(200, $exist); }
     }
 
@@ -33,7 +33,7 @@ class BlockedController extends BaseController {
         }     
     }
 
-    public function remove( int $idUser,int $idBlocked): void {
+    public function remove(int $idUser,int $idBlocked): void {
         
         if ($idUser == $idBlocked) {$this->send(HTTPCodes::BAD_REQUEST); return ;}
 
@@ -43,7 +43,7 @@ class BlockedController extends BaseController {
             $this-> blockedModel-> remove($idUser, $idBlocked);
             $this->send(HTTPCodes::OK);
         } else {
-            $this->send(HTTPCodes::BAD_REQUEST);
+            $this->send(HTTPCodes::NOT_FOUND);
         }     
     }
 

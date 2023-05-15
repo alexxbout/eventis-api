@@ -102,7 +102,7 @@ abstract class BaseController extends Controller {
      * 
      * @return object data obtained from the JWT token.
      */
-    private function getJwtData(): object {
+    private function getJwtData(): object | null {
         return service("jwt")->getTokenData();
     }
 }

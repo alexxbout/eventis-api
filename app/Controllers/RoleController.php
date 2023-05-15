@@ -15,10 +15,10 @@ class RoleController extends BaseController {
     public function getAll(): void {
         if ($this->user->isDeveloper()) {
             $exist =  $this->roleModel->getAll();
-            if (sizeof($exist)==0){ $this->send(HTTPCodes::NOT_FOUND);}
+            if ($exist==null){ $this->send(HTTPCodes::NOT_FOUND);}
             else { $this->send(200, $exist); }
         }else{
-            $this->send(HTTPCodes::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN);
         }
     }
 }

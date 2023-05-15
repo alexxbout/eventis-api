@@ -60,7 +60,7 @@ $routes->group("api", static function ($routes) {
             $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
         
         $routes->group("blocked", static function ($routes) {
-            $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2"); // Vérifie si un utilisateur est bloqué par un autre
+            $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2"); // Vérifie si un utilisateur est bloqué par un autre $1=blocker $2  = bloqué
             $routes->get("(:num)",           "BlockedController::getAll/$1"); // Tous les utilisateurs bloqués par un utilisateur
             $routes->post("(:num)/(:num)",     "BlockedController::add/$1/$2"); // Ajoute un utilisateur bloqué
             $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2"); // Supprime un utilisateur bloqué

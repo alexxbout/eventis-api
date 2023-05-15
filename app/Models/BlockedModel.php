@@ -14,11 +14,11 @@ class BlockedModel extends BaseModel {
 
     //un tableau correspondant si idUser est dans la table blocked null sinon
     public function isBlocked(int $idUser, int $idBlocked): bool {
-        $result = $this->db->table("blocked")->getWhere(["idUser" => $idUser,"idBlocked" => $idBlocked])->getFirstRow();
-        return isset($result);
+        $result = $this->db->table("blocked")->getWhere(["idUser" => $idUser,"idBlocked" => $idBlocked])->getResultObject();
+        return $result!=null ;
     }
 
-    public function add(int $idUser, int $idBlocked ): int {
+    public function add(int $idUser, int $idBlocked ): void {
         $data = [
             "id"         => $this->getMax("blocked", "id") + 1,
             "idUser"     => $idUser,
@@ -26,8 +26,8 @@ class BlockedModel extends BaseModel {
         ];
 
         $this->db->table("blocked")->insert($data);
-        return $data["idUser"];
-    } 
+        
+    }
     public function remove(int $idUser, int $idBlocked): void {
        $this->db->table("blocked")->delete(["idBlocked" => $idBlocked,"idUser" => $idUser]);
     }
