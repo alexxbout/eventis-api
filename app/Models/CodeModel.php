@@ -13,7 +13,7 @@ class CodeModel extends BaseModel {
     }
 
     public function getByCode(string $code): object|null {
-        return $this->db->table("code")->getWhere(["code" => $code])->getFirstRow();
+        return $this->db->table("code")->select(["id", "code"])->getWhere(["code" => $code])->getFirstRow();
     }
 
     public function checkExists(string $code): bool {
