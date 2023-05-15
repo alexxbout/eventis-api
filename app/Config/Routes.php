@@ -53,7 +53,9 @@ $routes->group("api", static function ($routes) {
             //Friends
             $routes->get("(:num)/friend",           "FriendController::getAll/$1"); // Tous les amis d'un utilisateur
             $routes->get("(:num)/friend/(:num)",    "FriendController::isFriend/$1/$2");// Vérifie si deux utilisateurs sont amis
-            $routes->post("(:num)/friend/(:num)",   "FriendController::add/$1/$2"); // Ajoute un ami
+
+            //$routes->post("(:num)/friend/(:num)",   "FriendController::add/$1/$2"); // Ajoute un ami
+
             $routes->delete("(:num)/friend/(:num)", "FriendController::remove/$1/$2"); // Supprime un ami
             
             $routes->post("(:num)/friend/ask/(:num)",      "FriendController::askFriend/$1/$2"); // Ajoute une demaande d'ami

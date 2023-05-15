@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use DateTime;
+
 class FriendModel extends BaseModel
 {
     public function getAll(int $idUser): array |null
@@ -59,10 +61,11 @@ class FriendModel extends BaseModel
     public function add(int $idUser, int $idFriend): bool
     {
         $db = $this->db->table("friend");
-
+        $now = date('Y-m-d H:i:s');
         $data = [
             "idUser1" => $idUser,
             "idUser2" => $idFriend,
+            "since" =>$now
         ];
         return $db->insert($data);
     }

@@ -100,21 +100,21 @@ class FriendController extends BaseController
                         $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
                     }
                 } else {
-                    $this->send(HTTPCodes::NO_CONTENT, null, null);
+                    $this->send(HTTPCodes::NOT_FOUND, null, "Friend request already exists");
                 }
             } else {
                 $this->send(HTTPCodes::NOT_ALLOWED, ["Attempting to add realtion beetween two users"], "Insertion not allowed");
             }
         } else {
             if ($this->friendRequestModel->isPending($idUser, $idFriend) == null) {
-                $result = $this->friendRequestModel->askFriend($idUser, $idFriend);
+                $result = $this->friendModel->add($idUser, $idFriend);
                 if ($result) {
                     $this->send(HTTPCodes::CREATED, null, "Ressource added");
                 } else {
                     $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
                 }
             } else {
-                $this->send(HTTPCodes::NO_CONTENT, null, null);
+                $this->send(HTTPCodes::NO_CONTENT, null, "null");
             }
         }
     }
@@ -145,54 +145,71 @@ class FriendController extends BaseController
 
 
         if (!$this->user->isDeveloper()) {
+
             if ($this->user->getId() == $idUser) {
 
-                if ($this->friendModel->isPending($idUser, $idFriend) != null) {
+                if ($this->friendModel->isPending($idUser, $idFriend) != null && $this->friendRequestModel->isNotRequester($idUser, $idFriend)) {
                     $result = $this->friendModel->add($idUser, $idFriend);
                     if ($result) {
+                        $this->friendRequestModel->remove($idUser, $idFriend);
                         $this->send(HTTPCodes::CREATED, null, "Ressource added");
                     } else {
                         $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
                     }
                 } else {
-                    $this->send(HTTPCodes::NO_CONTENT, null, null);
+                    $this->send(HTTPCodes::BAD_REQUEST, null, "No request sent");
                 }
             } else {
                 $this->send(HTTPCodes::NOT_ALLOWED, ["Attempting to add realtion beetween two users"], "Insertion not allowed");
             }
-        } 
-        else {
-                $result = $this->friendModel->add($idUser, $idFriend);
-                if ($result) {
-                    $this->send(HTTPCodes::CREATED, null, "Ressource added");
+        } else {
+            $result = $this->friendModel->add($idUser, $idFriend);
+            if ($result) {
+                $this->send(HTTPCodes::CREATED, null, "Ressource added");
+            } else {
+                $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
+            }
+        }
+    }
+
+
+
+
+    public function rejectRequest($idUser, $idFriend)
+    {
+
+        if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
+            $this->send(HTTPCodes::NOT_FOUND, ["One of the users don't exist"], "Ressource not found");
+            return;
+        }
+        // if ($this->friendModel->isFriend($idUser, $idFriend) != null) {
+        //     $this->send(HTTPCodes::BAD_REQUEST, ["Users are already friends"], "Relation exist");
+        //     return;
+        // }
+        if ($idUser == $idFriend) {
+            $this->send(HTTPCodes::BAD_REQUEST, ["People cannot be friend with themself "], "Same arguments");
+            return;
+        }
+
+        if (!$this->user->isDeveloper()) {
+            if ($this->user->getId() == $idUser || $this->user->getId() == $idFriend) {
+
+                if ($this->friendRequestModel->isPending($idUser, $idFriend) != null) {
+                    $result = $this->friendRequestModel->remove($idUser, $idFriend);
+                    if ($result) {
+                        $this->send(HTTPCodes::CREATED, null, "Ressource removed");
+                    } else {
+                        $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Request failed");
+                    }
                 } else {
-                    $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
+                    $this->send(HTTPCodes::BAD_REQUEST, null, "No request sent");
                 }
-    }}
-
-
-
-
-public function rejectRequest($idUser, $idFriend){
-    if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
-        $this->send(HTTPCodes::NOT_FOUND, ["One of the users don't exist"], "Ressource not found");
-        return;
-    }
-    if ($this->friendModel->isFriend($idUser, $idFriend) != null) {
-        $this->send(HTTPCodes::BAD_REQUEST, ["Users are already friends"], "Relation exist");
-        return;
-    }
-    if ($idUser == $idFriend) {
-        $this->send(HTTPCodes::BAD_REQUEST, ["People cannot be friend with themself "], "Same arguments");
-        return;
-    }
-
-
-    if (!$this->user->isDeveloper()) {
-        if ($this->user->getId() == $idUser) {
-
+            } else {
+                $this->send(HTTPCodes::NOT_ALLOWED, null, "Insertion not allowed");
+            }
+        } else {
             if ($this->friendRequestModel->isPending($idUser, $idFriend) != null) {
-                $result = $this->friendRequestModel->reject($idUser, $idFriend);
+                $result = $this->friendRequestModel->remove($idUser, $idFriend);
                 if ($result) {
                     $this->send(HTTPCodes::CREATED, null, "Ressource added");
                 } else {
@@ -201,43 +218,8 @@ public function rejectRequest($idUser, $idFriend){
             } else {
                 $this->send(HTTPCodes::NO_CONTENT, null, null);
             }
-        } 
-        else {
-            $this->send(HTTPCodes::NOT_ALLOWED, null, "Insertion not allowed");
-        }
-
-
-
-    } else {
-        if ($this->friendRequestModel->isPending($idUser, $idFriend) != null) {
-            $result = $this->friendRequestModel->reject($idUser, $idFriend);
-            if ($result) {
-                $this->send(HTTPCodes::CREATED, null, "Ressource added");
-            } else {
-                $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Request failed");
-            }
-        } else {
-            $this->send(HTTPCodes::NO_CONTENT, null, null);
         }
     }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -254,13 +236,20 @@ public function rejectRequest($idUser, $idFriend){
         if ($this->friendModel->isFriend($idUser, $idFriend) == null) {
             $this->send(HTTPCodes::BAD_REQUEST, ["Users are not friends"], "Relation doesn't exist, cannot be removed");
             return;
-        } else {
-            $result = $this->friendModel->remove($idUser, $idFriend);
-            if ($result) {
-                $this->send(HTTPCodes::OK, ["Successfully removed data"], "{$result}");
+        }
+
+
+
+        if (!$this->user->isDeveloper()) {
+            if (($this->user->getId() == $idUser || $this->user->getId() == $idFriend) && $this->friendModel->isFriend($idUser, $idFriend)) {
+                $this->friendModel->remove($idUser, $idFriend);
+                $this->send(HTTPCodes::CREATED, null, "Ressource removed");
             } else {
-                $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
+                $this->send(HTTPCodes::NOT_ALLOWED, null, "Suppression not allowed");
             }
+        } else {
+            $this->friendRequestModel->remove($idUser, $idFriend);
+            $this->send(HTTPCodes::CREATED, null, "Ressource removed");
         }
     }
 }

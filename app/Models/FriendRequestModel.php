@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use CodeIgniter\Database\RawSql;
+use PHPUnit\Framework\MockObject\ReturnValueNotConfiguredException;
 
 class FriendRequestModel extends BaseModel
 {
@@ -34,15 +35,26 @@ class FriendRequestModel extends BaseModel
         return $data;
     }
 
-    public function reject(int $idRequester, int $idRequested): bool| string
+    public function remove(int $idRequester, int $idRequested)
     {
-        $result = $this->db->table("friendrequest")->delete(["idRequester" => $idRequester, "idRequested" => $idRequested]);
+        $array = ["idRequester" => $idRequester, "idRequested" => $idRequested];
+        $array2 = ["idRequester" => $idRequested, "idRequested" => $idRequester];
+        $this->db->table("friendrequest")->groupStart()
+            ->where($array)
+            ->groupEnd()
+            ->orGroupStart()
+            ->where($array2)
+            ->groupEnd()
+            ->delete();
+        return $this->db->affectedRows() > 0;
+    }
 
-        if (!$result) {
-            return $this->db->table("friendrequest")->delete(["idRequester" => $idRequested, "idRequested" => $idRequester]);
-        }
-        
-        return $result;
+    public function isNotRequester($idRequested, $idRequester): bool
+    {
+        $db = $this->db->table("friendrequest");
+        $array = ["idRequester" => $idRequester, "idRequested" => $idRequested];
+        $data = $db->where($array)->get()->getRowArray();
+        return $data != null;
     }
 
     // fonction pour annuler sa propre demande d'ami ex: cancelRequest
