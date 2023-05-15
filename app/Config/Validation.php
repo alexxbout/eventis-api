@@ -3,6 +3,7 @@
 namespace Config;
 
 use App\Utils\Regex;
+use App\Utils\UtilsRegistrationCode;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
@@ -113,5 +114,16 @@ class Validation extends BaseConfig {
     public $code_add_validation = [
         "idFoyer" => "required|integer",
         "expire"  => "required|valid_date[Y-m-d H:i:s]"
+    ];
+
+    // --------------------------------------------------------------------
+    // REGISTRATION
+    // --------------------------------------------------------------------
+
+    public $registration_add_validation = [
+        "code"      => "required|exact_length[" . UtilsRegistrationCode::CODE_LENGTH . "]",
+        "lastname"  => "required|max_length[30]",
+        "firstname" => "required|max_length[30]",
+        "password"  => "required|regex_match[" . Regex::PASSWORD . "]"
     ];
 }

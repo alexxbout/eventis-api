@@ -36,15 +36,13 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 $routes->get("/", "Home::index");
 
+$routes->get("login",     "AuthController::login");            // Connexion
+$routes->post("register", "RegistrationController::register"); // Inscription
+
 // Unauthorized
 $routes->get("unauthorized", "Home::unauthorized");
 
 $routes->group("api", static function ($routes) {
-
-    $routes->group("auth", static function ($routes) {
-        $routes->get("login",        "AuthController::login"); // Connexion
-        // $routes->post("register", "AuthController::register"); // Inscription
-    });
 
     $routes->group("v1", static function ($routes) {
         $routes->group("user", static function ($routes) {
@@ -120,7 +118,7 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("registration", static function ($routes) {
-            $routes->post("register", "RegistrationController::register"); // Enregistre un utilisateur
+            $routes->get("",          "RegistrationController::getAll");
         });
     });
 });

@@ -5,7 +5,7 @@ namespace App\Models;
 class RegistrationModel extends BaseModel {
 
     public function getAll(): array {
-        return $this->db->table("registration")->get()->getResultArray();
+        return $this->db->table("registration")->orderBy("at", "DESC")->get()->getResultArray();
     }
 
     public function add(int $idCode, int $idUser): bool {

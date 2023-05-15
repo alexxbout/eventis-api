@@ -6,6 +6,7 @@ use App\Models\CodeModel;
 use App\Models\RegistrationModel;
 use App\Models\UserModel;
 use App\Utils\HTTPCodes;
+use App\Utils\UtilsCredentials;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -24,47 +25,59 @@ class RegistrationController extends BaseController {
         $this->registrationModel = new \App\Models\RegistrationModel();
     }
 
-    public function register() {
-        // Validation des données code, nom, prenom, password
-        $validation = \Config\Services::validation();
+    public function getAll() {
+        if ($this->user->isDeveloper()) {
+            $data = $this->registrationModel->getAll();
+            if ($data != null) {
+                $this->send(HTTPCodes::OK, $data, "All registrations");
+            }
+        } else {
+            $this->send(HTTPCodes::UNAUTHORIZED);
+        }
+    }
 
+    public function register() {
+        $validation = \Config\Services::validation();
         $validation->setRuleGroup("registration_add_validation");
 
         // Valider les données
         if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
         }
-        $data = $this->request->getJSON(true);
+
+        $data = $this->request->getJSON();
 
         // Vérifier si le code existe
-        $code = $this->codeModel->getByCode($data["code"]);
+        $code = $this->codeModel->getByCode($data->code);
+
         if ($code == null) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Code doesn't exist");
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "Code doesn't exist");
         }
 
         // Vérifier la validité du code
-        if (!CodeController::isValid($this->codeModel, $code["id"])) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Invalid code");
-            return;
+        if (!$this->codeModel->isValid($code->id)) {
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "Invalid code");
         }
 
-        // Ajout du nouvel utilisateur
-        // Extraire les données id du code et id du foyer
-        $idCode = $code["id"];
-        $idFoyer = $code["idFoyer"];
+        // Ajouter nouvel utilisateur
+        $login = UtilsCredentials::getValidRandomLogin($data->lastname, $data->firstname);
+        $hashedPassword = password_hash($data->password, PASSWORD_DEFAULT);
 
-        $idRole = 2; // A modifier plus tard
+        $idUser = $this->userModel->add($data->lastname, $data->firstname, $login, $hashedPassword, $code->idRole, $code->idFoyer);
 
-        // Ajouter l'utilisateur
-        $idUser = UserController::addUser($this->userModel, $data["nom"], $data["prenom"], $data["password"], $idRole, $idFoyer);
+        if ($idUser == -1) {
+            return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while adding user");
+        }
 
         // Ajouter l'enregistrement
-        $this->registrationModel->add($idCode, $idUser);
+        $status = $this->registrationModel->add($code->id, $idUser);
+
+        if (!$status) {
+            return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while adding registration");
+        }
 
         // Passer le code à utilisé
-        $this->codeModel->setUsed($idCode);
+        $this->codeModel->setUsed($code->id);
 
         // Renvoyer le statut de la requête
         $this->send(HTTPCodes::OK, null, "User added");

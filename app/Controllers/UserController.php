@@ -7,6 +7,7 @@ use App\Models\UserModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
+use App\Utils\UtilsCredentials;
 use Psr\Log\LoggerInterface;
 
 class UserController extends BaseController
@@ -85,7 +86,7 @@ class UserController extends BaseController
                 return;
             }
 
-            $login = $this->getValidRandomLogin($data->lastname, $data->firstname);
+            $login = UtilsCredentials::getValidRandomLogin($data->lastname, $data->firstname);
             $hashedPassword = password_hash($data->password, PASSWORD_DEFAULT);
 
             // Update password field to new hashed password
@@ -226,30 +227,5 @@ class UserController extends BaseController
         } else {
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
-    }
-
-    /**
-     * It generates a valid random login for a user
-     * 
-     * @param UserModel userModel the user model
-     * @param string lastname
-     * @param string firstname
-     * 
-     * @return string the login
-     */
-    private function getValidRandomLogin(string $lastname, string $firstname): string
-    {
-        $lastname = str_replace(" ", "", $lastname);
-        $firstname = str_replace(" ", "", $firstname);
-
-        $login = strtolower($firstname[0] . $lastname);
-
-        $i = 0;
-        while ($this->userModel->getByLogin($login) != null) {
-            $login = strtolower($firstname[0] . $lastname . $i);
-            $i++;
-        }
-
-        return $login;
     }
 }

@@ -7,13 +7,13 @@ use App\Models\FoyerModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
+use App\Utils\UtilsRegistrationCode;
 use App\Utils\UtilsRoles;
 use Psr\Log\LoggerInterface;
 use DateTime;
 
 class CodeController extends BaseController {
 
-    private const CODE_LENGTH = 6;
     private const MAX_CODE_VALIDITY = 7; // En jours
 
     private CodeModel $codeModel;
@@ -114,25 +114,11 @@ class CodeController extends BaseController {
 
         // Générer un code unique
         do {
-            $code = $this->getRandomCode();
+            $code = UtilsRegistrationCode::getRandom();
         } while ($this->codeModel->getByCode($code) != null);
 
         $this->codeModel->add($code, $data->idFoyer, $this->user->getId(), $data->idRole, $data->expire);
 
         $this->send(HTTPCodes::OK, ["code" => $code], "Code generated");
-    }
-
-    /**
-     * It generates a random string of CODE_LENGTH characters
-     * 
-     * @return string A string of CODE_LENGTH random characters.
-     */
-    private function getRandomCode(): string {
-        $code = "";
-        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        for ($i = 0; $i < CodeController::CODE_LENGTH; $i++) {
-            $code .= $chars[rand(0, strlen($chars) - 1)];
-        }
-        return $code;
     }
 }

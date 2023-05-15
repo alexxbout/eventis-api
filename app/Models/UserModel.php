@@ -30,6 +30,19 @@ class UserModel extends BaseModel {
         return $this->db->table("user")->getWhere(["login" => $login])->getRowObject();
     }
 
+    /**
+     * This function adds a new user to a database table with the provided information and returns the
+     * ID of the newly created user.
+     * 
+     * @param string lastname
+     * @param string firstname
+     * @param string login
+     * @param string password
+     * @param int idRole
+     * @param int idFoyer
+     * 
+     * @return int ID of the newly added user or -1 if an error occurred
+     */
     public function add(string $lastname, string $firstname, string $login, string $password, int $idRole, int $idFoyer): int {
         $data = [
             "id"        => $this->getMax("user", "id") + 1,
@@ -41,7 +54,12 @@ class UserModel extends BaseModel {
             "idFoyer"   => $idFoyer
         ];
 
-        $this->db->table("user")->insert($data);
+        $status = $this->db->table("user")->insert($data);
+
+        if (!$status) {
+            return -1;
+        }
+
         return $data["id"];
     }
 
