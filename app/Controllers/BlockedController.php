@@ -23,7 +23,7 @@ class BlockedController extends BaseController {
       
         if ($idUser == $idBlocked) {$this->send(HTTPCodes::BAD_REQUEST); return ;}
 
-        $isInTable =  $this-> blockedModel-> isBlocked($idBlocked);
+        $isInTable =  $this-> blockedModel-> isBlocked($idUser,$idBlocked);
 
         if (!$isInTable) {
             $this-> blockedModel-> add($idUser, $idBlocked);
@@ -37,7 +37,7 @@ class BlockedController extends BaseController {
         
         if ($idUser == $idBlocked) {$this->send(HTTPCodes::BAD_REQUEST); return ;}
 
-        $isInTable =  $this-> blockedModel-> isBlocked($idBlocked);
+        $isInTable =  $this-> blockedModel-> isBlocked($idUser,$idBlocked);
 
         if ($isInTable) {
             $this-> blockedModel-> remove($idUser, $idBlocked);

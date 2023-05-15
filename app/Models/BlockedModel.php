@@ -13,8 +13,8 @@ class BlockedModel extends BaseModel {
     }
 
     //un tableau correspondant si idUser est dans la table blocked null sinon
-    public function isBlocked(int $idUser): bool {
-        $result = $this->db->table("blocked")->getWhere(["idUser" => $idUser])->getFirstRow();
+    public function isBlocked(int $idUser, int $idBlocked): bool {
+        $result = $this->db->table("blocked")->getWhere(["idUser" => $idUser,"idBlocked" => $idBlocked])->getFirstRow();
         return isset($result);
     }
 
