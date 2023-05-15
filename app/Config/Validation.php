@@ -79,6 +79,12 @@ class Validation extends BaseConfig {
     ];
 
     public $event_add_validation = [
+        "zip"   => "required|max_length[5]",
+        "title" => "required|max_length[20]",
+        "start" => "required|valid_date[Y-m-d]"  //valid_date[d/m/Y]?
+    ];
+
+    public $event_addImage_validation = [
         
     ];
 }

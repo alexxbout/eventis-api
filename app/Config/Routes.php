@@ -81,17 +81,12 @@ $routes->group("api", static function ($routes) {
         $routes->group("event", static function ($routes) {
             $routes->get("",                   "EventController::getAll");
             $routes->get("zip/(:alphanum)",    "EventController::getByZip/$1");
-
             $routes->get("(:num)",             "EventController::getById/$1");
-
-            //$routes->post("add",               "EventController::add"); //old version
             $routes->post("",                  "EventController::add"); 
-            //$routes->put("updateData",         "EventController::updateData"); //old version
-            $routes->put("edit/(:num)",        "EventController::updateData/$1"); //$1 = idEvent
-            //$routes->put("cancel",             "EventController::cancel"); //old version
-            $routes->put("(:num)",             "EventController::cancel/$1"); //$1 = idEvent
+            $routes->put("(:num)",             "EventController::updateData/$1"); //$1 = idEvent
+            $routes->put("cancel/(:num)",      "EventController::cancel/$1"); //$1 = idEvent
             $routes->put("uncancel/(:num)",    "EventController::uncancel/$1"); //$1 = idEvent
-            //$routes->put("image/(:alphanum)",  "EventController::addImage/$1"); //rajouter ou changer image?
+            $routes->put("image/(:num)",       "EventController::addImage/$1"); //$1 = idEvent
         });  
 
         $routes->group("participant", static function ($routes) {

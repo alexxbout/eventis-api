@@ -78,10 +78,11 @@ class EventController extends BaseController {
         if($this->user->isDeveloper() || $this->user->isAdmin() || 
         ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
             
-            if($this->eventModel->getByIdNotCanceled($idEvent) == NULL){//if event is canceled, this will be null
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Event not cancelled");
-                return;
-            }
+            $data = $this->eventModel->getById($idEvent);
+
+            if($data == NULL) $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist"); return;
+
+            if($data["canceled"] == 1) $this->send(HTTPCodes::BAD_REQUEST, null, "Event already cancelled"); return;
             
             $validation =  \Config\Services::validation();
 
@@ -107,8 +108,15 @@ class EventController extends BaseController {
         if($this->user->isDeveloper() || $this->user->isAdmin() || 
         ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
 
-            if($this->eventModel->getByIdCanceled($idEvent) == NULL){//if event is not canceled, this will be null
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Event not cancelled");
+            $data = $this->eventModel->getById($idEvent);
+
+            if($data == NULL) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist"); 
+                return;
+            }
+            
+            if($data["canceled"] == 0) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Event is not cancelled"); 
                 return;
             }
 
@@ -165,38 +173,6 @@ class EventController extends BaseController {
         }
     }
 
-    
-    /*
-
-    //OLD ADD FUNCTION
-    
-    public function add(): void {
-        if($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()){
-            $validation =  \Config\Services::validation();
-
-            $validation->setRuleGroup("event_add_validation");
-
-            if (!$validation->withRequest($this->request)->run()) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-                return;
-            }
-
-            $data = $this->request->getJSON(true);
-
-            //if (isset($data["id"])) { // We don't want to update the id with this method
-            //    unset($data["id"]);
-            //}
-            faut ajouter aussi pour le createur du coup
-            
-
-            $this->eventModel->add($data);
-
-            $this->send(HTTPCodes::OK, $data, "Event added");
-        } else {
-            $this->send(HTTPCodes::UNAUTHORIZED);
-        }
-    }*/
-
     public function add(): void {
         if($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()){
             $validation =  \Config\Services::validation();
@@ -228,39 +204,44 @@ class EventController extends BaseController {
         }
     }
 
-    public function addImage(int $id): void {
-        if ($this->eventModel->getById($id) == null) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Event with id $id does not exist");
-            return;
-        }
+    public function addImage(int $idEvent): void {
+        if($this->user->isDeveloper() || $this->user->isAdmin() || 
+        ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
+            if ($this->eventModel->getById($idEvent) == null) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Event with id $idEvent does not exist");
+                return;
+            }
 
-        $validation =  \Config\Services::validation();
+            $validation =  \Config\Services::validation();
 
-        $validation->setRuleGroup("event_addImage_validation");
+            $validation->setRuleGroup("event_addImage_validation");
 
-        if (!$validation->withRequest($this->request)->run()) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-            return;
-        }
+            if (!$validation->withRequest($this->request)->run()) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return;
+            }
 
-        $file = $this->request->getFile("image");
+            $file = $this->request->getFile("image");
 
-        if ($file->hasMoved()) {
-            $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "The file has already been moved");
+            if ($file->hasMoved()) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "The file has already been moved");
+            } else {
+                // Generate random name
+                $newName = $file->getRandomName();
+                $file->move(WRITEPATH . "uploads/images", $newName);
+
+                // Optimize image
+                \Config\Services::image()
+                    ->withFile(WRITEPATH . "uploads/images/" . $newName)
+                    ->save(WRITEPATH . "uploads/images/" . $newName, 30);
+
+                // Save image name in database
+                $this->eventModel->addImage($idEvent, $newName);
+
+                $this->send(HTTPCodes::OK, ["file" => $newName], "Image uploaded");
+            }
         } else {
-            // Generate random name
-            $newName = $file->getRandomName();
-            $file->move(WRITEPATH . "uploads/images", $newName);
-
-            // Optimize image
-            \Config\Services::image()
-                ->withFile(WRITEPATH . "uploads/images/" . $newName)
-                ->save(WRITEPATH . "uploads/images/" . $newName, 30);
-
-            // Save image name in database
-            $this->eventModel->addImage($id, $newName);
-
-            $this->send(HTTPCodes::OK, ["file" => $newName], "Image uploaded");
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
 }
