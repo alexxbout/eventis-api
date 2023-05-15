@@ -77,6 +77,12 @@ class EventController extends BaseController {
         //account can cancel event
         if($this->user->isDeveloper() || $this->user->isAdmin() || 
         ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
+            
+            if($this->eventModel->getByIdNotCanceled($idEvent) == NULL){//if event is canceled, this will be null
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Event not cancelled");
+                return;
+            }
+            
             $validation =  \Config\Services::validation();
 
             $validation->setRuleGroup("event_cancel_validation");
@@ -97,12 +103,18 @@ class EventController extends BaseController {
     }
 
     public function uncancel($idEvent): void {
-        //account can cancel event
+        //account can uncancel event
         if($this->user->isDeveloper() || $this->user->isAdmin() || 
         ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
+
+            if($this->eventModel->getByIdCanceled($idEvent) == NULL){//if event is not canceled, this will be null
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Event not cancelled");
+                return;
+            }
+
             $validation =  \Config\Services::validation();
 
-            $validation->setRuleGroup("event_cancel_validation");
+            $validation->setRuleGroup("event_uncancel_validation"); //validation the same as cancel
 
             if (!$validation->withRequest($this->request)->run()) {
                 $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
@@ -114,7 +126,7 @@ class EventController extends BaseController {
             $this->eventModel->uncancel($data["id"]);
 
             $this->send(HTTPCodes::OK, $data, "Event canceled");
-        } else {//account is unauthorized to cancel an event
+        } else {//account is unauthorized to uncancel an event
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
@@ -135,6 +147,14 @@ class EventController extends BaseController {
 
             if (isset($data["canceled"])) { // We don't want to update the canceled status with this method
                 unset($data["canceled"]);
+            }
+
+            if (isset($data["id"])) { // We don't want to update the ID with this method
+                unset($data["id"]);
+            }
+
+            if (isset($data["idCreator"])) { // We don't want to update the creator ID with this method
+                unset($data["idCreator"]);
             }
 
             $this->eventModel->updateData($data);
@@ -192,6 +212,10 @@ class EventController extends BaseController {
 
             if (isset($data["id"])) { // We don't want to update the id with this method
                 unset($data["id"]);
+            }
+
+            if (isset($data["canceled"])) { // We don't want to update the canceled status with this method
+                unset($data["canceled"]);
             }
             
             $data["idCreator"] = $this->user->getId(); //creator = the person who makes the request

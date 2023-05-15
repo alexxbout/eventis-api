@@ -91,6 +91,7 @@ $routes->group("api", static function ($routes) {
             //$routes->put("cancel",             "EventController::cancel"); //old version
             $routes->put("(:num)",             "EventController::cancel/$1"); //$1 = idEvent
             $routes->put("uncancel/(:num)",    "EventController::uncancel/$1"); //$1 = idEvent
+            //$routes->put("image/(:alphanum)",  "EventController::addImage/$1"); //rajouter ou changer image?
         });  
 
         $routes->group("participant", static function ($routes) {

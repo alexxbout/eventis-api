@@ -66,6 +66,19 @@ class Validation extends BaseConfig {
     ];
 
     public $event_cancel_validation = [
+        "id" => "required|integer",
+        "reason" => "permit_empty|max_length[500]"
+    ];
+
+    public $event_uncancel_validation = [
         "id" => "required|integer"
+    ];
+
+    public $event_update_validation = [
+        "id" => "required|integer"
+    ];
+
+    public $event_add_validation = [
+        
     ];
 }
