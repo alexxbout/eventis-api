@@ -77,8 +77,6 @@ $routes->group("api", static function ($routes) {
 
         $routes->group("role", static function ($routes) {
             $routes->get("",         "RoleController::getAll"); // Tous les rôles
-            $routes->get("(:num)",   "RoleController::getById/$1"); // Un rôle par son id
-            $routes->get("(:alpha)", "RoleController::getByLibelle/$1"); // Un rôle par son libellé
         });
 
         $routes->group("event", static function ($routes) {

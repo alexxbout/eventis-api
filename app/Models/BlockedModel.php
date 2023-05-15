@@ -27,7 +27,7 @@ class BlockedModel extends BaseModel {
 
         $this->db->table("blocked")->insert($data);
         return $data["idUser"];
-    }
+    } 
     public function remove(int $idUser, int $idBlocked): void {
        $this->db->table("blocked")->delete(["idBlocked" => $idBlocked,"idUser" => $idUser]);
     }

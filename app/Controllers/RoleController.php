@@ -6,24 +6,19 @@ use App\Utils\HTTPCodes;
 
 class RoleController extends BaseController {
     private $roleModel;
-    private $userModel;
+    
     
     public function __construct() {
         $this->roleModel = new \App\Models\RoleModel();
-        $this->userModel = new \App\Models\UserModel();
     }
-
     
-
-    
-    public function getById(int $id): void {
+    public function getAll(): void {
         if ($this->user->isDeveloper()) {
-            $exist = $this-> $this->roleModel->getById($id);
+            $exist =  $this->roleModel->getAll();
             if (sizeof($exist)==0){ $this->send(HTTPCodes::NOT_FOUND);}
             else { $this->send(200, $exist); }
         }else{
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
-  
 }
