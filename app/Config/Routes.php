@@ -72,6 +72,13 @@ $routes->group("api", static function ($routes) {
             $routes->put("updateData",       "UserController::updateData"); // Met à jour un utilisateur
             $routes->put("updateLastLogin",  "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
             $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
+        
+        $routes->group("blocked", static function ($routes) {
+            $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2"); // Vérifie si un utilisateur est bloqué par un autre $1=blocker $2  = bloqué
+            $routes->get("(:num)",           "BlockedController::getAll/$1"); // Tous les utilisateurs bloqués par un utilisateur
+            $routes->post("(:num)/(:num)",     "BlockedController::add/$1/$2"); // Ajoute un utilisateur bloqué
+            $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2"); // Supprime un utilisateur bloqué
+        });
         });
 
         $routes->group("foyer", static function ($routes) {
@@ -84,8 +91,6 @@ $routes->group("api", static function ($routes) {
 
         $routes->group("role", static function ($routes) {
             $routes->get("",         "RoleController::getAll"); // Tous les rôles
-            $routes->get("(:num)",   "RoleController::getById/$1"); // Un rôle par son id
-            $routes->get("(:alpha)", "RoleController::getByLibelle/$1"); // Un rôle par son libellé
         });
 
         $routes->group("event", static function ($routes) {
