@@ -16,13 +16,17 @@ class EventModel extends BaseModel {
         return $this->db->table("event")->getWhere(["id" => $id])->getRowArray();
     }
 
-    public function getIdCreatorByIdEvent(int $idEvent): int {
-        $result = $this->db->table("event")->select("idCreator")->getWhere(["id" => $idEvent])->getRow();
+    public function getIdFoyerByIdEvent(int $idEvent): int {
+        $result = $this->db->table("event")->select("idFoyer")->getWhere(["id" => $idEvent])->getRow();
         return $result == null ? -1 : $result;
     }
 
     public function getByIdNotCanceled(int $id): array|null {
         return $this->db->table("event")->getWhere(["id" => $id, "canceled" => 0])->getRowArray();
+    }
+
+    public function getByIdCanceled(int $id): array|null {
+        return $this->db->table("event")->getWhere(["id" => $id, "canceled" => 1])->getRowArray();
     }
 
     public function getByZip(string $zip): array|null {

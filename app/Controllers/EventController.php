@@ -73,24 +73,23 @@ class EventController extends BaseController {
         }
     }
 
-    public function cancel($idEvent): void {
+    public function cancel($idEvent) {
         //account can cancel event
         if($this->user->isDeveloper() || $this->user->isAdmin() || 
-        ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
+        ($this->user->isEducator() && $this->user->getIdFoyer() == $this->eventModel->getIdFoyerByIdEvent($idEvent))){
             
             $data = $this->eventModel->getById($idEvent);
 
-            if($data == NULL) $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist"); return;
+            if($data == NULL) return $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist"); 
 
-            if($data["canceled"] == 1) $this->send(HTTPCodes::BAD_REQUEST, null, "Event already cancelled"); return;
+            if($data["canceled"] == 1) return $this->send(HTTPCodes::BAD_REQUEST, null, "Event already cancelled");
             
             $validation =  \Config\Services::validation();
 
             $validation->setRuleGroup("event_cancel_validation");
 
             if (!$validation->withRequest($this->request)->run()) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-                return;
+                return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
             }
 
             $data = $this->request->getJSON(true);
@@ -103,21 +102,19 @@ class EventController extends BaseController {
         }
     }
 
-    public function uncancel($idEvent): void {
+    public function uncancel($idEvent) {
         //account can uncancel event
         if($this->user->isDeveloper() || $this->user->isAdmin() || 
-        ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
+        ($this->user->isEducator() && $this->user->getIdFoyer() == $this->eventModel->getIdFoyerByIdEvent($idEvent))){
 
             $data = $this->eventModel->getById($idEvent);
 
             if($data == NULL) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist"); 
-                return;
+                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist"); 
             }
             
             if($data["canceled"] == 0) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Event is not cancelled"); 
-                return;
+                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event is not cancelled");
             }
 
             $validation =  \Config\Services::validation();
@@ -125,15 +122,14 @@ class EventController extends BaseController {
             $validation->setRuleGroup("event_uncancel_validation"); //validation the same as cancel
 
             if (!$validation->withRequest($this->request)->run()) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
-                return;
+                return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
             }
 
             $data = $this->request->getJSON(true);
 
             $this->eventModel->uncancel($data["id"]);
 
-            $this->send(HTTPCodes::OK, $data, "Event canceled");
+            $this->send(HTTPCodes::OK, $data, "Event cancelled");
         } else {//account is unauthorized to uncancel an event
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
@@ -141,7 +137,7 @@ class EventController extends BaseController {
 
     public function updateData(int $idEvent): void {
         if($this->user->isDeveloper() || $this->user->isAdmin() || 
-        ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
+        ($this->user->isEducator() && $this->user->getIdFoyer() == $this->eventModel->getIdFoyerByIdEvent($idEvent))){
             $validation =  \Config\Services::validation();
 
             $validation->setRuleGroup("event_update_validation");
@@ -161,8 +157,8 @@ class EventController extends BaseController {
                 unset($data["id"]);
             }
 
-            if (isset($data["idCreator"])) { // We don't want to update the creator ID with this method
-                unset($data["idCreator"]);
+            if (isset($data["idFoyer"])) { // We don't want to update the creator ID with this method
+                unset($data["idFoyer"]);
             }
 
             $this->eventModel->updateData($data);
@@ -194,7 +190,7 @@ class EventController extends BaseController {
                 unset($data["canceled"]);
             }
             
-            $data["idCreator"] = $this->user->getId(); //creator = the person who makes the request
+            $data["idFoyer"] = $this->user->getIdFoyer(); //creator = the person who makes the request
 
             $this->eventModel->add($data);
 
@@ -206,7 +202,7 @@ class EventController extends BaseController {
 
     public function addImage(int $idEvent): void {
         if($this->user->isDeveloper() || $this->user->isAdmin() || 
-        ($this->user->isEducator() && $this->user->getId() == $this->eventModel->getIdCreatorByIdEvent($idEvent))){
+        ($this->user->isEducator() && $this->user->getIdFoyer() == $this->eventModel->getIdFoyerByIdEvent($idEvent))){
             if ($this->eventModel->getById($idEvent) == null) {
                 $this->send(HTTPCodes::BAD_REQUEST, null, "Event with id $idEvent does not exist");
                 return;

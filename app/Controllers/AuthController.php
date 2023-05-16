@@ -85,7 +85,8 @@ class AuthController extends BaseController {
             "data" => [ // Data : contains the claims. Don't put sensitive data here, it will be visible by anyone.
                 "id"        => $user->id,
                 "login"     => $user->login,
-                "idRole"    => $user->idRole
+                "idRole"    => $user->idRole,
+                "idFoyer"   => $user->idFoyer
             ]
         ];
 
