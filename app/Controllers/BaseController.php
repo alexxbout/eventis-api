@@ -62,7 +62,7 @@ abstract class BaseController extends Controller {
         $data = $this->getJwtData();
 
         if (isset($data)) {
-            $this->user = new User($data->id, $data->idRole);
+            $this->user = new User($data->id, $data->idRole, $data->idFoyer);
         }
     }
 

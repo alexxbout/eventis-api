@@ -85,6 +85,28 @@ $routes->group("api", static function ($routes) {
         $routes->group("registration", static function ($routes) {
             $routes->get("",          "RegistrationController::getAll"); // ?
         });
+
+        $routes->group("foyer", static function ($routes) {
+            $routes->get("",                "FoyerController::getAll"); // OK
+            $routes->get("zip/(:alphanum)", "FoyerController::getAllByZip/$1"); // OK
+            $routes->post("",               "FoyerController::add"); // OK
+        });
+
+        $routes->group("event", static function ($routes) {
+            $routes->get("",                   "EventController::getAll"); // OK
+            $routes->get("zip/(:alphanum)",    "EventController::getByZip/$1"); // OK
+            $routes->get("(:num)",             "EventController::getById/$1"); // OK
+            $routes->post("",                  "EventController::add"); // OK
+            $routes->put("(:num)",             "EventController::updateData/$1"); // OK
+            $routes->put("cancel/(:num)",      "EventController::cancel/$1"); // OK
+            $routes->put("uncancel/(:num)",    "EventController::uncancel/$1"); // OK
+            $routes->put("image/(:num)",       "EventController::addImage/$1"); // OK
+
+            // Participants
+            $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2"); //$1 = idEvent $2 = idUser
+            $routes->delete("(:num)/participant/(:num)", "ParticipantController::remove/$1/$2");
+            $routes->get("(:num)/participant",           "ParticipantController::getAll/$1");
+        });
     });
 });
 

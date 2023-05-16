@@ -10,7 +10,8 @@ use CodeIgniter\Validation\StrictRules\FileRules;
 use CodeIgniter\Validation\StrictRules\FormatRules;
 use CodeIgniter\Validation\StrictRules\Rules;
 
-class Validation extends BaseConfig {
+class Validation extends BaseConfig
+{
     // --------------------------------------------------------------------
     // Setup
     // --------------------------------------------------------------------
@@ -46,7 +47,6 @@ class Validation extends BaseConfig {
     // --------------------------------------------------------------------
     // USER
     // --------------------------------------------------------------------
-
     public $user_add_validation = [
         "lastname"  => "required|max_length[30]",
         "firstname" => "required|max_length[30]",
@@ -73,7 +73,6 @@ class Validation extends BaseConfig {
     // --------------------------------------------------------------------
     // EVENT
     // --------------------------------------------------------------------
-
     public $event_update_validation = [
         "id"          => "required|integer",
         "dateDebut"   => "permit_empty|valid_date[Y-m-d H:i:s]",
@@ -88,14 +87,6 @@ class Validation extends BaseConfig {
         "reason" => "required|max_length[50]"
     ];
 
-    public $event_add_validation = [
-        "zip"         => "required|max_length[5]",
-        "dateDebut"   => "required|valid_date[Y-m-d H:i:s]",
-        "dateFin"     => "required|valid_date[Y-m-d H:i:s]",
-        "title"       => "required|max_length[20]",
-        "description" => "required|max_length[1000]"
-    ];
-
     public $event_addImage_validation = [
         "image"     => [
             "label" => "Image",
@@ -107,10 +98,19 @@ class Validation extends BaseConfig {
         ]
     ];
 
+    public $event_uncancel_validation = [
+        "id" => "required|integer"
+    ];
+
+    public $event_add_validation = [
+        "zip"   => "required|max_length[5]",
+        "title" => "required|max_length[20]",
+        "start" => "required|valid_date[Y-m-d]"
+    ];
+
     // --------------------------------------------------------------------
     // CODE
     // --------------------------------------------------------------------
-
     public $code_add_validation = [
         "idFoyer" => "required|integer",
         "expire"  => "required|valid_date[Y-m-d H:i:s]"
@@ -119,11 +119,21 @@ class Validation extends BaseConfig {
     // --------------------------------------------------------------------
     // REGISTRATION
     // --------------------------------------------------------------------
-
     public $registration_add_validation = [
         "code"      => "required|exact_length[" . UtilsRegistrationCode::CODE_LENGTH . "]",
         "lastname"  => "required|max_length[30]",
         "firstname" => "required|max_length[30]",
         "password"  => "required|regex_match[" . Regex::PASSWORD . "]"
+    ];
+
+    // --------------------------------------------------------------------
+    // FOYER
+    // --------------------------------------------------------------------
+    public $foyer_add_validation = [
+        "siret"   => "required|exact_length[14]|alpha_numeric",
+        "city"    => "required|max_length[10]",
+        "zip"     => "required|max_length[5]",
+        "address" => "required|max_length[50]",
+        "street"  => "required|max_length[10]"
     ];
 }
