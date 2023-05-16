@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Utils\HTTPCodes;
+use App\Models\FriendModel;
 
 class BlockedController extends BaseController {
     private $blockedModel;
+    private FriendModel $friendModel;
     
     
     public function __construct() {
@@ -26,6 +28,9 @@ class BlockedController extends BaseController {
         $isInTable =  $this-> blockedModel-> isBlocked($idUser,$idBlocked);
 
         if (!$isInTable) {
+            if($this->friendModel->isFriend($idUser,$idBlocked)){
+                $this->friendModel->remove($idUser,$idBlocked);
+            }
             $this-> blockedModel-> add($idUser, $idBlocked);
             $this->send(HTTPCodes::OK);
         } else {
@@ -40,6 +45,7 @@ class BlockedController extends BaseController {
         $isInTable =  $this-> blockedModel-> isBlocked($idUser,$idBlocked);
 
         if ($isInTable) {
+            
             $this-> blockedModel-> remove($idUser, $idBlocked);
             $this->send(HTTPCodes::OK);
         } else {

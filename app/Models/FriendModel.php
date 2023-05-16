@@ -77,6 +77,16 @@ class FriendModel extends BaseModel
             "idUser1" => $idUser,
             "idUser2" => $idFriend,
         ];
-        return $db->delete($data);
+        $array = ["idUser1" => $idUser, "idUser2" => $idFriend];
+        $array2 = ["idUser1" => $idFriend, "idUser2" => $idUser];
+        $db
+            ->groupStart()
+            ->where($array)
+            ->groupEnd()
+            ->orGroupStart()
+            ->where($array2)
+            ->groupEnd()
+            ->delete();
+        return $this->db->affectedRows() > 0;
     }
 }
