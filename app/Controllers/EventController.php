@@ -33,12 +33,6 @@ class EventController extends BaseController {
                 $this->send(HTTPCodes::NO_CONTENT);
             }
         }
-
-        $data = $this->request->getJSON(true);
-
-        $this->eventModel->cancel($data["id"], $data["reason"]);
-
-        $this->send(HTTPCodes::OK, $data, "Event canceled");
     }
 
     public function getById(int $id): void {
@@ -173,16 +167,6 @@ class EventController extends BaseController {
         } else {
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
-
-        $data = $this->request->getJSON(true);
-
-        if (isset($data["canceled"])) { // We don't want to update the canceled status with this method
-            unset($data["canceled"]);
-        }
-
-        $this->eventModel->updateData($data);
-
-        $this->send(HTTPCodes::OK, $data, "Event updated");
     }
 
     public function add(): void {
