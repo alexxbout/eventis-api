@@ -7,12 +7,14 @@ use App\Utils\HTTPCodes;
 use App\Models\FriendModel;
 use App\Models\UserModel;
 use App\Models\FriendRequestModel;
+use App\Models\BlockedModel;
 
 class FriendController extends BaseController
 {
     private FriendModel $friendModel;
     private UserModel $userModel;
     private FriendRequestModel $friendRequestModel;
+    private BlockedModel $blockedModel;
 
     public function __construct()
     {
@@ -81,12 +83,10 @@ class FriendController extends BaseController
             return;
         }
 
-        //add is blocked 
-        ############################
-        ############################
-        ############################
-        ############################
-        ############################
+        if(!$this->blockedModel->isBlocked($idUser,$idFriend)){
+            $this->send(HTTPCodes::NOT_ALLOWED, null, "Users are blocked");
+            return;
+        }
 
 
         if (!$this->user->isDeveloper()) {
@@ -136,12 +136,10 @@ class FriendController extends BaseController
             return;
         }
 
-        //add is blocked 
-        ############################
-        ############################
-        ############################
-        ############################
-        ############################
+        if(!$this->blockedModel->isBlocked($idUser,$idFriend)){
+            $this->send(HTTPCodes::NOT_ALLOWED, null, "Users are blocked");
+            return;
+        }
 
 
         if (!$this->user->isDeveloper()) {
@@ -237,8 +235,6 @@ class FriendController extends BaseController
             $this->send(HTTPCodes::BAD_REQUEST, ["Users are not friends"], "Relation doesn't exist, cannot be removed");
             return;
         }
-
-
 
         if (!$this->user->isDeveloper()) {
             if (($this->user->getId() == $idUser || $this->user->getId() == $idFriend) && $this->friendModel->isFriend($idUser, $idFriend)) {

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use stdClass;
 
 class BlockedModel extends BaseModel {
 
@@ -14,7 +13,18 @@ class BlockedModel extends BaseModel {
 
     //un tableau correspondant si idUser est dans la table blocked null sinon
     public function isBlocked(int $idUser, int $idBlocked): bool {
-        $result = $this->db->table("blocked")->getWhere(["idUser" => $idUser,"idBlocked" => $idBlocked])->getResultObject();
+        
+        $array = ["idUser" => $idUser,"idBlocked" => $idBlocked];
+        $array2 = ["idUser" => $idBlocked,"idBlocked" => $idUser];
+        $result = $this->db->table("blocked")
+            ->groupStart()
+            ->where($array)
+            ->groupEnd()
+            ->orGroupStart()
+            ->where($array2)
+            ->groupEnd()
+            ->get()->getRowArray();
+
         return $result!=null ;
     }
 
