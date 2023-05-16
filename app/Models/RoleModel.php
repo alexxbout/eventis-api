@@ -2,17 +2,23 @@
 
 namespace App\Models;
 
+use stdClass;
+
 class RoleModel extends BaseModel {
 
-    public function getAll(): array {
-        return $this->db->table('role')->get()->getResultArray();
-    }
+   /* public function getAll(int $id): Array {
+        return $this->db->table("role")->getWhere(["id" => $id])->getResultObject();
+    }*/
 
-    public function getById(int $id): array {
-        return $this->db->table('role')->getWhere(['id' => $id])->getRowArray();
-    }
-
-    public function getByLibelle(String $libelle): array {
-        return $this->db->table('role')->getWhere(['libelle' => $libelle])->getResultArray();
+    public function getAll(): Array {
+        return $this->db->table("role")->get()->getResultObject();
     }
 }
+
+
+
+       
+        
+    
+
+

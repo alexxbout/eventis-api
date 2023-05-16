@@ -61,6 +61,37 @@ $routes->group("api", static function ($routes) {
             $routes->put("login/(:num)",      "UserController::updateLogin");
 
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer");
+
+
+            //Friends
+            $routes->get("(:num)/friend",           "FriendController::getAll/$1"); // Tous les amis d'un utilisateur
+            $routes->get("(:num)/friend/(:num)",    "FriendController::isFriend/$1/$2");// Vérifie si deux utilisateurs sont amis
+
+            //$routes->post("(:num)/friend/(:num)",   "FriendController::add/$1/$2"); // Ajoute un ami
+
+            $routes->delete("(:num)/friend/(:num)", "FriendController::remove/$1/$2"); // Supprime un ami
+            
+            $routes->post("(:num)/friend/ask/(:num)",      "FriendController::askFriend/$1/$2"); // Ajoute une demaande d'ami
+            $routes->delete("(:num)/friend/reject/(:num)", "FriendController::rejectRequest/$1/$2");
+            $routes->post("(:num)/friend/accept/(:num)",   "FriendController::add/$1/$2");
+
+            //User
+            $routes->get("",             "UserController::getAll"); // Tous les utilisateurs
+            $routes->get("(:num)",       "UserController::getById/$1"); // Un utilisateur par son id
+            $routes->get("foyer/(:num)", "UserController::getByIdFoyer/$1"); // Tous les utilisateurs d'un foyer
+            $routes->get("role/(:num)",  "UserController::getByIdRole/$1"); // Tous les utilisateurs d'un rôle
+            $routes->get("ref/(:num)",   "UserController::getByIdRef/$1"); // Tous les utilisateurs d'un référent
+            $routes->post("add",             "UserController::add"); // Ajoute un utilisateur
+            $routes->put("updateData",       "UserController::updateData"); // Met à jour un utilisateur
+            $routes->put("updateLastLogin",  "UserController::updateLastLogin"); // Met à jour la date de dernière connexion d'un utilisateur
+            $routes->put("updateLastLogout", "UserController::updateLastLogout"); // Met à jour la date de dernière déconnexion d'un utilisateur
+        
+        $routes->group("blocked", static function ($routes) {
+            $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2"); // Vérifie si un utilisateur est bloqué par un autre $1=blocker $2  = bloqué
+            $routes->get("(:num)",           "BlockedController::getAll/$1"); // Tous les utilisateurs bloqués par un utilisateur
+            $routes->post("(:num)/(:num)",     "BlockedController::add/$1/$2"); // Ajoute un utilisateur bloqué
+            $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2"); // Supprime un utilisateur bloqué
+        });
         });
 
         $routes->group("foyer", static function ($routes) {
@@ -73,8 +104,6 @@ $routes->group("api", static function ($routes) {
 
         $routes->group("role", static function ($routes) {
             $routes->get("",         "RoleController::getAll"); // Tous les rôles
-            $routes->get("(:num)",   "RoleController::getById/$1"); // Un rôle par son id
-            $routes->get("(:alpha)", "RoleController::getByLibelle/$1"); // Un rôle par son libellé
         });
 
         $routes->group("event", static function ($routes) {
@@ -120,7 +149,15 @@ $routes->group("api", static function ($routes) {
         $routes->group("registration", static function ($routes) {
             $routes->get("",          "RegistrationController::getAll");
         });
-    });
+            $routes->get("",               "CodeController::getAll"); // Tous les codes
+            $routes->get("(:num)",         "CodeController::getById/$1"); // Un code par son id
+            $routes->get("check/(:alpha)", "CodeController::checkExist/$1"); // Vérifie si un code existe
+            $routes->get("valid/(:alpha)", "CodeController::isValid/$1"); // Vérifie si un code est valide
+
+            $routes->post("add",      "CodeController::add"); // Ajoute un code
+            $routes->delete("delete", "CodeController::delete"); // Supprime un code
+            $routes->put("use",       "CodeController::use"); // Utilise un code
+        });
 });
 
 /*

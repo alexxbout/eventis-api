@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Utils;
 
 class HTTPCodes {
@@ -8,6 +7,10 @@ class HTTPCodes {
      * La requête a réussi.
      */
     const OK = 200;
+
+
+
+    const CREATED = 201;
     /**
      * Il n'y a pas de contenu à envoyer pour cette requête, mais les en-têtes peuvent être utiles.
      */
@@ -32,6 +35,8 @@ class HTTPCodes {
      * Le serveur n'a pas trouvé la ressource demandée. Ce code de réponse est principalement connu pour son apparition fréquente sur le web.
      */
     const NOT_FOUND = 404;
+
+    const NOT_ALLOWED = 405;
 
     /**
      * Le serveur a rencontré une situation qu'il ne sait pas traiter.

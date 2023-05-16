@@ -4,34 +4,21 @@ namespace App\Controllers;
 
 use App\Utils\HTTPCodes;
 
-use function PHPUnit\Framework\isEmpty;
-
 class RoleController extends BaseController {
     private $roleModel;
-
+    
+    
     public function __construct() {
-        $this->roleModel = new \App\Models\FoyerModel();
+        $this->roleModel = new \App\Models\RoleModel();
     }
-
+    
     public function getAll(): void {
-        $tab = $this->roleModel->getAll();
-        if($tab == NULL){
-            $this->send(HTTPCodes::NOT_FOUND,$tab);
+        if ($this->user->isDeveloper()) {
+            $exist =  $this->roleModel->getAll();
+            if ($exist==null){ $this->send(HTTPCodes::NOT_FOUND);}
+            else { $this->send(200, $exist); }
+        }else{
+            $this->send(HTTPCodes::FORBIDDEN);
         }
-        else if($tab.isEmpty()){
-            $this->send(HTTPCodes::NO_CONTENT,$tab);
-        }
-        else{
-            $this->send(HTTPCodes::OK,$tab);
-        }  
     }
-
-    public function getById(int $id): void {
-        $this->send(200, $this->roleModel->getById($id));
-    }
-
-    public function getByLibelle(String $libelle): void {
-        $this->send(200, $this->roleModel->getByLibelle($libelle));
-    }
-
 }
