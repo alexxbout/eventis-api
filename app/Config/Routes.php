@@ -121,15 +121,6 @@ $routes->group("api", static function ($routes) {
             $routes->put("use",       "CodeController::use"); // Utilise un code
         });
 
-
-
-        $routes->group("blocked", static function ($routes) {
-            $routes->get("(:num)",                  "BlockedController::getAll/$1"); // Tous les utilisateurs bloqués par un utilisateur
-            $routes->get("isBlocked/(:num)/(:num)", "BlockedController::isBlocked/$1/$2"); // Vérifie si un utilisateur est bloqué par un autre
-
-            $routes->post("add",      "BlockedController::add"); // Ajoute un utilisateur bloqué
-            $routes->delete("remove", "BlockedController::remove"); // Supprime un utilisateur bloqué
-        });
     });
 });
 
