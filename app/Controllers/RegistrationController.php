@@ -20,17 +20,14 @@ class RegistrationController extends BaseController {
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
 
-        $this->userModel         = new \App\Models\UserModel();
-        $this->codeModel         = new \App\Models\CodeModel();
-        $this->registrationModel = new \App\Models\RegistrationModel();
+        $this->userModel         = new UserModel();
+        $this->codeModel         = new CodeModel();
+        $this->registrationModel = new RegistrationModel();
     }
 
     public function getAll() {
         if ($this->user->isDeveloper()) {
-            $data = $this->registrationModel->getAll();
-            if ($data != null) {
-                $this->send(HTTPCodes::OK, $data, "All registrations");
-            }
+            $this->send(HTTPCodes::OK, $this->registrationModel->getAll(), "All registrations");
         } else {
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
@@ -72,7 +69,7 @@ class RegistrationController extends BaseController {
         // Ajouter l'enregistrement
         $status = $this->registrationModel->add($code->id, $idUser);
 
-        if (!$status) {
+        if ($status == -1) {
             return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while adding registration");
         }
 

@@ -5,16 +5,22 @@ namespace App\Models;
 class RegistrationModel extends BaseModel {
 
     public function getAll(): array {
-        return $this->db->table("registration")->orderBy("at", "DESC")->get()->getResultArray();
+        return $this->db->table("registration")->orderBy("at", "DESC")->get()->getResultObject();
     }
 
-    public function add(int $idCode, int $idUser): bool {
+    public function add(int $idCode, int $idUser): int {
         $data = [
             "id"     => $this->getMax("registration", "id") + 1,
             "idCode" => $idCode,
             "idUser" => $idUser
         ];
 
-        return $this->db->table("registration")->insert($data);
+        $this->db->table("registration")->insert($data);
+
+        if ($this->isLastQuerySuccessfull()) {
+            return $data["id"];
+        } else {
+            return -1;
+        }
     }
 }

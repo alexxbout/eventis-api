@@ -22,7 +22,7 @@ class AuthController extends BaseController {
         $this->userModel = new UserModel();
     }
 
-    public function login(): void {
+    public function login() {
         /**
          * Format du header : Authorization: Bearer <token>
          */
@@ -31,22 +31,19 @@ class AuthController extends BaseController {
         $header = $this->request->header("Authorization");
         if (!isset($header)) {
             // Renvoyer une erreur 401 Unauthorized avec le header WWW-Authenticate pour indiquer à l'utilisateur comment s'authentifier
-            $this->send(HTTPCodes::UNAUTHORIZED, null, "No authorization header", null, ["WWW-Authenticate" => "Bearer"]);
-            return;
+            return $this->send(HTTPCodes::UNAUTHORIZED, null, "No authorization header", null, ["WWW-Authenticate" => "Bearer"]);
         }
 
         // Vérifier si le header Authorization est au format Bearer
         $authHeader = explode(" ", $header);
         if (count($authHeader) !== 3 || $authHeader[1] !== "Bearer") {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, "Wrong authorization header format");
-            return;
+            return $this->send(HTTPCodes::UNAUTHORIZED, null, "Wrong authorization header format");
         }
 
         // Vérifier si le token est présent
         $token = $authHeader[2];
         if (!$token) {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, "No token");
-            return;
+            return $this->send(HTTPCodes::UNAUTHORIZED, null, "No token");
         }
 
         // Décoder le login et le mot de passe
@@ -60,14 +57,12 @@ class AuthController extends BaseController {
         $user = $this->userModel->getByLogin($login);
 
         if ($user == null) {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, "User not found");
-            return;
+            return $this->send(HTTPCodes::UNAUTHORIZED, null, "User not found");
         }
 
         // Vérifier si le mot de passe est correct
         if (!password_verify($password, $user->password)) {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, "Wrong password");
-            return;
+            return $this->send(HTTPCodes::UNAUTHORIZED, null, "Wrong password");
         }
 
         // Mettre à jour lastLogin

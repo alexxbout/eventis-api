@@ -4,16 +4,16 @@ namespace App\Models;
 
 class EventModel extends BaseModel {
 
-    public function getAll(): array|null {
-        return $this->db->table("event")->get()->getResultArray();
+    public function getAll(): array {
+        return $this->db->table("event")->get()->getResultObject();
     }
 
-    public function getAllNotCanceled(): array|null {
-        return $this->db->table("event")->getWhere(["canceled" => 0])->getResultArray();
+    public function getAllNotCanceled(): array {
+        return $this->db->table("event")->getWhere(["canceled" => 0])->getResultObject();
     }
 
-    public function getById(int $id): array|null {
-        return $this->db->table("event")->getWhere(["id" => $id])->getRowArray();
+    public function getById(int $id): object|null {
+        return $this->db->table("event")->getWhere(["id" => $id])->getRowObject();
     }
 
     public function getIdFoyerByIdEvent(int $idEvent): int {
@@ -21,50 +21,55 @@ class EventModel extends BaseModel {
         return $result == null ? -1 : $result;
     }
 
-    public function getByIdNotCanceled(int $id): array|null {
-        return $this->db->table("event")->getWhere(["id" => $id, "canceled" => 0])->getRowArray();
+    public function getByIdNotCanceled(int $id): array {
+        return $this->db->table("event")->getWhere(["id" => $id, "canceled" => 0])->getResultObject();
     }
 
-    public function getByIdCanceled(int $id): array|null {
-        return $this->db->table("event")->getWhere(["id" => $id, "canceled" => 1])->getRowArray();
+    public function getByIdCanceled(int $id): array {
+        return $this->db->table("event")->getWhere(["id" => $id, "canceled" => 1])->getResultObject();
     }
 
-    public function getByZip(string $zip): array|null {
-        return $this->db->table("event")->getWhere(["zip" => $zip])->getResultArray();
+    public function getByZip(string $zip): array {
+        return $this->db->table("event")->getWhere(["zip" => $zip])->getResultObject();
     }
 
-    public function getByZipNotCanceled(string $zip): array|null {
-        return $this->db->table("event")->getWhere(["zip" => $zip, "canceled" => 0])->getResultArray();
+    public function getByZipNotCanceled(string $zip): array {
+        return $this->db->table("event")->getWhere(["zip" => $zip, "canceled" => 0])->getResultObject();
     }
 
-    /**
-     * SELECT * from event 
-     * JOIN 
-     */
-
-    // public function getByIdFoyer(int $id): array|null{
-    //     return $this->db->table("event")->getWhere(["zip" => $zip, "canceled" => 0])->getResultArray();;
-    // }
-
-    public function cancel(int $id, string $reason): void {
+    public function cancel(int $id, string $reason): bool {
         $this->db->table("event")->update(["canceled" => true, "reason" => $reason], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
     }
 
-    public function uncancel(int $id): void {
+    public function uncancel(int $id): bool {
         $this->db->table("event")->update(["canceled" => false, "reason" => null], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
     }
 
-    public function updateData(array $data): void {
+    public function updateData(array $data): bool {
         $this->db->table("event")->update($data, ["id" => $data["id"]]);
+
+        return $this->isLastQuerySuccessfull();
     }
 
-    public function add(array $data): void {
-        $data["id"] = $this->getMax("event", "id") + 1;
+    public function add(object $data): int {
+        $data->id = $this->getMax("event", "id") + 1;
         $this->db->table("event")->insert($data);
         $this->db->insertID();
+
+        if ($this->isLastQuerySuccessfull()) {
+            return $data->id;
+        } else {
+            return -1;
+        }
     }
 
-    public function addImage(int $id, string $image): void {
+    public function addImage(int $id, string $image): bool {
         $this->db->table("event")->update(["pic" => $image], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
     }
 }

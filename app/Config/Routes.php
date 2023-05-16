@@ -36,74 +36,73 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 $routes->get("/", "Home::index");
 
-$routes->get("login",     "AuthController::login");            // Connexion
-$routes->post("register", "RegistrationController::register"); // Inscription
+$routes->get("login",     "AuthController::login");
+$routes->post("register", "RegistrationController::register");
 
-// Unauthorized
 $routes->get("unauthorized", "Home::unauthorized");
 
 $routes->group("api", static function ($routes) {
 
     $routes->group("v1", static function ($routes) {
         $routes->group("user", static function ($routes) {
-            $routes->get("",                  "UserController::getAll"); // OK
-            $routes->get("(:num)",            "UserController::getById/$1"); // OK
-            $routes->post("",                 "UserController::add"); // OK
-            $routes->put("(:num)",            "UserController::update/$1"); // OK
-            $routes->put("deactivate/(:num)", "UserCcontroller::deactiveAccount/$1"); // OK
-            $routes->put("reactivate/(:num)", "UserCcontroller::reactivateAccount/$1"); // OK
-            $routes->put("password/(:num)",   "UserController::updatePassword/$1"); // OK
-            $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1"); // OK
+            $routes->get("",                  "UserController::getAll");
+            $routes->get("(:num)",            "UserController::getById/$1");
+            $routes->post("",                 "UserController::add");
+            $routes->put("(:num)",            "UserController::update/$1");
+            $routes->put("deactivate/(:num)", "UserCcontroller::deactiveAccount/$1");
+            $routes->put("reactivate/(:num)", "UserCcontroller::reactivateAccount/$1");
+            $routes->put("password/(:num)",   "UserController::updatePassword/$1");
+            $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");
 
             // Friends
-            $routes->get("(:num)/friend",                  "FriendController::getAll/$1"); // OK
-            $routes->get("(:num)/friend/(:num)",           "FriendController::isFriend/$1/$2"); // OK
-            $routes->delete("(:num)/friend/(:num)",        "FriendController::remove/$1/$2"); // OK
-            $routes->post("(:num)/friend/ask/(:num)",      "FriendController::askFriend/$1/$2"); // OK
-            $routes->delete("(:num)/friend/reject/(:num)", "FriendController::rejectRequest/$1/$2"); // OK
-            $routes->post("(:num)/friend/accept/(:num)",   "FriendController::add/$1/$2"); // OK
+            $routes->get("(:num)/friend",                  "FriendController::getAll/$1");
+            $routes->get("(:num)/friend/(:num)",           "FriendController::isFriend/$1/$2");
+            $routes->delete("(:num)/friend/(:num)",        "FriendController::remove/$1/$2");
+            $routes->post("(:num)/friend/ask/(:num)",      "FriendController::askFriend/$1/$2");
+            $routes->delete("(:num)/friend/reject/(:num)", "FriendController::rejectRequest/$1/$2");
+            $routes->post("(:num)/friend/accept/(:num)",   "FriendController::add/$1/$2");
 
             $routes->group("blocked", static function ($routes) {
-                $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2"); // OK
-                $routes->get("(:num)",           "BlockedController::getAll/$1"); // OK
-                $routes->post("(:num)/(:num)",   "BlockedController::add/$1/$2"); // OK
-                $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2"); // OK
+                $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2");
+                $routes->get("(:num)",           "BlockedController::getAll/$1");
+                $routes->post("(:num)/(:num)",   "BlockedController::add/$1/$2");
+                $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2");
             });
         });
 
         $routes->group("role", static function ($routes) {
-            $routes->get("",         "RoleController::getAll"); // OK
+            $routes->get("", "RoleController::getAll");
         });
 
         $routes->group("code", static function ($routes) {
-            $routes->get("",             "CodeController::getAll"); // OK
-            $routes->get("(:alphanum)",  "CodeController::getByCode/$1"); // OK
-            $routes->get("foyer/(:num)", "CodeController::getAllByFoyer/$1"); // OK
-            $routes->post("",            "CodeController::add"); // OK
+            $routes->get("",             "CodeController::getAll");
+            $routes->get("(:alphanum)",  "CodeController::getByCode/$1");
+            $routes->get("foyer/(:num)", "CodeController::getAllByFoyer/$1");
+            $routes->post("",            "CodeController::add");
         });
 
         $routes->group("registration", static function ($routes) {
-            $routes->get("",          "RegistrationController::getAll"); // ?
+            $routes->get("", "RegistrationController::getAll");
         });
 
         $routes->group("foyer", static function ($routes) {
-            $routes->get("",                "FoyerController::getAll"); // OK
-            $routes->get("zip/(:alphanum)", "FoyerController::getAllByZip/$1"); // OK
-            $routes->post("",               "FoyerController::add"); // OK
+            $routes->get("",                "FoyerController::getAll");
+            $routes->get("zip/(:alphanum)", "FoyerController::getAllByZip/$1");
+            $routes->post("",               "FoyerController::add");
         });
 
         $routes->group("event", static function ($routes) {
-            $routes->get("",                   "EventController::getAll"); // OK
-            $routes->get("zip/(:alphanum)",    "EventController::getByZip/$1"); // OK
-            $routes->get("(:num)",             "EventController::getById/$1"); // OK
-            $routes->post("",                  "EventController::add"); // OK
-            $routes->put("(:num)",             "EventController::updateData/$1"); // OK
-            $routes->put("cancel/(:num)",      "EventController::cancel/$1"); // OK
-            $routes->put("uncancel/(:num)",    "EventController::uncancel/$1"); // OK
-            $routes->put("image/(:num)",       "EventController::addImage/$1"); // OK
+            $routes->get("",                "EventController::getAll");
+            $routes->get("zip/(:alphanum)", "EventController::getByZip/$1");
+            $routes->get("(:num)",          "EventController::getById/$1");
+            $routes->post("",               "EventController::add");
+            $routes->put("(:num)",          "EventController::updateData/$1");
+            $routes->put("cancel/(:num)",   "EventController::cancel/$1");
+            $routes->put("uncancel/(:num)", "EventController::uncancel/$1");
+            $routes->put("image/(:num)",    "EventController::addImage/$1");
 
             // Participants
-            $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2"); //$1 = idEvent $2 = idUser
+            $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2");
             $routes->delete("(:num)/participant/(:num)", "ParticipantController::remove/$1/$2");
             $routes->get("(:num)/participant",           "ParticipantController::getAll/$1");
         });

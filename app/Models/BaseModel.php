@@ -4,24 +4,20 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class BaseModel extends Model
-{
+class BaseModel extends Model {
 
     protected $db;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->db = \Config\Database::connect();
     }
 
-    protected function getMax(string $table, string $column): int
-    {
+    protected function getMax(string $table, string $column): int {
         $max = $this->db->table($table)->selectMax($column)->get()->getRowArray()[$column];
         return $max === null ? -1 : $max;
     }
 
-    protected function isLastQuerySuccessfull(): bool
-    {
+    protected function isLastQuerySuccessfull(): bool {
         return $this->db->affectedRows() > 0;
     }
 }

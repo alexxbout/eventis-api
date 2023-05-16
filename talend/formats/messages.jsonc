@@ -1,8 +1,0 @@
-// we cannot access single message with the API
-// we can only access messages by conversation
-
-// it will be more efficient to get all messages of a conversation
-// because of user id verification and blocking verification
-
-// mmessages will be received by the client using a websocket
-// a websocket is a persistent connection between client and server

@@ -5,17 +5,14 @@ namespace App\Models;
 
 class BlockedModel extends BaseModel {
 
-    //groupes des bloques par un utilisateur
     public function getAll(int $idUser): array {
         return $this->db->table("blocked")->getWhere(["idUser" => $idUser])->getResultObject();
-
     }
 
-    //un tableau correspondant si idUser est dans la table blocked null sinon
     public function isBlocked(int $idUser, int $idBlocked): bool {
-        
-        $array = ["idUser" => $idUser,"idBlocked" => $idBlocked];
-        $array2 = ["idUser" => $idBlocked,"idBlocked" => $idUser];
+
+        $array = ["idUser" => $idUser, "idBlocked" => $idBlocked];
+        $array2 = ["idUser" => $idBlocked, "idBlocked" => $idUser];
         $result = $this->db->table("blocked")
             ->groupStart()
             ->where($array)
@@ -25,10 +22,10 @@ class BlockedModel extends BaseModel {
             ->groupEnd()
             ->get()->getRowArray();
 
-        return $result!=null ;
+        return $result != null;
     }
 
-    public function add(int $idUser, int $idBlocked ): void {
+    public function add(int $idUser, int $idBlocked): int {
         $data = [
             "id"         => $this->getMax("blocked", "id") + 1,
             "idUser"     => $idUser,
@@ -36,14 +33,17 @@ class BlockedModel extends BaseModel {
         ];
 
         $this->db->table("blocked")->insert($data);
-        
+
+        if ($this->isLastQuerySuccessfull()) {
+            return $data["id"];
+        } else {
+            return -1;
+        }
     }
 
-    /**
-     * $idUser only can execute this command 
-     */
-    public function remove(int $idUser, int $idBlocked): void {
-       $this->db->table("blocked")->delete(["idBlocked" => $idBlocked,"idUser" => $idUser]);
-    }
+    public function remove(int $idUser, int $idBlocked): int {
+        $this->db->table("blocked")->delete(["idBlocked" => $idBlocked, "idUser" => $idUser]);
 
+        return $this->isLastQuerySuccessfull();
+    }
 }

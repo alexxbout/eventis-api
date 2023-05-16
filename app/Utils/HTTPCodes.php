@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Utils;
 
 class HTTPCodes {
@@ -8,13 +9,10 @@ class HTTPCodes {
      */
     const OK = 200;
 
-
-
-    const CREATED = 201;
     /**
-     * Il n'y a pas de contenu à envoyer pour cette requête, mais les en-têtes peuvent être utiles.
+     * La requête a été traitée avec succès et une nouvelle ressource a été créée.
      */
-    const NO_CONTENT = 204;
+    const CREATED = 201;
 
     /**
      * Cette réponse indique que le serveur n'a pas pu comprendre la requête à cause d'une syntaxe invalide.
@@ -36,6 +34,9 @@ class HTTPCodes {
      */
     const NOT_FOUND = 404;
 
+    /**
+     * Le client n'est pas autorisé à utiliser la méthode demandée.
+     */
     const NOT_ALLOWED = 405;
 
     /**

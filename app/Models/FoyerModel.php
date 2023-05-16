@@ -16,8 +16,14 @@ class FoyerModel extends BaseModel {
         return $this->db->table("foyer")->getWhere(["zip" => $zip])->getResultObject();
     }
 
-    public function add(array $data) {
-        $data["id"] = $this->getMax("foyer", "id") + 1;
-        return $this->db->table("foyer")->insert($data);
+    public function add(object $data): int {
+        $data->id = $this->getMax("foyer", "id") + 1;
+        $this->db->table("foyer")->insert($data);
+
+        if ($this->isLastQuerySuccessfull()) {
+            return $data->id;
+        } else {
+            return -1;
+        }
     }
 }

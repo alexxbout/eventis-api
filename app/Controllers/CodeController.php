@@ -21,8 +21,8 @@ class CodeController extends BaseController {
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
-        $this->codeModel = new \App\Models\CodeModel();
-        $this->foyerModel = new \App\Models\FoyerModel();
+        $this->codeModel = new CodeModel();
+        $this->foyerModel = new FoyerModel();
     }
 
     public function getAll() {
@@ -30,13 +30,12 @@ class CodeController extends BaseController {
             return $this->send(HTTPCodes::FORBIDDEN);
         } else {
             $data = $this->codeModel->getAll();
-            if ($data != null) {
-                // Ajouter l'information de validité pour chaque code
-                foreach ($data as &$code) {
-                    $code->valid = $this->codeModel->isValid($code->id);
-                }
-                return $this->send(HTTPCodes::OK, $data, "");
+
+            // Ajouter l'information de validité pour chaque code
+            foreach ($data as &$code) {
+                $code->valid = $this->codeModel->isValid($code->id);
             }
+            return $this->send(HTTPCodes::OK, $data, "All codes");
         }
     }
 
@@ -45,13 +44,12 @@ class CodeController extends BaseController {
             return $this->send(HTTPCodes::FORBIDDEN);
         } else {
             $data = $this->codeModel->getAllByFoyer($idFoyer);
-            if ($data != null) {
-                // Ajouter l'information de validité pour chaque code
-                foreach ($data as &$code) {
-                    $code->valid = $this->codeModel->isValid($code->id);
-                }
-                return $this->send(HTTPCodes::OK, $data, "");
+
+            // Ajouter l'information de validité pour chaque code
+            foreach ($data as &$code) {
+                $code->valid = $this->codeModel->isValid($code->id);
             }
+            return $this->send(HTTPCodes::OK, $data, "All codes for foyer " . $idFoyer);
         }
     }
 
@@ -61,7 +59,7 @@ class CodeController extends BaseController {
             $data->valid = $this->codeModel->isValid($data->id);
             return $this->send(HTTPCodes::OK, $data, "");
         } else {
-            return $this->send(HTTPCodes::NO_CONTENT);
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "Code not found");
         }
     }
 

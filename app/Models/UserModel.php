@@ -2,31 +2,29 @@
 
 namespace App\Models;
 
-use stdClass;
-
 class UserModel extends BaseModel {
 
-    public function getAll(): array|null {
-        return $this->db->table("user")->get()->getResultArray();
+    public function getAll(): array {
+        return $this->db->table("user")->get()->getResultObject();
     }
 
-    public function getById(int $id): array|null {
+    public function getById(int $id): object|null {
         return $this->db->table("user")->getWhere(["id" => $id])->getRowObject();
     }
 
-    public function getByIdFoyer(int $idFoyer): array|null {
-        return $this->db->table("user")->getWhere(["idFoyer" => $idFoyer])->getResultArray();
+    public function getByIdFoyer(int $idFoyer): array {
+        return $this->db->table("user")->getWhere(["idFoyer" => $idFoyer])->getResultObject();
     }
 
-    public function getByIdRole(int $idRole): array|null {
-        return $this->db->table("user")->getWhere(["idRole" => $idRole])->getResultArray();
+    public function getByIdRole(int $idRole): array {
+        return $this->db->table("user")->getWhere(["idRole" => $idRole])->getResultObject();
     }
 
-    public function getByIdRef(int $idRef): array|null {
-        return $this->db->table("user")->getWhere(["idRef" => $idRef])->getResultArray();
+    public function getByIdRef(int $idRef): array {
+        return $this->db->table("user")->getWhere(["idRef" => $idRef])->getResultObject();
     }
 
-    public function getByLogin(string $login): stdClass|null {
+    public function getByLogin(string $login): object|null {
         return $this->db->table("user")->getWhere(["login" => $login])->getRowObject();
     }
 
@@ -54,32 +52,42 @@ class UserModel extends BaseModel {
             "idFoyer"   => $idFoyer
         ];
 
-        $status = $this->db->table("user")->insert($data);
+        $this->db->table("user")->insert($data);
 
-        if (!$status) {
+        if ($this->isLastQuerySuccessfull()) {
+            return $data["id"];
+        } else {
             return -1;
         }
-
-        return $data["id"];
     }
 
     public function updateData(int $idUser, object $data): bool {
-        return $this->db->table("user")->update($data, ["id" => $idUser]);
+        $this->db->table("user")->update($data, ["id" => $idUser]);
+
+        return $this->isLastQuerySuccessfull();
     }
 
     public function updateLastLogin(int $id): bool {
-        return $this->db->table("user")->update(["lastLogin" => date("Y-m-d H:i:s")], ["id" => $id]);
+        $this->db->table("user")->update(["lastLogin" => date("Y-m-d H:i:s")], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
     }
 
     public function updateLastLogout(int $id): bool {
-        return $this->db->table("user")->update(["lastLogout" => date("Y-m-d H:i:s")], ["id" => $id]);
+        $this->db->table("user")->update(["lastLogout" => date("Y-m-d H:i:s")], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
     }
 
     public function updatePassword(int $id, string $password): bool {
-        return $this->db->table("user")->update(["password" => $password], ["id" => $id]);
+        $this->db->table("user")->update(["password" => $password], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
     }
 
     public function setActive(int $id, int $value): bool {
-        return $this->db->table("user")->update(["active" => $value], ["id" => $id]);
+        $this->db->table("user")->update(["active" => $value], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
     }
 }

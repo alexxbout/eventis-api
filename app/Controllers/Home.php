@@ -6,11 +6,11 @@ use App\Utils\HTTPCodes;
 
 class Home extends BaseController {
 
-    public function index(): void {
+    public function index() {
         $this->send(HTTPCodes::OK, null, "API is working");
     }
 
-    public function unauthorized(): void {
-        $this->send(HTTPCodes::UNAUTHORIZED, ["message" => "Authentication required"]);
+    public function unauthorized() {
+        $this->send(HTTPCodes::UNAUTHORIZED, null, "Authentication required");
     }
 }

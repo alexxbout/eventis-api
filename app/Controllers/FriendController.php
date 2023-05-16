@@ -8,84 +8,62 @@ use App\Models\FriendModel;
 use App\Models\UserModel;
 use App\Models\FriendRequestModel;
 use App\Models\BlockedModel;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
-class FriendController extends BaseController
-{
+class FriendController extends BaseController {
+
     private FriendModel $friendModel;
     private UserModel $userModel;
     private FriendRequestModel $friendRequestModel;
     private BlockedModel $blockedModel;
 
-    public function __construct()
-    {
-        $this->friendModel = new \App\Models\FriendModel();
-        $this->friendRequestModel = new \App\Models\FriendRequestModel();
-        $this->userModel = new \App\Models\UserModel();
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
+        parent::initController($request, $response, $logger);
+
+        $this->friendModel = new FriendModel();
+        $this->friendRequestModel = new FriendRequestModel();
+        $this->userModel = new UserModel();
     }
 
-    public function getAll($idUser): void
-    {
-
+    public function getAll($idUser) {
         if ($this->userModel->getById($idUser) == null) {
-            $this->send(HTTPCodes::NOT_FOUND, ["User don't exist"], "Ressource not found");
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "User don't exist");
         }
 
         if (!$this->user->isDeveloper()) {
             if ($this->user->getId() == $idUser) {
-                $data = $this->friendModel->getAll($idUser);
-                if (empty($data) || $data == null) {
-                    $this->send(HTTPCodes::NO_CONTENT, ["You have no friends"]);
-                } else {
-                    $this->send(HTTPCodes::OK, $data);
-                }
+                $this->send(HTTPCodes::OK, $this->friendModel->getAll($idUser), "Friends of " . $idUser);
             } else {
-                $this->send(HTTPCodes::BAD_REQUEST, ["Attempting to access to others relations"]);
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Attempting to access to others relations");
             }
-            //$idUser = $this->request->{'data'}->id;
-
         } else {
-            $data = $this->friendModel->getAll($idUser);
-            if (empty($data) || $data == null) {
-                $this->send(HTTPCodes::NO_CONTENT, `{$idUser} has no friend`);
-            } else {
-                $this->send(HTTPCodes::OK, $data);
-            }
+            $this->send(HTTPCodes::OK, $this->friendModel->getAll($idUser), "Friends of " . $idUser);
         }
     }
 
-    public function isFriend(int $idUser, int $idFriend): void
-    {
+    public function isFriend(int $idUser, int $idFriend) {
         if ($idUser != $idFriend) {
-            $data = $this->friendModel->isFriend($idUser, $idFriend);
-
-            $this->send(HTTPCodes::OK, ["data" => $data != null]);
+            $this->send(HTTPCodes::OK, ["data" => $this->friendModel->isFriend($idUser, $idFriend)]);
         } else {
-            $err = ["message" => "Same arguments", "data" => "Cannot ask if someone is friend with himself"];
-            $this->send(HTTPCodes::BAD_REQUEST, $err);
+            $this->send(HTTPCodes::BAD_REQUEST, null, "Cannot ask if someone is friend with himself");
         }
     }
 
-
-
-    public function askFriend(int $idUser, $idFriend)
-    {
+    public function askFriend(int $idUser, $idFriend) {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
-            $this->send(HTTPCodes::NOT_FOUND, ["One of the users don't exist"], "Ressource not found");
-            return;
+            return $this->send(HTTPCodes::NOT_FOUND, null, "One of the users don't exist");
         }
         if ($this->friendModel->isFriend($idUser, $idFriend) != null) {
-            $this->send(HTTPCodes::BAD_REQUEST, ["Users are already friends"], "Relation exist");
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "Users are already friends");
         }
         if ($idUser == $idFriend) {
-            $this->send(HTTPCodes::BAD_REQUEST, ["People cannot be friend with themself "], "Same arguments");
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "People cannot be friend with themself");
         }
 
-        if(!$this->blockedModel->isBlocked($idUser,$idFriend)){
-            $this->send(HTTPCodes::NOT_ALLOWED, null, "Users are blocked");
-            return;
+        if (!$this->blockedModel->isBlocked($idUser, $idFriend)) {
+            return $this->send(HTTPCodes::NOT_ALLOWED, null, "Users are blocked");
         }
 
 
@@ -97,7 +75,7 @@ class FriendController extends BaseController
                     if ($result) {
                         $this->send(HTTPCodes::CREATED, null, "Ressource added");
                     } else {
-                        $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
+                        $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while asking friend");
                     }
                 } else {
                     $this->send(HTTPCodes::NOT_FOUND, null, "Friend request already exists");
@@ -111,36 +89,28 @@ class FriendController extends BaseController
                 if ($result) {
                     $this->send(HTTPCodes::CREATED, null, "Ressource added");
                 } else {
-                    $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
+                    $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while asking friend");
                 }
             } else {
-                $this->send(HTTPCodes::NO_CONTENT, null, "null");
+                $this->send(HTTPCodes::BAD_REQUEST, null, "");
             }
         }
     }
 
-
-
-    public function add(int $idUser, $idFriend)
-    {
+    public function add(int $idUser, $idFriend) {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
-            $this->send(HTTPCodes::NOT_FOUND, ["One of the users don't exist"], "Ressource not found");
-            return;
+            return $this->send(HTTPCodes::NOT_FOUND, null, "One of the users don't exist");
         }
         if ($this->friendModel->isFriend($idUser, $idFriend) != null) {
-            $this->send(HTTPCodes::BAD_REQUEST, ["Users are already friends"], "Relation exist");
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "Users are already friends");
         }
         if ($idUser == $idFriend) {
-            $this->send(HTTPCodes::BAD_REQUEST, ["People cannot be friend with themself "], "Same arguments");
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "People cannot be friend with themself");
         }
 
-        if(!$this->blockedModel->isBlocked($idUser,$idFriend)){
-            $this->send(HTTPCodes::NOT_ALLOWED, null, "Users are blocked");
-            return;
+        if (!$this->blockedModel->isBlocked($idUser, $idFriend)) {
+            return $this->send(HTTPCodes::NOT_ALLOWED, null, "Users are blocked");
         }
-
 
         if (!$this->user->isDeveloper()) {
 
@@ -152,41 +122,31 @@ class FriendController extends BaseController
                         $this->friendRequestModel->remove($idUser, $idFriend);
                         $this->send(HTTPCodes::CREATED, null, "Ressource added");
                     } else {
-                        $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
+                        $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while adding friend");
                     }
                 } else {
                     $this->send(HTTPCodes::BAD_REQUEST, null, "No request sent");
                 }
             } else {
-                $this->send(HTTPCodes::NOT_ALLOWED, ["Attempting to add realtion beetween two users"], "Insertion not allowed");
+                $this->send(HTTPCodes::NOT_ALLOWED, null, "Attempting to add realtion beetween two users");
             }
         } else {
             $result = $this->friendModel->add($idUser, $idFriend);
             if ($result) {
                 $this->send(HTTPCodes::CREATED, null, "Ressource added");
             } else {
-                $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, ["Server failed to execute request"], "Request failed");
+                $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while adding friend");
             }
         }
     }
 
-
-
-
-    public function rejectRequest($idUser, $idFriend)
-    {
-
+    public function rejectRequest($idUser, $idFriend) {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
-            $this->send(HTTPCodes::NOT_FOUND, ["One of the users don't exist"], "Ressource not found");
-            return;
+            return $this->send(HTTPCodes::NOT_FOUND, null, "One of the users don't exist");
         }
-        // if ($this->friendModel->isFriend($idUser, $idFriend) != null) {
-        //     $this->send(HTTPCodes::BAD_REQUEST, ["Users are already friends"], "Relation exist");
-        //     return;
-        // }
+
         if ($idUser == $idFriend) {
-            $this->send(HTTPCodes::BAD_REQUEST, ["People cannot be friend with themself "], "Same arguments");
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "People cannot be friend with themself");
         }
 
         if (!$this->user->isDeveloper()) {
@@ -197,7 +157,7 @@ class FriendController extends BaseController
                     if ($result) {
                         $this->send(HTTPCodes::CREATED, null, "Ressource removed");
                     } else {
-                        $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Request failed");
+                        $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while removing friend request");
                     }
                 } else {
                     $this->send(HTTPCodes::BAD_REQUEST, null, "No request sent");
@@ -211,29 +171,20 @@ class FriendController extends BaseController
                 if ($result) {
                     $this->send(HTTPCodes::CREATED, null, "Ressource added");
                 } else {
-                    $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Request failed");
+                    $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while removing friend request");
                 }
             } else {
-                $this->send(HTTPCodes::NO_CONTENT, null, null);
+                $this->send(HTTPCodes::BAD_REQUEST, null, "No request sent");
             }
         }
     }
 
-
-
-
-
-
-
-    public function remove(int $idUser, $idFriend)
-    {
+    public function remove(int $idUser, $idFriend) {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
-            $this->send(HTTPCodes::NOT_FOUND, ["One of the users don't exist"], "Ressource not found");
-            return;
+            return $this->send(HTTPCodes::NOT_FOUND, null, "One of the users don't exist");
         }
         if ($this->friendModel->isFriend($idUser, $idFriend) == null) {
-            $this->send(HTTPCodes::BAD_REQUEST, ["Users are not friends"], "Relation doesn't exist, cannot be removed");
-            return;
+            return $this->send(HTTPCodes::BAD_REQUEST, null, "Users are not friends");
         }
 
         if (!$this->user->isDeveloper()) {

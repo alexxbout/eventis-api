@@ -21,10 +21,12 @@ class CodeModel extends BaseModel {
     }
 
     public function setUsed(int $id): bool {
-        return $this->db->table("code")->update(["used" => 1], ["id" => $id]);
+        $this->db->table("code")->update(["used" => 1], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
     }
 
-    public function add(string $code, int $idFoyer, int $idCreator, int $idRole, string $expire): bool {
+    public function add(string $code, int $idFoyer, int $idCreator, int $idRole, string $expire): int {
         $data = [
             "id"        => $this->getMax("code", "id") + 1,
             "code"      => $code,
@@ -33,16 +35,20 @@ class CodeModel extends BaseModel {
             "createdBy" => $idCreator,
             "idRole"    => $idRole
         ];
-        return $this->db->table("code")->insert($data);
+
+        $this->db->table("code")->insert($data);
+
+        if ($this->isLastQuerySuccessfull()) {
+            return $data["id"];
+        } else {
+            return -1;
+        }
     }
 
     public function isValid(int $idCode): bool {
         $data = $this->getById($idCode);
-        if ($data == null) {
-            return false;
-        }
 
-        return $data->expire > date("Y-m-d H:i:s") && $data->used == 0;
+        return $data != null && $data->expire > date("Y-m-d H:i:s") && $data->used == 0;
     }
 
     private function getById(int $id): object|null {
