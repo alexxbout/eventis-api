@@ -2,69 +2,51 @@
 
 namespace App\Controllers;
 
-class FoyerController extends BaseController {
-    private $foyerModel;
+use App\Models\FoyerModel;
+use App\Utils\HTTPCodes;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
-    public function __construct() {
-        $this->foyerModel = new \App\Models\FoyerModel();
+class FoyerController extends BaseController
+{
+
+    private FoyerModel $foyerModel;
+
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    {
+        parent::initController($request, $response, $logger);
+
+        $this->foyerModel = new FoyerModel();
     }
 
-    public function getAll(): void {
-        $this->send(200, $this->foyerModel->getAll());
+    public function getAll()
+    {
+        $this->send(HTTPCodes::OK, $this->foyerModel->getAll(), "All foyers");
     }
 
-    public function getById(int $id): void {
-        $this->send(200, $this->foyerModel->getById($id));
+    public function getAllByZip(int $zip)
+    {
+        $this->send(HTTPCodes::OK, $this->foyerModel->getByZip($zip), "All foyers of zip " . $zip);
     }
 
-    public function getByZip(int $zip): void {
-        $this->send(200, $this->foyerModel->getByZip($zip));
-    }
+    public function add()
+    {
+        if ($this->user->isAdmin() || $this->user->isDeveloper()) {
+            $validation =  \Config\Services::validation();
+            $validation->setRuleGroup("foyer_add_validation");
 
-    public function add(): void {
-        $validation =  \Config\Services::validation();
+            if (!$validation->withRequest($this->request)->run()) {
+                return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+            }
 
-        $validation->setRules([
-            "city" => "required|max_length[10]",
-            "zip" => "required|max_length[5]",
-            "address" => "required|max_length[50]",
-            "street" => "permit_empty|max_length[10]"
-        ]);
-
-        if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
-        } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
+            $data = $this->request->getJSON(true);
 
             $this->foyerModel->add($data);
 
-            $this->send(200, ["message" => "Foyer added"]);
-        }
-    }
-
-    public function updateData(): void {
-        $validation =  \Config\Services::validation();
-
-        $validation->setRules([
-            "id" => "required|integer",
-            "city" => "permit_empty|max_length[10]",
-            "zip" => "permit_empty|max_length[5]",
-            "address" => "permit_empty|max_length[50]",
-            "street" => "permit_empty|max_length[10]"
-        ]);
-
-        if (!$validation->withRequest($this->request)->run()) {
-            $this->send(400, $validation->getErrors());
+            $this->send(HTTPCodes::OK, $data, "Foyer added");
         } else {
-            $data = $this->stdClassToArray($this->request->getJSON());
-
-            if (isset($data["password"])) {
-                unset($data["password"]); // We don't want to update the password with this method
-            }
-
-            $this->foyerModel->updateData($data);
-
-            $this->send(200, ["message" => "User updated", "data" => $data]);
+            $this->send(HTTPCodes::UNAUTHORIZED);
         }
     }
 }

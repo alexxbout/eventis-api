@@ -9,7 +9,8 @@ use CodeIgniter\Validation\StrictRules\FileRules;
 use CodeIgniter\Validation\StrictRules\FormatRules;
 use CodeIgniter\Validation\StrictRules\Rules;
 
-class Validation extends BaseConfig {
+class Validation extends BaseConfig
+{
     // --------------------------------------------------------------------
     // Setup
     // --------------------------------------------------------------------
@@ -42,6 +43,10 @@ class Validation extends BaseConfig {
     // Rules
     // --------------------------------------------------------------------
 
+
+    // --------------------------------------------------------------------
+    // USER
+    // --------------------------------------------------------------------
     public $user_add_validation = [
         "lastname"  => "required|max_length[30]",
         "firstname" => "required|max_length[30]",
@@ -65,6 +70,10 @@ class Validation extends BaseConfig {
         "id" => "required|integer"
     ];
 
+    // --------------------------------------------------------------------
+    // EVENT
+    // --------------------------------------------------------------------
+
     public $event_cancel_validation = [
         "id" => "required|integer",
         "reason" => "permit_empty|max_length[500]"
@@ -84,7 +93,17 @@ class Validation extends BaseConfig {
         "start" => "required|valid_date[Y-m-d]"  //valid_date[d/m/Y]?
     ];
 
-    public $event_addImage_validation = [
-        
+    public $event_addImage_validation = [];
+
+    // --------------------------------------------------------------------
+    // FOYER
+    // --------------------------------------------------------------------
+
+    public $foyer_add_validation = [
+        "siret"   => "required|exact_length[14]|alpha_numeric",
+        "city"    => "required|max_length[10]",
+        "zip"     => "required|max_length[5]",
+        "address" => "required|max_length[50]",
+        "street"  => "required|max_length[10]"
     ];
 }

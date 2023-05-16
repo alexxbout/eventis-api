@@ -65,11 +65,10 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("foyer", static function ($routes) {
-            $routes->get("",       "FoyerController::getAll"); // Tous les foyers
-            $routes->get("(:num)", "FoyerController::getById/$1"); // Un foyer par son id
+            $routes->get("",                "FoyerController::getAll");
+            $routes->get("zip/(:alphanum)", "FoyerController::getAllByZip/$1");
 
-            $routes->post("add",   "FoyerController::add"); // Ajoute un foyer
-            $routes->put("update", "FoyerController::update"); // Met à jour un foyer
+            $routes->post("",               "FoyerController::add");
         });
 
         $routes->group("role", static function ($routes) {

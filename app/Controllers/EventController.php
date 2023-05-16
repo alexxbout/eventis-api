@@ -110,7 +110,7 @@ class EventController extends BaseController {
             $data = $this->eventModel->getById($idEvent);
 
             if($data == NULL) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist"); 
+                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist");
             }
             
             if($data["canceled"] == 0) {
