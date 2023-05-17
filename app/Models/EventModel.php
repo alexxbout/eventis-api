@@ -72,4 +72,9 @@ class EventModel extends BaseModel {
 
         return $this->isLastQuerySuccessfull();
     }
+
+    public function getImage(int $id): string | null {
+        $result = $this->db->table("event")->select("pic")->getWhere(["id" => $id])->getRow();
+        return $result == null ? null : $result->pic;
+    }
 }

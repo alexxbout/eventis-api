@@ -99,7 +99,7 @@ $routes->group("api", static function ($routes) {
             $routes->put("(:num)",          "EventController::updateData/$1");
             $routes->put("cancel/(:num)",   "EventController::cancel/$1");
             $routes->put("uncancel/(:num)", "EventController::uncancel/$1");
-            $routes->put("image/(:num)",    "EventController::addImage/$1");
+            $routes->post("image/(:num)",    "EventController::addImage/$1");
 
             // Participants
             $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2");

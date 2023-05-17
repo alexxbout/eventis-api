@@ -199,10 +199,18 @@ class EventController extends BaseController {
                 return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
             }
 
+            $imageName = $this->eventModel->getImage($idEvent);
+            if ($imageName != NULL) {
+                // Check if image has already been uploaded with the same name
+                if (file_exists(WRITEPATH . "uploads/images/" . $imageName)) {
+                    unlink(WRITEPATH . "uploads/images/" . $imageName);
+                }
+            }
+
             $file = $this->request->getFile("image");
 
             if ($file->hasMoved()) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", self::FILE_ALREADY_MOVED);
+                $this->send(HTTPCodes::BAD_REQUEST, null, self::FILE_ALREADY_MOVED);
             } else {
                 // Generate random name
                 $newName = $file->getRandomName();
