@@ -55,7 +55,7 @@ class FriendController extends BaseController {
             if ($this->user->getId() == $idUser) {
                 $this->send(HTTPCodes::OK, $this->friendModel->getAll($idUser), self::FRIENDS_OF_USER . $idUser);
             } else {
-                $this->send(HTTPCodes::BAD_REQUEST, null, self::ACCESS_OTHER_RELATIONS);
+                $this->send(HTTPCodes::NOT_ALLOWED, null, self::ACCESS_OTHER_RELATIONS);
             }
         } else {
             $this->send(HTTPCodes::OK, $this->friendModel->getAll($idUser), self::FRIENDS_OF_USER . $idUser);
@@ -81,7 +81,7 @@ class FriendController extends BaseController {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::CANNOT_BE_FRIEND_WITH_SELF);
         }
 
-        if (!$this->blockedModel->isBlocked($idUser, $idFriend)) {
+        if ($this->blockedModel->isBlocked($idUser, $idFriend)) {
             return $this->send(HTTPCodes::NOT_ALLOWED, null, self::USERS_BLOCKED);
         }
 
@@ -126,7 +126,7 @@ class FriendController extends BaseController {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::CANNOT_BE_FRIEND_WITH_SELF);
         }
 
-        if (!$this->blockedModel->isBlocked($idUser, $idFriend)) {
+        if ($this->blockedModel->isBlocked($idUser, $idFriend)) {
             return $this->send(HTTPCodes::NOT_ALLOWED, null, self::USERS_BLOCKED);
         }
 
