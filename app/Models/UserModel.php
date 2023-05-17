@@ -90,4 +90,16 @@ class UserModel extends BaseModel {
 
         return $this->isLastQuerySuccessfull();
     }
+
+    public function getProfilPicture(int $id): string | null {
+        $result = $this->db->table("user")->select("pic")->getWhere(["id" => $id])->getRow();
+
+        return $result == null ? null : $result->pic;
+    }
+
+    public function setProfilPicture(int $id, string $path): bool {
+        $this->db->table("user")->update(["pic" => $path], ["id" => $id]);
+
+        return $this->isLastQuerySuccessfull();
+    }
 }

@@ -28,6 +28,8 @@ class EventController extends BaseController {
 
     private const VALIDATION_ERROR          = "Erreur de validation";
 
+    private const EVENT_PICTURE_PATH        = WRITEPATH . "uploads/images/events/";
+
     private EventModel $eventModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
@@ -193,7 +195,7 @@ class EventController extends BaseController {
             }
 
             $validation =  \Config\Services::validation();
-            $validation->setRuleGroup("event_addImage_validation");
+            $validation->setRuleGroup("addImage_validation");
 
             if (!$validation->withRequest($this->request)->run()) {
                 return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
@@ -202,8 +204,8 @@ class EventController extends BaseController {
             $imageName = $this->eventModel->getImage($idEvent);
             if ($imageName != NULL) {
                 // Check if image has already been uploaded with the same name
-                if (file_exists(WRITEPATH . "uploads/images/" . $imageName)) {
-                    unlink(WRITEPATH . "uploads/images/" . $imageName);
+                if (file_exists(self::EVENT_PICTURE_PATH . $imageName)) {
+                    unlink(self::EVENT_PICTURE_PATH . $imageName);
                 }
             }
 
@@ -214,12 +216,12 @@ class EventController extends BaseController {
             } else {
                 // Generate random name
                 $newName = $file->getRandomName();
-                $file->move(WRITEPATH . "uploads/images", $newName);
+                $file->move(self::EVENT_PICTURE_PATH, $newName);
 
                 // Optimize image
                 \Config\Services::image()
-                    ->withFile(WRITEPATH . "uploads/images/" . $newName)
-                    ->save(WRITEPATH . "uploads/images/" . $newName, 30);
+                    ->withFile(self::EVENT_PICTURE_PATH . $newName)
+                    ->save(self::EVENT_PICTURE_PATH . $newName, 30);
 
                 // Save image name in database
                 $this->eventModel->addImage($idEvent, $newName);

@@ -26,6 +26,10 @@ class UserController extends BaseController {
     private const PASSWORD_UPDATED         = "Mot de passe mis à jour";
     private const OLD_PASSWORD_INCORRECT   = "Ancien mot de passe incorrect";
     private const NEW_PASSWORD_SAME_AS_OLD = "Le nouveau mot de passe est identique à l'ancien";
+    private const FILE_ALREADY_MOVED       = "Le fichier a déjà été déplacé";
+    private const IMAGE_UPLOADED           = "Image téléchargée";
+
+    private const PROFIL_PICTURE_PATH      = WRITEPATH . "uploads/images/users/";
 
     private UserModel $userModel;
     private FoyerModel $foyerModel;
@@ -202,6 +206,47 @@ class UserController extends BaseController {
             $this->userModel->updatePassword($data->id, $data->newPassword);
 
             $this->send(HTTPCodes::OK, null, self::PASSWORD_UPDATED);
+        } else {
+            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+        }
+    }
+
+    public function addProfilPicture(int $idUser) {
+        if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
+            $validation =  \Config\Services::validation();
+            $validation->setRuleGroup("addImage_validation");
+
+            if (!$validation->withRequest($this->request)->run()) {
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
+            }
+
+            $imageName = $this->userModel->getProfilPicture($idUser);
+            if ($imageName != NULL) {
+                // Check if image has already been uploaded with the same name
+                if (file_exists(self::PROFIL_PICTURE_PATH . $imageName)) {
+                    unlink(self::PROFIL_PICTURE_PATH . $imageName);
+                }
+            }
+
+            $file = $this->request->getFile("image");
+
+            if ($file->hasMoved()) {
+                $this->send(HTTPCodes::BAD_REQUEST, null, self::FILE_ALREADY_MOVED);
+            } else {
+                // Generate random name
+                $newName = $file->getRandomName();
+                $file->move(self::PROFIL_PICTURE_PATH, $newName);
+
+                // Optimize image
+                \Config\Services::image()
+                    ->withFile(self::PROFIL_PICTURE_PATH . $newName)
+                    ->save(self::PROFIL_PICTURE_PATH . $newName, 30);
+
+                // Save image name in database
+                $this->userModel->setProfilPicture($idUser, $newName);
+
+                $this->send(HTTPCodes::OK, ["file" => $newName], self::IMAGE_UPLOADED);
+            }
         } else {
             $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
         }
