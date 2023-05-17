@@ -15,6 +15,18 @@ use DateTime;
 class CodeController extends BaseController {
 
     private const MAX_CODE_VALIDITY = 7; // En jours
+    
+    private const ALL_CODES                 = "Tous les codes";
+    private const ALL_CODES_FOR_FOYER       = "Tous les codes pour le foyer";
+    private const CODE_NOT_FOUND            = "Code introuvable";
+    private const INVALID_ROLE              = "Rôle invalide";
+    private const EXPIRE_DATE_TOO_FAR       = "La date d'expiration est trop éloignée dans le futur";
+    private const FOYER_NOT_FOUND           = "Foyer introuvable";
+    private const FORBIDDEN_ADMIN_DEVELOPER = "Les administrateurs ne peuvent pas générer de code pour un autre administrateur ou développeur";
+    private const FORBIDDEN_EDUCATOR        = "Les éducateurs peuvent générer de code seulement pour des utilisateurs";
+    private const CODE_GENERATED            = "Code généré";
+    private const VALIDATION_ERROR          = "Erreur de validation";
+    private const CODES_FOR_FOYER           = "Tous les codes pour le foyer";
 
     private CodeModel $codeModel;
     private FoyerModel $foyerModel;
@@ -35,7 +47,7 @@ class CodeController extends BaseController {
             foreach ($data as &$code) {
                 $code->valid = $this->codeModel->isValid($code->id);
             }
-            return $this->send(HTTPCodes::OK, $data, "All codes");
+            return $this->send(HTTPCodes::OK, $data, self::ALL_CODES);
         }
     }
 
@@ -49,7 +61,7 @@ class CodeController extends BaseController {
             foreach ($data as &$code) {
                 $code->valid = $this->codeModel->isValid($code->id);
             }
-            return $this->send(HTTPCodes::OK, $data, "All codes for foyer " . $idFoyer);
+            return $this->send(HTTPCodes::OK, $data, self::ALL_CODES_FOR_FOYER . ' ' . $idFoyer);
         }
     }
 
@@ -59,7 +71,7 @@ class CodeController extends BaseController {
             $data->valid = $this->codeModel->isValid($data->id);
             return $this->send(HTTPCodes::OK, $data, "");
         } else {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, "Code not found");
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::CODE_NOT_FOUND);
         }
     }
 
@@ -72,14 +84,14 @@ class CodeController extends BaseController {
         $validation->setRuleGroup("code_add_validation");
 
         if (!$validation->withRequest($this->request)->run()) {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
         }
 
         $data = $this->request->getJSON();
 
         // Vérifier que le role existe
         if (!UtilsRoles::isValidRole($data->idRole)) {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, "Invalid role");
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::INVALID_ROLE);
         }
 
         // Vérifier que le code n'est pas valide plus de MAX_CODE_VALIDITY jours
@@ -87,12 +99,12 @@ class CodeController extends BaseController {
         $validDate->modify("+" . self::MAX_CODE_VALIDITY . " days");
 
         if (new DateTime($data->expire) > $validDate) {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, "Expire date is too far in the future");
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::EXPIRE_DATE_TOO_FAR);
         }
 
         // Vérifier que le foyer existe
         if ($this->foyerModel->getById($data->idFoyer) == null) {
-            return $this->send(HTTPCodes::NOT_FOUND, null, "Foyer not found");
+            return $this->send(HTTPCodes::NOT_FOUND, null, self::FOYER_NOT_FOUND);
         }
 
         // Vérifier que l'utilisateur a le droit de générer un code pour un rôle
@@ -100,11 +112,11 @@ class CodeController extends BaseController {
         // Les éducateurs peuvent générer de code seulement pour des utilisateurs 
         if ($this->user->isAdmin()) {
             if ($data->idRole == UtilsRoles::ADMIN || $data->idRole == UtilsRoles::DEVELOPER) {
-                return $this->send(HTTPCodes::FORBIDDEN);
+                return $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN_ADMIN_DEVELOPER);
             }
         } else if ($this->user->isEducator()) {
             if ($data->idRole != UtilsRoles::USER) {
-                return $this->send(HTTPCodes::FORBIDDEN);
+                return $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN_EDUCATOR);
             }
         }
 
@@ -117,6 +129,6 @@ class CodeController extends BaseController {
 
         $this->codeModel->add($code, $data->idFoyer, $this->user->getId(), $data->idRole, $data->expire);
 
-        $this->send(HTTPCodes::OK, ["code" => $code], "Code generated");
+        $this->send(HTTPCodes::OK, ["code" => $code], self::CODE_GENERATED);
     }
 }

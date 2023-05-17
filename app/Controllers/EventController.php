@@ -10,6 +10,24 @@ use Psr\Log\LoggerInterface;
 
 class EventController extends BaseController {
 
+    private const ALL_EVENTS                = "Tous les événements";
+    private const ALL_NON_CANCELED_EVENTS   = "Tous les événements non annulés";
+    private const EVENT_BY_ID               = "Evénement d'id ";
+    private const EVENT_BY_ID_NOT_CANCELED  = "Evénement non annulé d'id ";
+    private const EVENT_BY_ZIP              = "Evénements du code postal ";
+    private const EVENT_BY_ZIP_NOT_CANCELED = "Evénements non annulés du code postal ";
+    private const EVENT_DOES_NOT_EXIST      = "L'événement n'existe pas";
+    private const EVENT_ALREADY_CANCELED    = "L'événement est déjà annulé";
+    private const EVENT_CANCELED            = "L'événement a été annulé";
+    private const EVENT_UNCANCELED          = "L'événement a été restauré";
+    private const EVENT_UPDATED             = "L'événement a été mis à jour";
+    private const EVENT_ADDED               = "L'événement a été ajouté";
+
+    private const FILE_ALREADY_MOVED        = "Le fichier a déjà été déplacé";
+    private const IMAGE_UPLOADED            = "L'image a été téléchargée";
+
+    private const VALIDATION_ERROR          = "Erreur de validation";
+
     private EventModel $eventModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
@@ -20,27 +38,27 @@ class EventController extends BaseController {
     public function getAll() {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            $this->send(HTTPCodes::OK, $this->eventModel->getAll(), "OK");
+            $this->send(HTTPCodes::OK, $this->eventModel->getAll(), self::ALL_EVENTS);
         } else { // Account should see ONLY non-canceled events
-            $this->send(HTTPCodes::OK, $this->eventModel->getAllNotCanceled(), "OK");
+            $this->send(HTTPCodes::OK, $this->eventModel->getAllNotCanceled(), self::ALL_NON_CANCELED_EVENTS);
         }
     }
 
     public function getById(int $id) {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            $this->send(HTTPCodes::OK, $this->eventModel->getById($id), "OK");
+            $this->send(HTTPCodes::OK, $this->eventModel->getById($id), self::EVENT_BY_ID . $id);
         } else { // Account should see ONLY non-canceled event
-            $this->send(HTTPCodes::OK, $this->eventModel->getByIdNotCanceled($id), "OK");
+            $this->send(HTTPCodes::OK, $this->eventModel->getByIdNotCanceled($id), self::EVENT_BY_ID_NOT_CANCELED . $id);
         }
     }
 
     public function getByZip(string $zip) {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            $this->send(HTTPCodes::OK, $this->eventModel->getByZip($zip), "OK");
+            $this->send(HTTPCodes::OK, $this->eventModel->getByZip($zip), self::EVENT_BY_ZIP . $zip);
         } else { // Account should see ONLY non-canceled events
-            $this->send(HTTPCodes::OK, $this->eventModel->getByZipNotCanceled($zip), "OK");
+            $this->send(HTTPCodes::OK, $this->eventModel->getByZipNotCanceled($zip), self::EVENT_BY_ZIP_NOT_CANCELED . $zip);
         }
     }
 
@@ -51,25 +69,25 @@ class EventController extends BaseController {
             $data = $this->eventModel->getById($idEvent);
 
             if ($data == NULL) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist");
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_DOES_NOT_EXIST);
             }
 
             if ($data->canceled == 1) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event already cancelled");
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_ALREADY_CANCELED);
             }
 
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("event_cancel_validation");
 
             if (!$validation->withRequest($this->request)->run()) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
             }
 
             $data = $this->request->getJSON();
 
             $this->eventModel->cancel($data->id, $data->reason);
 
-            $this->send(HTTPCodes::OK, $data, "Event canceled");
+            $this->send(HTTPCodes::OK, $data, self::EVENT_CANCELED);
         } else { // Account is unauthorized to cancel an event
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
@@ -82,25 +100,25 @@ class EventController extends BaseController {
             $data = $this->eventModel->getById($idEvent);
 
             if ($data == NULL) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event does not exist");
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_DOES_NOT_EXIST);
             }
 
             if ($data->canceled == 0) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event is not cancelled");
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_DOES_NOT_EXIST);
             }
 
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("event_uncancel_validation"); // Validation the same as cancel
 
             if (!$validation->withRequest($this->request)->run()) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
             }
 
             $data = $this->request->getJSON();
 
             $this->eventModel->uncancel($data->id);
 
-            $this->send(HTTPCodes::OK, $data, "Event cancelled");
+            $this->send(HTTPCodes::OK, $data, self::EVENT_UNCANCELED);
         } else { // Account is unauthorized to uncancel an event
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
@@ -113,7 +131,7 @@ class EventController extends BaseController {
             $validation->setRuleGroup("event_update_validation");
 
             if (!$validation->withRequest($this->request)->run()) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
             }
 
             $data = $this->request->getJSON();
@@ -132,7 +150,7 @@ class EventController extends BaseController {
 
             $this->eventModel->updateData($data);
 
-            $this->send(HTTPCodes::OK, $data, "Event updated");
+            $this->send(HTTPCodes::OK, $data, self::EVENT_UPDATED);
         } else {
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
@@ -145,7 +163,7 @@ class EventController extends BaseController {
             $validation->setRuleGroup("event_add_validation");
 
             if (!$validation->withRequest($this->request)->run()) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
             }
 
             $data = $this->request->getJSON();
@@ -162,7 +180,7 @@ class EventController extends BaseController {
 
             $this->eventModel->add($data);
 
-            $this->send(HTTPCodes::OK, $data, "Event added");
+            $this->send(HTTPCodes::OK, $data, self::EVENT_ADDED);
         } else {
             $this->send(HTTPCodes::UNAUTHORIZED);
         }
@@ -171,20 +189,20 @@ class EventController extends BaseController {
     public function addImage(int $idEvent) {
         if ($this->user->isDeveloper() || $this->user->isAdmin() || ($this->user->isEducator() && $this->user->getIdFoyer() == $this->eventModel->getIdFoyerByIdEvent($idEvent))) {
             if ($this->eventModel->getById($idEvent) == null) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Event with id $idEvent does not exist");
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_DOES_NOT_EXIST);
             }
 
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("event_addImage_validation");
 
             if (!$validation->withRequest($this->request)->run()) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
             }
 
             $file = $this->request->getFile("image");
 
             if ($file->hasMoved()) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", "The file has already been moved");
+                $this->send(HTTPCodes::BAD_REQUEST, null, "Error", self::FILE_ALREADY_MOVED);
             } else {
                 // Generate random name
                 $newName = $file->getRandomName();
@@ -198,7 +216,7 @@ class EventController extends BaseController {
                 // Save image name in database
                 $this->eventModel->addImage($idEvent, $newName);
 
-                $this->send(HTTPCodes::OK, ["file" => $newName], "Image uploaded");
+                $this->send(HTTPCodes::OK, ["file" => $newName], self::IMAGE_UPLOADED);
             }
         } else {
             $this->send(HTTPCodes::UNAUTHORIZED);

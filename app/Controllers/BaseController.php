@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-use App\ThirdParty\TokenService;
-use App\Utils\HTTPCodes;
 use App\Utils\User;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\CLIRequest;

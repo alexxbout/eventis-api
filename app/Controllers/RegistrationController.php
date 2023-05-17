@@ -13,6 +13,15 @@ use Psr\Log\LoggerInterface;
 
 class RegistrationController extends BaseController {
 
+    private const REGISTRATION_ERROR = "Erreur lors de l'ajout de l'inscription";
+    private const CODE_DOESNT_EXIST  = "Le code n'existe pas";
+    private const INVALID_CODE       = "Code invalide";
+    private const VALIDATION_ERROR   = "Erreur de validation";
+    private const USER_ERROR         = "Erreur lors de l'ajout de l'utilisateur";
+    private const UNAUTHORIZED       = "Non autorisé";
+    private const ALL_REGISTRATIONS  = "Toutes les inscriptions";
+    private const USER_ADDED         = "Utilisateur ajouté";
+
     private UserModel $userModel;
     private CodeModel $codeModel;
     private RegistrationModel $registrationModel;
@@ -27,9 +36,9 @@ class RegistrationController extends BaseController {
 
     public function getAll() {
         if ($this->user->isDeveloper()) {
-            $this->send(HTTPCodes::OK, $this->registrationModel->getAll(), "All registrations");
+            $this->send(HTTPCodes::OK, $this->registrationModel->getAll(), self::ALL_REGISTRATIONS);
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED);
+            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
         }
     }
 
@@ -39,7 +48,7 @@ class RegistrationController extends BaseController {
 
         // Valider les données
         if (!$validation->withRequest($this->request)->run()) {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, "Validation error", $validation->getErrors());
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
         }
 
         $data = $this->request->getJSON();
@@ -48,12 +57,12 @@ class RegistrationController extends BaseController {
         $code = $this->codeModel->getByCode($data->code);
 
         if ($code == null) {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, "Code doesn't exist");
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::CODE_DOESNT_EXIST);
         }
 
         // Vérifier la validité du code
         if (!$this->codeModel->isValid($code->id)) {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, "Invalid code");
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::INVALID_CODE);
         }
 
         // Ajouter nouvel utilisateur
@@ -63,20 +72,20 @@ class RegistrationController extends BaseController {
         $idUser = $this->userModel->add($data->lastname, $data->firstname, $login, $hashedPassword, $code->idRole, $code->idFoyer);
 
         if ($idUser == -1) {
-            return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while adding user");
+            return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::USER_ERROR);
         }
 
         // Ajouter l'enregistrement
         $status = $this->registrationModel->add($code->id, $idUser);
 
         if ($status == -1) {
-            return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, "Error while adding registration");
+            return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::REGISTRATION_ERROR);
         }
 
         // Passer le code à utilisé
         $this->codeModel->setUsed($code->id);
 
         // Renvoyer le statut de la requête
-        $this->send(HTTPCodes::OK, null, "User added");
+        $this->send(HTTPCodes::OK, null, self::USER_ADDED);
     }
 }

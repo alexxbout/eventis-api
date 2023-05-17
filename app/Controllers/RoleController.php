@@ -10,6 +10,8 @@ use Psr\Log\LoggerInterface;
 
 class RoleController extends BaseController {
 
+    private const ALL_ROLES = "Tous les rôles";
+
     private RoleModel $roleModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
@@ -20,7 +22,7 @@ class RoleController extends BaseController {
 
     public function getAll() {
         if ($this->user->isDeveloper()) {
-            $this->send(200, $this->roleModel->getAll(), "All roles");
+            $this->send(200, $this->roleModel->getAll(), self::ALL_ROLES);
         } else {
             $this->send(HTTPCodes::FORBIDDEN);
         }
