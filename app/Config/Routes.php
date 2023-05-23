@@ -36,12 +36,19 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 $routes->get("/", "Home::index");
 
-$routes->get("login",     "AuthController::login");
-$routes->post("register", "RegistrationController::register");
-
 $routes->get("unauthorized", "Home::unauthorized");
 
+// TEMP
+$routes->get("image/(:alphanum)/(:segment)", "ImageController::getImage/$1/$2");
+
 $routes->group("api", static function ($routes) {
+
+    $routes->group("auth", static function ($routes) {
+        $routes->post("login",    "AuthController::login");
+        $routes->post("register", "RegistrationController::register");
+    
+        $routes->get("code/(:alphanum)",  "CodeController::getByCode/$1");
+    });
 
     $routes->group("v1", static function ($routes) {
         $routes->group("user", static function ($routes) {
@@ -76,10 +83,9 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("code", static function ($routes) {
-            $routes->get("",             "CodeController::getAll");//
-            $routes->get("(:alphanum)",  "CodeController::getByCode/$1"); //
-            $routes->get("foyer/(:num)", "CodeController::getAllByFoyer/$1");//
-            $routes->post("",            "CodeController::add");//
+            $routes->get("",             "CodeController::getAll");
+            $routes->get("foyer/(:num)", "CodeController::getAllByFoyer/$1");
+            $routes->post("",            "CodeController::add");
         });
 
         $routes->group("registration", static function ($routes) {
@@ -100,7 +106,7 @@ $routes->group("api", static function ($routes) {
             $routes->put("(:num)",          "EventController::updateData/$1");
             $routes->put("cancel/(:num)",   "EventController::cancel/$1");
             $routes->put("uncancel/(:num)", "EventController::uncancel/$1");
-            $routes->post("image/(:num)",    "EventController::addImage/$1");
+            $routes->post("image/(:num)",   "EventController::addImage/$1");
 
             // Participants
             $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2");

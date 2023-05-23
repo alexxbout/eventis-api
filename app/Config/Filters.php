@@ -3,8 +3,6 @@
 namespace Config;
 
 use App\Filters\AuthFilter;
-use App\Filters\EducatorFilter;
-use App\Filters\UserFilter;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
 
@@ -15,7 +13,8 @@ class Filters extends BaseConfig {
      */
     public array $aliases = [
         "csrf"          => CSRF::class,
-        "auth"          => AuthFilter::class
+        "auth"          => AuthFilter::class,
+        "cors"          => \Fluent\Cors\Filters\CorsFilter::class
     ];
 
     /**
@@ -48,6 +47,10 @@ class Filters extends BaseConfig {
      * "isLoggedIn" => ["before" => ["account/*", "profiles/*"]]
      */
     public array $filters = [
+        "cors" => [
+            "before" => ["/*"],
+            "after" => ["/*"]
+        ],
         "auth" => [
             "before" => [
                 "api/v1/*"

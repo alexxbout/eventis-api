@@ -86,6 +86,6 @@ class RegistrationController extends BaseController {
         $this->codeModel->setUsed($code->id);
 
         // Renvoyer le statut de la requête
-        $this->send(HTTPCodes::OK, null, self::USER_ADDED);
+        $this->send(HTTPCodes::OK, ["login" => $login], self::USER_ADDED);
     }
 }

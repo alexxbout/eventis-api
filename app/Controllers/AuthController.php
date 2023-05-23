@@ -23,35 +23,34 @@ class AuthController extends BaseController {
     }
 
     public function login() {
-        /**
-         * Format du header : Authorization: Bearer <token>
-         */
-
         // Vérifier si le header Authorization est présent
-        $header = $this->request->header("Authorization");
-        if (!isset($header)) {
-            // Renvoyer une erreur 401 Unauthorized avec le header WWW-Authenticate pour indiquer à l'utilisateur comment s'authentifier
-            return $this->send(HTTPCodes::UNAUTHORIZED, null, "No authorization header", null, ["WWW-Authenticate" => "Bearer"]);
-        }
+        // $header = $this->request->header("Authorization");
+        // if (!isset($header)) {
+        //     // Renvoyer une erreur 401 Unauthorized avec le header WWW-Authenticate pour indiquer à l'utilisateur comment s'authentifier
+        //     return $this->send(HTTPCodes::UNAUTHORIZED, null, "No authorization header", null, ["WWW-Authenticate" => "Bearer"]);
+        // }
 
         // Vérifier si le header Authorization est au format Bearer
-        $authHeader = explode(" ", $header);
-        if (count($authHeader) !== 3 || $authHeader[1] !== "Bearer") {
-            return $this->send(HTTPCodes::UNAUTHORIZED, null, "Wrong authorization header format");
-        }
+        // $authHeader = explode(" ", $header);
+        // if (count($authHeader) !== 3 || $authHeader[1] !== "Bearer") {
+        //     return $this->send(HTTPCodes::UNAUTHORIZED, null, "Wrong authorization header format");
+        // }
 
         // Vérifier si le token est présent
-        $token = $authHeader[2];
-        if (!$token) {
-            return $this->send(HTTPCodes::UNAUTHORIZED, null, "No token");
-        }
+        // $token = $authHeader[2];
+        // if (!$token) {
+        //     return $this->send(HTTPCodes::UNAUTHORIZED, null, "No token");
+        // }
 
         // Décoder le login et le mot de passe
-        $decoded = base64_decode($token);
+        // $decoded = base64_decode($token);
 
         // Récupérer le login et le mot de passe
-        $login = explode(":", $decoded)[0];
-        $password = explode(":", $decoded)[1];
+        // $login = explode(":", $decoded)[0];
+        // $password = explode(":", $decoded)[1];
+
+        $login = $this->request->getVar("login");
+        $password = $this->request->getVar("password");
 
         // Vérifier si le login existe
         $user = $this->userModel->getByLogin($login);

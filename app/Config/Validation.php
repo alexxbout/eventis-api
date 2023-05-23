@@ -42,6 +42,16 @@ class Validation extends BaseConfig {
     // --------------------------------------------------------------------
     // Rules
     // --------------------------------------------------------------------
+    public $addImage_validation = [
+        "image"     => [
+            "label" => "Image",
+            "rules" => [
+                "uploaded[image]",
+                "is_image[image]",
+                "ext_in[image,jpg,jpeg,png]"
+            ]
+        ]
+    ];
 
     // --------------------------------------------------------------------
     // USER
@@ -84,17 +94,6 @@ class Validation extends BaseConfig {
     public $event_cancel_validation = [
         "id"     => "required|integer",
         "reason" => "required|max_length[50]"
-    ];
-
-    public $event_addImage_validation = [
-        "image"     => [
-            "label" => "Image",
-            "rules" => [
-                "uploaded[image]",
-                "is_image[image]",
-                "ext_in[image,jpg,jpeg,png]"
-            ]
-        ]
     ];
 
     public $event_uncancel_validation = [
