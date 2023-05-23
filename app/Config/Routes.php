@@ -45,49 +45,50 @@ $routes->group("api", static function ($routes) {
 
     $routes->group("v1", static function ($routes) {
         $routes->group("user", static function ($routes) {
-            $routes->get("",                  "UserController::getAll");
-            $routes->get("(:num)",            "UserController::getById/$1");
-            $routes->post("",                 "UserController::add");
-            $routes->put("(:num)",            "UserController::update/$1");
-            $routes->put("deactivate/(:num)", "UserCcontroller::deactiveAccount/$1");
-            $routes->put("reactivate/(:num)", "UserCcontroller::reactivateAccount/$1");
-            $routes->put("password/(:num)",   "UserController::updatePassword/$1");
-            $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");
+            $routes->get("",                  "UserController::getAll"); //
+            $routes->get("(:num)",            "UserController::getById/$1");//
+            $routes->post("",                 "UserController::add");//
+            $routes->put("(:num)",            "UserController::update/$1"); //
+            $routes->put("deactivate/(:num)", "UserCcontroller::deactiveAccount/$1");//
+            $routes->put("reactivate/(:num)", "UserCcontroller::reactivateAccount/$1");//
+            $routes->put("password/(:num)",   "UserController::updatePassword/$1");//
+            $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");//
 
             // Friends
-            $routes->get("(:num)/friend",                  "FriendController::getAll/$1");
-            $routes->get("(:num)/friend/(:num)",           "FriendController::isFriend/$1/$2");
-            $routes->delete("(:num)/friend/(:num)",        "FriendController::remove/$1/$2");
-            $routes->post("(:num)/friend/ask/(:num)",      "FriendController::askFriend/$1/$2");
-            $routes->delete("(:num)/friend/reject/(:num)", "FriendController::rejectRequest/$1/$2");
-            $routes->post("(:num)/friend/accept/(:num)",   "FriendController::add/$1/$2");
+            $routes->get("(:num)/friend",                  "FriendController::getAll/$1");//
+            $routes->get("(:num)/friend/(:num)",           "FriendController::isFriend/$1/$2");//
+            $routes->delete("(:num)/friend/(:num)",        "FriendController::remove/$1/$2");//
+            $routes->post("(:num)/friend/ask/(:num)",      "FriendController::askFriend/$1/$2");//
+            $routes->delete("(:num)/friend/reject/(:num)", "FriendController::rejectRequest/$1/$2");//
+            $routes->post("(:num)/friend/accept/(:num)",   "FriendController::add/$1/$2");//
+            $routes->post("(:num)/friend/pending/(:num)",   "FriendController::isPending/$1/$2");
 
             $routes->group("blocked", static function ($routes) {
-                $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2");
-                $routes->get("(:num)",           "BlockedController::getAll/$1");
-                $routes->post("(:num)/(:num)",   "BlockedController::add/$1/$2");
-                $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2");
+                //$routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2");
+                $routes->get("(:num)",           "BlockedController::getAll/$1");//
+                $routes->post("(:num)/(:num)",   "BlockedController::add/$1/$2");//
+                $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2");//
             });
         });
 
         $routes->group("role", static function ($routes) {
-            $routes->get("", "RoleController::getAll");
+            $routes->get("", "RoleController::getAll");//
         });
 
         $routes->group("code", static function ($routes) {
-            $routes->get("",             "CodeController::getAll");
-            $routes->get("(:alphanum)",  "CodeController::getByCode/$1");
-            $routes->get("foyer/(:num)", "CodeController::getAllByFoyer/$1");
-            $routes->post("",            "CodeController::add");
+            $routes->get("",             "CodeController::getAll");//
+            $routes->get("(:alphanum)",  "CodeController::getByCode/$1"); //
+            $routes->get("foyer/(:num)", "CodeController::getAllByFoyer/$1");//
+            $routes->post("",            "CodeController::add");//
         });
 
         $routes->group("registration", static function ($routes) {
-            $routes->get("", "RegistrationController::getAll");
+            $routes->get("", "RegistrationController::getAll"); //
         });
 
         $routes->group("foyer", static function ($routes) {
-            $routes->get("",                "FoyerController::getAll");
-            $routes->get("zip/(:alphanum)", "FoyerController::getAllByZip/$1");
+            $routes->get("",                "FoyerController::getAll");//
+            $routes->get("zip/(:alphanum)", "FoyerController::getAllByZip/$1");//
             $routes->post("",               "FoyerController::add");
         });
 

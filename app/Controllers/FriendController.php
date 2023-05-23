@@ -197,7 +197,7 @@ class FriendController extends BaseController {
         }
     }
 
-    public function remove(int $idUser, $idFriend) {
+    public function remove(int $idUser, int $idFriend) {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         }
@@ -216,5 +216,32 @@ class FriendController extends BaseController {
             $this->friendRequestModel->remove($idUser, $idFriend);
             $this->send(HTTPCodes::CREATED, null, self::RESOURCE_REMOVED);
         }
+    }
+
+
+    public function isPending(int $idUser, $idUser2){
+        if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idUser2) == null) {
+            return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
+        }
+        if ($this->friendModel->isFriend($idUser, $idUser2) == null) {
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::USERS_NOT_FRIENDS);
+        }
+
+        if (!$this->user->isDeveloper()) {
+            if (($this->user->getId() == $idUser || $this->user->getId() == $idUser2) && !$this->friendModel->isFriend($idUser, $idUser2)) {
+                if($this->friendModel->isPending($idUser, $idUser2)){
+                    $this->send(HTTPCodes::OK, null, "are Pending");
+                }else{
+                    $this->send(204, null, "are not Pending");
+                }
+                
+            } else {
+                $this->send(HTTPCodes::NOT_ALLOWED, null, self::INSERTION_NOT_ALLOWED);
+            }
+        } else {
+            $this->friendRequestModel->isPending($idUser, $idUser2);
+            $this->send(HTTPCodes::CREATED, null, self::RESOURCE_ADDED);
+        }
+
     }
 }
