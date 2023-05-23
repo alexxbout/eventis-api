@@ -42,7 +42,7 @@ class HTTPCodes {
     /**
      * Le client n'est pas autorisé à utiliser la méthode demandée.
      */
-    const NOT_ALLOWED = 405;
+    //const NOT_ALLOWED = 405;
 
     /**
      * Le serveur a rencontré une situation qu'il ne sait pas traiter.

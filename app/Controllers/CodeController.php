@@ -16,9 +16,11 @@ class CodeController extends BaseController {
 
     private const MAX_CODE_VALIDITY = 7; // En jours
 
+    private const NO_CONTENT                 = "Rien n'a été trouvé";
     private const ALL_CODES                  = "Tous les codes";
     private const ALL_CODES_FOR_FOYER        = "Tous les codes pour le foyer";
     private const CODE_NOT_FOUND             = "Code introuvable";
+    private const CODE_USED                  = "Code déjà utilisé ou expiré";
     private const INVALID_ROLE               = "Rôle invalide";
     private const EXPIRE_DATE_TOO_FAR        = "La date d'expiration est trop éloignée dans le futur";
     private const EXPIRE_DATE_ALREADY_PASSED = "La date d'expiration est déjà passée";
@@ -40,23 +42,31 @@ class CodeController extends BaseController {
 
     public function getAll() {
         if (!$this->user->isDeveloper()) {
-            return $this->send(HTTPCodes::FORBIDDEN);
+            return $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         } else {
             $data = $this->codeModel->getAll();
+
+            //NO_CONTENT s'il y en a pas
+            if(empty($data)) return $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
 
             // Ajouter l'information de validité pour chaque code
             foreach ($data as &$code) {
                 $code->valid = $this->codeModel->isValid($code->id);
             }
+
             return $this->send(HTTPCodes::OK, $data, self::ALL_CODES);
         }
     }
 
     public function getAllByFoyer(int $idFoyer) {
-        if ($this->user->isUser()) {
-            return $this->send(HTTPCodes::FORBIDDEN);
+        //interdit pour les utilisateur et les educateur qui cherchent en dehors de leurs foyers
+        if ($this->user->isUser() || ($this->user->isEducator() && $this->user->getIdFoyer() != $idFoyer)) {
+            return $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         } else {
             $data = $this->codeModel->getAllByFoyer($idFoyer);
+
+            //NO_CONTENT s'il y en a pas
+            if(empty($data)) return $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
 
             // Ajouter l'information de validité pour chaque code
             foreach ($data as &$code) {
@@ -66,26 +76,22 @@ class CodeController extends BaseController {
         }
     }
 
-    public function getByCode(string $code) {
+    public function getByCode(string $code) { 
         $data = $this->codeModel->getByCode($code);
-
-
-        if ($data != null) {
-            $valid = $this->codeModel->isValid($data->id);
-
-            if ($valid) {
-                return $this->send(HTTPCodes::OK, null, self::ONE_CODE);
-            } else {
-                return $this->send(HTTPCodes::NO_CONTENT, null, self::CODE_NOT_FOUND);
-            }
+        if($data == null){
+            return $this->send(HTTPCodes::NOT_FOUND, null, self::CODE_NOT_FOUND);
+        }
+        $valid = $this->codeModel->isValid($data->id);
+        if(!$valid) {
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::CODE_USED);
         } else {
-            return $this->send(HTTPCodes::NO_CONTENT, null, self::CODE_NOT_FOUND);
+            return $this->send(HTTPCodes::OK, null, self::ONE_CODE);
         }
     }
 
     public function add() {
         if ($this->user->isUser()) {
-            return $this->send(HTTPCodes::FORBIDDEN);
+            return $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
 
         $validation =  \Config\Services::validation();
@@ -142,6 +148,6 @@ class CodeController extends BaseController {
 
         $this->codeModel->add($code, $data->idFoyer, $this->user->getId(), $data->idRole, $data->expire);
 
-        $this->send(HTTPCodes::OK, ["code" => $code], self::CODE_GENERATED);
+        $this->send(HTTPCodes::CREATED, ["code" => $code], self::CODE_GENERATED);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Models;
 
 class EventModel extends BaseModel {
 
-    public function getAll(): array {
+    public function getAll(): array{
         return $this->db->table("event")->get()->getResultObject();
     }
 

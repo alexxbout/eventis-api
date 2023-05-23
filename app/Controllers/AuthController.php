@@ -56,7 +56,7 @@ class AuthController extends BaseController {
         $user = $this->userModel->getByLogin($login);
 
         if ($user == null) {
-            return $this->send(HTTPCodes::UNAUTHORIZED, null, "User not found");
+            return $this->send(HTTPCodes::NOT_FOUND, null, "User not found");
         }
 
         // Vérifier si le mot de passe est correct

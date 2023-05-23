@@ -14,13 +14,15 @@ class UserController extends BaseController {
 
     private const ALL_USERS                = "Tous les utilisateurs";
     private const USER_WITH_ID             = "Utilisateur ";
+    private const NO_CONTENT               = "Rien n'a été trouvé";
+    private const ID_USER_DOESNT_EXIST     = "Utilisateur inconnu";
     private const ALL_USERS_OF_FOYER       = "Tous les utilisateurs du foyer ";
     private const VALIDATION_ERROR         = "Erreur de validation";
     private const ID_FOYER_DOESNT_EXIST    = "L'identifiant de foyer n'existe pas";
     private const USER_ADDED               = "Utilisateur ajouté";
     private const ERROR_ADDING_USER        = "Erreur lors de l'ajout de l'utilisateur";
     private const USER_UPDATED             = "Utilisateur mis à jour";
-    private const UNAUTHORIZED             = "Non autorisé";
+    private const FORBIDDEN                = "Non autorisé";
     private const USER_DEACTIVATED         = "Utilisateur désactivé";
     private const USER_ACTIVATED           = "Utilisateur activé";
     private const PASSWORD_UPDATED         = "Mot de passe mis à jour";
@@ -43,25 +45,46 @@ class UserController extends BaseController {
 
     public function getAll() {
         if ($this->user->isDeveloper()) {
-            $this->send(HTTPCodes::OK, $this->userModel->getAll(), self::ALL_USERS);
+            $data = $this->userModel->getAll();
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, null, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_USERS);
+            }
+            
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
     public function getById(int $id) {
         if ($this->user->isDeveloper() || $this->user->isAdmin()) {
-            $this->send(HTTPCodes::OK, $this->userModel->getById($id), self::USER_WITH_ID . $id);
+            $data = $this->userModel->getById($id);
+            if($data == null){
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::USER_WITH_ID . $id);
+            }
+            
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
     public function getByIdFoyer(int $idFoyer) {
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            $this->send(HTTPCodes::OK, $this->userModel->getByIdFoyer($idFoyer), self::ALL_USERS_OF_FOYER . $idFoyer);
+            if($this->foyerModel->getById($idFoyer) == null){
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_FOYER_DOESNT_EXIST);
+            }
+            $data = $this->userModel->getByIdFoyer($idFoyer);
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_USERS_OF_FOYER . $idFoyer);
+            }
+            
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
@@ -71,13 +94,15 @@ class UserController extends BaseController {
             $validation->setRuleGroup("user_add_validation");
 
             if (!$validation->withRequest($this->request)->run()) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
+                $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
+                return;
             }
             $data = $this->request->getJSON();
 
             // Vérifier si l'idFoyer existe
             if ($this->foyerModel->getById($data->idFoyer) === null) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, self::ID_FOYER_DOESNT_EXIST);
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_FOYER_DOESNT_EXIST);
+                return;
             }
 
             $login = UtilsCredentials::getValidRandomLogin($data->lastname, $data->firstname);
@@ -85,24 +110,25 @@ class UserController extends BaseController {
 
             // Mettre à jour le champ du mot de passe avec le nouveau mot de passe haché
             $data->password = $hashedPassword;
-
             $id = $this->userModel->add($data->lastname, $data->firstname, $login, $hashedPassword, $data->idRole, $data->idFoyer);
 
             if ($id != -1) {
                 $data->id = $id;
-
-                $this->send(HTTPCodes::OK, $data, self::USER_ADDED);
+                $this->send(HTTPCodes::CREATED, $data, self::USER_ADDED);
             } else {
                 $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ADDING_USER);
             }
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
     public function update(int $idUser) {
         // Vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
+            if($this->userModel->getById($idUser == null)){
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+            }
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("user_update_data_validation");
 
@@ -130,7 +156,7 @@ class UserController extends BaseController {
         }
         // L'utilisateur essaie de modifier un compte autre que le sien OU n'est pas un administrateur / développeur
         else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
@@ -144,11 +170,14 @@ class UserController extends BaseController {
     public function deactivateAccount(int $idUser) {
         // Vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
+            if($this->userModel->getById($idUser == null)){
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+            }
             $this->userModel->setActive($idUser, 0);
 
             $this->send(HTTPCodes::OK, null, self::USER_DEACTIVATED);
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
@@ -162,11 +191,14 @@ class UserController extends BaseController {
     public function reactivateAccount(int $idUser) {
         // Soit le compte est dev/admin vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
+            if($this->userModel->getById($idUser == null)){
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+            }
             $this->userModel->setActive($idUser, 1);
 
             $this->send(HTTPCodes::OK, null, self::USER_ACTIVATED);
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
@@ -180,6 +212,9 @@ class UserController extends BaseController {
      */
     public function updatePassword(int $idUser) {
         if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
+            if($this->userModel->getById($idUser) == null){
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+            }
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("user_update_password_validation");
 
@@ -207,12 +242,15 @@ class UserController extends BaseController {
 
             $this->send(HTTPCodes::OK, null, self::PASSWORD_UPDATED);
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
     public function addProfilPicture(int $idUser) {
         if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
+            if($this->userModel->getById($idUser) == null){
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+            }
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("addImage_validation");
 
@@ -248,7 +286,7 @@ class UserController extends BaseController {
                 $this->send(HTTPCodes::OK, ["file" => $newName], self::IMAGE_UPLOADED);
             }
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 }

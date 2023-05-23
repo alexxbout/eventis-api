@@ -14,11 +14,12 @@ use Psr\Log\LoggerInterface;
 class RegistrationController extends BaseController {
 
     private const REGISTRATION_ERROR = "Erreur lors de l'ajout de l'inscription";
+    private const NO_CONTENT                    = "Rien n'a été trouvé";
     private const CODE_DOESNT_EXIST  = "Le code n'existe pas";
     private const INVALID_CODE       = "Code invalide";
     private const VALIDATION_ERROR   = "Erreur de validation";
     private const USER_ERROR         = "Erreur lors de l'ajout de l'utilisateur";
-    private const UNAUTHORIZED       = "Non autorisé";
+    private const FORBIDDEN          = "Non autorisé à faire cela";
     private const ALL_REGISTRATIONS  = "Toutes les inscriptions";
     private const USER_ADDED         = "Utilisateur ajouté";
 
@@ -36,9 +37,14 @@ class RegistrationController extends BaseController {
 
     public function getAll() {
         if ($this->user->isDeveloper()) {
-            $this->send(HTTPCodes::OK, $this->registrationModel->getAll(), self::ALL_REGISTRATIONS);
+            $data = $this->registrationModel->getAll();
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_REGISTRATIONS);
+            }
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED, null, self::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
     }
 
@@ -86,6 +92,6 @@ class RegistrationController extends BaseController {
         $this->codeModel->setUsed($code->id);
 
         // Renvoyer le statut de la requête
-        $this->send(HTTPCodes::OK, ["login" => $login], self::USER_ADDED);
+        $this->send(HTTPCodes::CREATED, ["login" => $login], self::USER_ADDED);
     }
 }

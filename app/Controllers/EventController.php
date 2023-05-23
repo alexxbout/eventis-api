@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 
 class EventController extends BaseController {
 
+    private const NO_CONTENT                = "Rien n'a été trouvé";
     private const ALL_EVENTS                = "Tous les événements";
     private const ALL_NON_CANCELED_EVENTS   = "Tous les événements non annulés";
     private const EVENT_BY_ID               = "Evénement d'id ";
@@ -18,10 +19,12 @@ class EventController extends BaseController {
     private const EVENT_BY_ZIP_NOT_CANCELED = "Evénements non annulés du code postal ";
     private const EVENT_DOES_NOT_EXIST      = "L'événement n'existe pas";
     private const EVENT_ALREADY_CANCELED    = "L'événement est déjà annulé";
+    private const EVENT_NOT_CANCELED        = "L'événement n'est pas annulé";
     private const EVENT_CANCELED            = "L'événement a été annulé";
     private const EVENT_UNCANCELED          = "L'événement a été restauré";
     private const EVENT_UPDATED             = "L'événement a été mis à jour";
     private const EVENT_ADDED               = "L'événement a été ajouté";
+    private const INVALID_ROLE               = "Rôle invalide";
 
     private const FILE_ALREADY_MOVED        = "Le fichier a déjà été déplacé";
     private const IMAGE_UPLOADED            = "L'image a été téléchargée";
@@ -40,27 +43,59 @@ class EventController extends BaseController {
     public function getAll() {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            $this->send(HTTPCodes::OK, $this->eventModel->getAll(), self::ALL_EVENTS);
+            $data = $this->eventModel->getAll();
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_EVENTS);
+            }
         } else { // Account should see ONLY non-canceled events
-            $this->send(HTTPCodes::OK, $this->eventModel->getAllNotCanceled(), self::ALL_NON_CANCELED_EVENTS);
+            $data = $this->eventModel->getAllNotCanceled();
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_NON_CANCELED_EVENTS);
+            }
         }
     }
 
     public function getById(int $id) {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            $this->send(HTTPCodes::OK, $this->eventModel->getById($id), self::EVENT_BY_ID . $id);
+            $data = $this->eventModel->getById($id);
+            if($data == null){
+                $this->send(HTTPCodes::NOT_FOUND, $data, self::EVENT_DOES_NOT_EXIST);
+            }
+            else{
+                $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ID . $id);
+            }
         } else { // Account should see ONLY non-canceled event
-            $this->send(HTTPCodes::OK, $this->eventModel->getByIdNotCanceled($id), self::EVENT_BY_ID_NOT_CANCELED . $id);
+            $data = $this->eventModel->getByIdNotCanceled($id);
+            if($data == null){
+                $this->send(HTTPCodes::NOT_FOUND, $data, self::EVENT_DOES_NOT_EXIST);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ID_NOT_CANCELED . $id);
+            }
+           
         }
     }
 
     public function getByZip(string $zip) {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            $this->send(HTTPCodes::OK, $this->eventModel->getByZip($zip), self::EVENT_BY_ZIP . $zip);
+            $data = $this->eventModel->getByZip($zip);
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP . $zip);
+            }
         } else { // Account should see ONLY non-canceled events
-            $this->send(HTTPCodes::OK, $this->eventModel->getByZipNotCanceled($zip), self::EVENT_BY_ZIP_NOT_CANCELED . $zip);
+            $data = $this->eventModel->getByZipNotCanceled($zip);
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP_NOT_CANCELED . $zip);
+            }
         }
     }
 
@@ -71,7 +106,7 @@ class EventController extends BaseController {
             $data = $this->eventModel->getById($idEvent);
 
             if ($data == NULL) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_DOES_NOT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::EVENT_DOES_NOT_EXIST);
             }
 
             if ($data->canceled == 1) {
@@ -90,8 +125,8 @@ class EventController extends BaseController {
             $this->eventModel->cancel($data->id, $data->reason);
 
             $this->send(HTTPCodes::OK, $data, self::EVENT_CANCELED);
-        } else { // Account is unauthorized to cancel an event
-            $this->send(HTTPCodes::UNAUTHORIZED);
+        } else { // Account is forbidden to cancel an event
+            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
     }
 
@@ -102,11 +137,11 @@ class EventController extends BaseController {
             $data = $this->eventModel->getById($idEvent);
 
             if ($data == NULL) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_DOES_NOT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::EVENT_DOES_NOT_EXIST);
             }
 
             if ($data->canceled == 0) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_DOES_NOT_EXIST);
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_NOT_CANCELED);
             }
 
             $validation =  \Config\Services::validation();
@@ -121,8 +156,8 @@ class EventController extends BaseController {
             $this->eventModel->uncancel($data->id);
 
             $this->send(HTTPCodes::OK, $data, self::EVENT_UNCANCELED);
-        } else { // Account is unauthorized to uncancel an event
-            $this->send(HTTPCodes::UNAUTHORIZED);
+        } else { // Account is forbidden to uncancel an event
+            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
     }
 
@@ -154,7 +189,7 @@ class EventController extends BaseController {
 
             $this->send(HTTPCodes::OK, $data, self::EVENT_UPDATED);
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
     }
 
@@ -182,16 +217,16 @@ class EventController extends BaseController {
 
             $this->eventModel->add($data);
 
-            $this->send(HTTPCodes::OK, $data, self::EVENT_ADDED);
+            $this->send(HTTPCodes::CREATED, $data, self::EVENT_ADDED);
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
     }
 
     public function addImage(int $idEvent) {
         if ($this->user->isDeveloper() || $this->user->isAdmin() || ($this->user->isEducator() && $this->user->getIdFoyer() == $this->eventModel->getIdFoyerByIdEvent($idEvent))) {
             if ($this->eventModel->getById($idEvent) == null) {
-                return $this->send(HTTPCodes::BAD_REQUEST, null, self::EVENT_DOES_NOT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::EVENT_DOES_NOT_EXIST);
             }
 
             $validation =  \Config\Services::validation();
@@ -229,7 +264,7 @@ class EventController extends BaseController {
                 $this->send(HTTPCodes::OK, ["file" => $newName], self::IMAGE_UPLOADED);
             }
         } else {
-            $this->send(HTTPCodes::UNAUTHORIZED);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
     }
 }

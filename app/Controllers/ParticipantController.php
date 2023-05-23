@@ -11,6 +11,8 @@ use Psr\Log\LoggerInterface;
 class ParticipantController extends BaseController {
 
     private const ALL_PARTICIPANTS              = "Tous les participants";
+    private const NOT_YOU                       = "Impossible de gérer les autres utilisateurs";
+    private const NO_CONTENT                    = "Rien n'a été trouvé";
     private const PARTICIPANT_ADDED             = "Le participant a été ajouté";
     private const PARTICIPANT_REMOVED           = "Le participant a été supprimé";
     private const PARTICIPANT_ADD_ERROR         = "Erreur lors de l'ajout du participant";
@@ -27,23 +29,31 @@ class ParticipantController extends BaseController {
     }
 
     public function getAll(int $idEvent) {
-        $this->send(HTTPCodes::OK, $this->participantModel->getAll($idEvent), self::ALL_PARTICIPANTS);
+        $data = $this->participantModel->getAll($idEvent);
+        if(empty($data)){
+            $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+        } else {
+            $this->send(HTTPCodes::OK, $data, self::ALL_PARTICIPANTS);
+        }
     }
 
     public function add(int $idEvent, int $idUser) {
         if ($this->user->isAdmin() || $this->user->isDeveloper() || ($this->user->getId() == $idUser)) {
-            $attending = $this->participantModel->isParticipating($idEvent, $idUser);
+            $attending = $this->participantModel->isParticipating($idUser, $idEvent);
             if ($attending) {
                 $this->send(HTTPCodes::BAD_REQUEST, null, self::PARTICIPANT_ALREADY_ATTENDING);
             } else {
                 $id = $this->participantModel->add($idEvent, $idUser);
 
                 if ($id == -1) {
-                    return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::PARTICIPANT_ADD_ERROR);
+                    $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::PARTICIPANT_ADD_ERROR);
                 }
-
-                $this->send(HTTPCodes::OK, ["id" => $id], self::PARTICIPANT_ADDED);
+                else {
+                    $this->send(HTTPCodes::CREATED, ["id" => $id], self::PARTICIPANT_ADDED);
+                }
             }
+        } else {
+            $this->send(HTTPCodes::FORBIDDEN, null, self::NOT_YOU);
         }
     }
 
@@ -59,8 +69,12 @@ class ParticipantController extends BaseController {
                     return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::PARTICIPANT_REMOVE_ERROR);
                 }
 
-                $this->send(HTTPCodes::OK, null, self::PARTICIPANT_REMOVED);
+                else{
+                    $this->send(HTTPCodes::OK, null, self::PARTICIPANT_REMOVED);
+                }
             }
+        } else {
+            $this->send(HTTPCodes::FORBIDDEN, null, self::NOT_YOU);
         }
     }
 }

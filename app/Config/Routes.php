@@ -68,7 +68,7 @@ $routes->group("api", static function ($routes) {
             $routes->post("(:num)/friend/accept/(:num)",   "FriendController::add/$1/$2");
 
             $routes->group("blocked", static function ($routes) {
-                $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2");
+                //$routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2");
                 $routes->get("(:num)",           "BlockedController::getAll/$1");
                 $routes->post("(:num)/(:num)",   "BlockedController::add/$1/$2");
                 $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2");

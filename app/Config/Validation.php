@@ -131,7 +131,6 @@ class Validation extends BaseConfig {
         "siret"   => "required|exact_length[14]|alpha_numeric",
         "city"    => "required|max_length[10]",
         "zip"     => "required|max_length[5]",
-        "address" => "required|max_length[50]",
-        "street"  => "required|max_length[10]"
+        "address" => "required|max_length[50]"
     ];
 }
