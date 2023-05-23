@@ -38,6 +38,9 @@ $routes->get("/", "Home::index");
 
 $routes->get("unauthorized", "Home::unauthorized");
 
+// TEMP
+$routes->get("image/(:alphanum)/(:segment)", "ImageController::getImage/$1/$2");
+
 $routes->group("api", static function ($routes) {
 
     $routes->group("auth", static function ($routes) {
