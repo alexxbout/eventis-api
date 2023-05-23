@@ -15,6 +15,11 @@ class HTTPCodes {
     const CREATED = 201;
 
     /**
+     * La requête a été traitée avec succès, mais que le contenu retourné dépend du résultat d'une action sur le serveur.
+     */
+    const NO_CONTENT = 204;
+
+    /**
      * Cette réponse indique que le serveur n'a pas pu comprendre la requête à cause d'une syntaxe invalide.
      */
     const BAD_REQUEST = 400;

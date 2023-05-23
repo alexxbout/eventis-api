@@ -4,7 +4,7 @@ namespace App\Utils;
 
 class UtilsRegistrationCode {
 
-    public const CODE_LENGTH = 6;
+    public const CODE_LENGTH = 5;
 
     /**
      * It generates a random string of CODE_LENGTH characters

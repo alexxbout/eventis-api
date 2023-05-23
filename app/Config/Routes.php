@@ -36,12 +36,20 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 $routes->get("/", "Home::index");
 
-$routes->get("login",     "AuthController::login");
-$routes->post("register", "RegistrationController::register");
-
 $routes->get("unauthorized", "Home::unauthorized");
 
+
+// TEMP
+$routes->get("image/(:alphanum)/(:segment)", "ImageController::getUserImage/$1/$2");
+
 $routes->group("api", static function ($routes) {
+
+    $routes->group("auth", static function ($routes) {
+        $routes->post("login",    "AuthController::login");
+        $routes->post("register", "RegistrationController::register");
+    
+        $routes->get("code/(:alphanum)",  "CodeController::getByCode/$1");
+    });
 
     $routes->group("v1", static function ($routes) {
         $routes->group("user", static function ($routes) {
@@ -77,7 +85,6 @@ $routes->group("api", static function ($routes) {
 
         $routes->group("code", static function ($routes) {
             $routes->get("",             "CodeController::getAll");
-            $routes->get("(:alphanum)",  "CodeController::getByCode/$1");
             $routes->get("foyer/(:num)", "CodeController::getAllByFoyer/$1");
             $routes->post("",            "CodeController::add");
         });

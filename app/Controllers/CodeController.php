@@ -15,18 +15,19 @@ use DateTime;
 class CodeController extends BaseController {
 
     private const MAX_CODE_VALIDITY = 7; // En jours
-    
-    private const ALL_CODES                 = "Tous les codes";
-    private const ALL_CODES_FOR_FOYER       = "Tous les codes pour le foyer";
-    private const CODE_NOT_FOUND            = "Code introuvable";
-    private const INVALID_ROLE              = "Rôle invalide";
-    private const EXPIRE_DATE_TOO_FAR       = "La date d'expiration est trop éloignée dans le futur";
-    private const FOYER_NOT_FOUND           = "Foyer introuvable";
-    private const FORBIDDEN_ADMIN_DEVELOPER = "Les administrateurs ne peuvent pas générer de code pour un autre administrateur ou développeur";
-    private const FORBIDDEN_EDUCATOR        = "Les éducateurs peuvent générer de code seulement pour des utilisateurs";
-    private const CODE_GENERATED            = "Code généré";
-    private const VALIDATION_ERROR          = "Erreur de validation";
-    private const CODES_FOR_FOYER           = "Tous les codes pour le foyer";
+
+    private const ALL_CODES                  = "Tous les codes";
+    private const ALL_CODES_FOR_FOYER        = "Tous les codes pour le foyer";
+    private const CODE_NOT_FOUND             = "Code introuvable";
+    private const INVALID_ROLE               = "Rôle invalide";
+    private const EXPIRE_DATE_TOO_FAR        = "La date d'expiration est trop éloignée dans le futur";
+    private const EXPIRE_DATE_ALREADY_PASSED = "La date d'expiration est déjà passée";
+    private const FOYER_NOT_FOUND            = "Foyer introuvable";
+    private const FORBIDDEN_ADMIN_DEVELOPER  = "Les administrateurs ne peuvent pas générer de code pour un autre administrateur ou développeur";
+    private const FORBIDDEN_EDUCATOR         = "Les éducateurs peuvent générer de code seulement pour des utilisateurs";
+    private const CODE_GENERATED             = "Code généré";
+    private const VALIDATION_ERROR           = "Erreur de validation";
+    private const ONE_CODE                   = "Code valide";
 
     private CodeModel $codeModel;
     private FoyerModel $foyerModel;
@@ -67,11 +68,18 @@ class CodeController extends BaseController {
 
     public function getByCode(string $code) {
         $data = $this->codeModel->getByCode($code);
+
+
         if ($data != null) {
-            $data->valid = $this->codeModel->isValid($data->id);
-            return $this->send(HTTPCodes::OK, $data, "");
+            $valid = $this->codeModel->isValid($data->id);
+
+            if ($valid) {
+                return $this->send(HTTPCodes::OK, null, self::ONE_CODE);
+            } else {
+                return $this->send(HTTPCodes::NO_CONTENT, null, self::CODE_NOT_FOUND);
+            }
         } else {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, self::CODE_NOT_FOUND);
+            return $this->send(HTTPCodes::NO_CONTENT, null, self::CODE_NOT_FOUND);
         }
     }
 
@@ -100,6 +108,11 @@ class CodeController extends BaseController {
 
         if (new DateTime($data->expire) > $validDate) {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::EXPIRE_DATE_TOO_FAR);
+        }
+
+        // Vérifier que le code n'est pas déjà expiré
+        if (new DateTime($data->expire) < new DateTime()) {
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::EXPIRE_DATE_ALREADY_PASSED);
         }
 
         // Vérifier que le foyer existe
