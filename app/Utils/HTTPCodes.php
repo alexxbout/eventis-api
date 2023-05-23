@@ -40,11 +40,6 @@ class HTTPCodes {
     const NOT_FOUND = 404;
 
     /**
-     * Le client n'est pas autorisé à utiliser la méthode demandée.
-     */
-    //const NOT_ALLOWED = 405;
-
-    /**
      * Le serveur a rencontré une situation qu'il ne sait pas traiter.
      */
     const INTERNAL_SERVER_ERROR = 500;

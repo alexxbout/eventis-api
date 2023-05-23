@@ -33,6 +33,8 @@ class FriendController extends BaseController {
     private const ERROR_REMOVING_FRIEND_REQUEST          = "Erreur lors de la suppression de la demande d'ami";
     private const ADD_RELATION_BETWEEN_USERS_NOT_ALLOWED = "Ajout de relation entre utilisateurs non autorisé";
     private const INVALID_ROLE                           = "Rôle invalide";
+    private const USERS_PENDING_REQUESTS                 = "Demande en attente";
+    private const NO_PENDING_REQUESTS                    = "Aucune demande en attente";
 
     private FriendModel $friendModel;
     private UserModel $userModel;
@@ -223,13 +225,13 @@ class FriendController extends BaseController {
         if (!$this->user->isDeveloper()) {
             if (($this->user->getId() == $idUser || $this->user->getId() == $idUser2) && !$this->friendModel->isFriend($idUser, $idUser2)) {
                 if($this->friendModel->isPending($idUser, $idUser2)){
-                    $this->send(HTTPCodes::OK, null, "are Pending");
+                    $this->send(HTTPCodes::OK, null, self::USERS_PENDING_REQUESTS);
                 }else{
-                    $this->send(204, null, "are not Pending");
+                    $this->send(204, null, self::NO_PENDING_REQUESTS);
                 }
                 
             } else {
-                $this->send(HTTPCodes::NOT_ALLOWED, null, self::INSERTION_NOT_ALLOWED);
+                $this->send(HTTPCodes::FORBIDDEN, null, self::INSERTION_NOT_ALLOWED);
             }
         } else {
             $this->friendRequestModel->isPending($idUser, $idUser2);
