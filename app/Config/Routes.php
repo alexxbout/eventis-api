@@ -74,6 +74,7 @@ $routes->group("api", static function ($routes) {
 
             $routes->group("blocked", static function ($routes) {
                 $routes->get("(:num)",           "BlockedController::getAll/$1");
+                $routes->get("(:num)/(:num)",           "BlockedController::isBlocked/$1/$2");
                 $routes->post("(:num)/(:num)",   "BlockedController::add/$1/$2");
                 $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2");
             });
@@ -96,6 +97,8 @@ $routes->group("api", static function ($routes) {
         $routes->group("foyer", static function ($routes) {
             $routes->get("",                "FoyerController::getAll");
             $routes->get("zip/(:alphanum)", "FoyerController::getAllByZip/$1");
+            $routes->get("(:num)", "FoyerController::getById/$1");
+
             $routes->post("",               "FoyerController::add");
         });
 

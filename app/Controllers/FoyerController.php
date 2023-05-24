@@ -12,6 +12,7 @@ class FoyerController extends BaseController {
 
     private const NO_CONTENT                = "Rien n'a été trouvé";
     private const ALL_FOYERS                = "Tous les foyers";
+    private const FOYER_BY_ID                = "Foyer d'ID demandé";
     private const ALL_FOYERS_BY_ZIP         = "Tous les foyers du code postal ";
     private const FOYER_ADDED               = "Le foyer a été ajouté";
     private const INVALID_ROLE               = "Rôle invalide";
@@ -40,6 +41,16 @@ class FoyerController extends BaseController {
             $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
         } else {
             $this->send(HTTPCodes::OK, $data, self::ALL_FOYERS_BY_ZIP . $zip);
+        }
+        
+    }
+
+    public function getById(int $idFoyer) {
+        $data = $this->foyerModel->getById($idFoyer);
+        if(empty($data)){
+            $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+        } else {
+            $this->send(HTTPCodes::OK, $data, self::FOYER_BY_ID . $idFoyer);
         }
         
     }

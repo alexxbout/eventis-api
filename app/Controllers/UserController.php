@@ -148,6 +148,10 @@ class UserController extends BaseController {
                 unset($data->id); // Nous ne voulons pas mettre à jour l'ID avec cette méthode
             }
 
+            if (isset($data->idFoyer)) {
+                unset($data->idFoyer); // Nous ne voulons pas mettre à jour l'ID avec cette méthode
+            }
+
             // Vérifier si le nom de famille et le prénom ne sont pas vides
             // TODO
 
