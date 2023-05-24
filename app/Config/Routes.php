@@ -94,6 +94,8 @@ $routes->group("api", static function ($routes) {
         $routes->group("foyer", static function ($routes) {
             $routes->get("",                "FoyerController::getAll");
             $routes->get("zip/(:alphanum)", "FoyerController::getAllByZip/$1");
+            $routes->get("(:num)", "FoyerController::getById/$1");
+
             $routes->post("",               "FoyerController::add");
         });
 
