@@ -102,4 +102,24 @@ class UserModel extends BaseModel {
 
         return $this->isLastQuerySuccessfull();
     }
+
+    public function getAffinities(int $idUser): array | null {
+        $query = $this->db->query(
+            "SELECT u.id, u.lastname, u.firstname
+            FROM user u
+            JOIN foyer f ON u.idFoyer = f.id
+            WHERE u.id <> ?
+            AND NOT EXISTS (
+                SELECT 1
+                FROM friend fr
+                WHERE (fr.idUser1 = ? AND fr.idUser2 = u.id)
+                OR (fr.idUser1 = u.id AND fr.idUser2 = ?)
+            )
+            AND f.id = (
+                SELECT idFoyer
+                FROM user
+                WHERE id = ?)", [$idUser, $idUser, $idUser, $idUser]);
+
+        return $query->getResultObject();
+    }
 }

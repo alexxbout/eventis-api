@@ -67,7 +67,10 @@ $routes->group("api", static function ($routes) {
             $routes->post("(:num)/friend/ask/(:num)",      "FriendController::askFriend/$1/$2");
             $routes->delete("(:num)/friend/reject/(:num)", "FriendController::rejectRequest/$1/$2");
             $routes->post("(:num)/friend/accept/(:num)",   "FriendController::add/$1/$2");
-            $routes->get("(:num)/friend/pending/(:num)",  "FriendController::isPending/$1/$2");
+            $routes->get("(:num)/friend/pending/(:num)",   "FriendController::isPending/$1/$2");
+
+            // Affinities
+            $routes->get("(:num)/affinities",               "UserController::getAffinities/$1");
 
             $routes->group("blocked", static function ($routes) {
                 $routes->get("(:num)",           "BlockedController::getAll/$1");
