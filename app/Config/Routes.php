@@ -116,6 +116,7 @@ $routes->group("api", static function ($routes) {
             $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2");
             $routes->delete("(:num)/participant/(:num)", "ParticipantController::remove/$1/$2");
             $routes->get("(:num)/participant",           "ParticipantController::getAll/$1");
+            $routes->get("(:num)/participant/(:num)",    "ParticipantController::isParticipating/$1/$2");
         });
     });
 });

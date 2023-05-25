@@ -30,7 +30,7 @@ class ParticipantModel extends BaseModel {
         return $this->isLastQuerySuccessfull();
     }
 
-    public function isParticipating(int $idUser, int $idEvent): bool {
+    public function isParticipating(int $idEvent, int $idUser): bool {
         $data = $this->db->table("participant")->getWhere(["idUser" => $idUser, "idEvent" => $idEvent])->getFirstRow();
 
         return $data != null;

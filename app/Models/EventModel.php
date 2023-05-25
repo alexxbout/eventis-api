@@ -21,8 +21,8 @@ class EventModel extends BaseModel {
         return $result == null ? -1 : $result;
     }
 
-    public function getByIdNotCanceled(int $id): array {
-        return $this->db->table("event")->getWhere(["id" => $id, "canceled" => 0])->getResultObject();
+    public function getByIdNotCanceled(int $id): object |  null {
+        return $this->db->table("event")->getWhere(["id" => $id, "canceled" => 0])->getRowObject();
     }
 
     public function getByIdCanceled(int $id): array {
@@ -34,7 +34,7 @@ class EventModel extends BaseModel {
     }
 
     public function getByZipNotCanceled(string $zip): array {
-        return $this->db->table("event")->getWhere(["zip" => $zip, "canceled" => 0])->getResultObject();
+        return $this->db->table("event")->orderBy("start", "ASC")->getWhere(["zip" => $zip, "canceled" => 0])->getResultObject();
     }
 
     public function cancel(int $id, string $reason): bool {
@@ -49,8 +49,8 @@ class EventModel extends BaseModel {
         return $this->isLastQuerySuccessfull();
     }
 
-    public function updateData(array $data): bool {
-        $this->db->table("event")->update($data, ["id" => $data["id"]]);
+    public function updateData(int $id, object $data): bool {
+        $this->db->table("event")->update($data, ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }

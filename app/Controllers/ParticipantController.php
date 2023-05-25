@@ -2,7 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Models\EventModel;
 use App\Models\ParticipantModel;
+use App\Models\UserModel;
 use App\Utils\HTTPCodes;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -19,27 +21,40 @@ class ParticipantController extends BaseController {
     private const PARTICIPANT_ALREADY_ATTENDING = "Le participant est déjà inscrit à l'événement";
     private const PARTICIPANT_NOT_ATTENDING     = "Le participant n'est pas inscrit à l'événement";
     private const PARTICIPANT_REMOVE_ERROR      = "Erreur lors de la suppression du participant";
+    private const USER_DOESNT_EXIST             = "L'utilisateur n'existe pas";
+    private const INVALID_ROLE                  = "Rôle invalide";
 
     private ParticipantModel $participantModel;
+    private UserModel $userModel;
+    private EventModel $eventModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
 
         $this->participantModel = new ParticipantModel();
+        $this->userModel = new UserModel();
+        $this->eventModel = new EventModel();
     }
 
     public function getAll(int $idEvent) {
         $data = $this->participantModel->getAll($idEvent);
-        if(empty($data)){
+        if (empty($data)) {
             $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
         } else {
+            foreach ($data as $participant) {
+                $participant->user = $this->userModel->getById($participant->idUser);
+                if ($participant->user == null) {
+                    return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::USER_DOESNT_EXIST);
+                }
+            }
+
             $this->send(HTTPCodes::OK, $data, self::ALL_PARTICIPANTS);
         }
     }
 
     public function add(int $idEvent, int $idUser) {
         if ($this->user->isAdmin() || $this->user->isDeveloper() || ($this->user->getId() == $idUser)) {
-            $attending = $this->participantModel->isParticipating($idUser, $idEvent);
+            $attending = $this->participantModel->isParticipating($idEvent, $idUser);
             if ($attending) {
                 $this->send(HTTPCodes::BAD_REQUEST, null, self::PARTICIPANT_ALREADY_ATTENDING);
             } else {
@@ -47,8 +62,7 @@ class ParticipantController extends BaseController {
 
                 if ($id == -1) {
                     $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::PARTICIPANT_ADD_ERROR);
-                }
-                else {
+                } else {
                     $this->send(HTTPCodes::CREATED, ["id" => $id], self::PARTICIPANT_ADDED);
                 }
             }
@@ -67,14 +81,19 @@ class ParticipantController extends BaseController {
 
                 if (!$status) {
                     return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::PARTICIPANT_REMOVE_ERROR);
-                }
-
-                else{
+                } else {
                     $this->send(HTTPCodes::OK, null, self::PARTICIPANT_REMOVED);
                 }
             }
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::NOT_YOU);
         }
+    }
+
+    public function isParticipating(int $idEvent, int $idUser) {
+        if ($this->userModel->getById($idUser) == null || $this->eventModel->getById($idEvent) == null) {
+            return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_DOESNT_EXIST);
+        }
+        return $this->send(HTTPCodes::OK, ["data" => $this->participantModel->isParticipating($idEvent, $idUser)]);
     }
 }

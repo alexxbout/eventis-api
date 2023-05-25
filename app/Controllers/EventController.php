@@ -185,7 +185,7 @@ class EventController extends BaseController {
                 unset($data->idFoyer);
             }
 
-            $this->eventModel->updateData($data);
+            $this->eventModel->updateData($idEvent, $data);
 
             $this->send(HTTPCodes::OK, $data, self::EVENT_UPDATED);
         } else {
