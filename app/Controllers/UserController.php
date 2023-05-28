@@ -47,12 +47,11 @@ class UserController extends BaseController {
     public function getAll() {
         if ($this->user->isDeveloper()) {
             $data = $this->userModel->getAll();
-            if(empty($data)){
+            if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, null, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::ALL_USERS);
             }
-            
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
@@ -61,12 +60,11 @@ class UserController extends BaseController {
     public function getById(int $id) {
         if ($this->user->isDeveloper() || $this->user->isAdmin()) {
             $data = $this->userModel->getById($id);
-            if($data == null){
+            if ($data == null) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::USER_WITH_ID . $id);
             }
-            
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
@@ -74,16 +72,15 @@ class UserController extends BaseController {
 
     public function getByIdFoyer(int $idFoyer) {
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            if($this->foyerModel->getById($idFoyer) == null){
+            if ($this->foyerModel->getById($idFoyer) == null) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_FOYER_DOESNT_EXIST);
             }
             $data = $this->userModel->getByIdFoyer($idFoyer);
-            if(empty($data)){
+            if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::ALL_USERS_OF_FOYER . $idFoyer);
             }
-            
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }
@@ -127,7 +124,7 @@ class UserController extends BaseController {
     public function update(int $idUser) {
         // Vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
-            if($this->userModel->getById($idUser == null)){
+            if ($this->userModel->getById($idUser == null)) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
             $validation =  \Config\Services::validation();
@@ -175,7 +172,7 @@ class UserController extends BaseController {
     public function deactivateAccount(int $idUser) {
         // Vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
-            if($this->userModel->getById($idUser == null)){
+            if ($this->userModel->getById($idUser == null)) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
             $this->userModel->setActive($idUser, 0);
@@ -196,7 +193,7 @@ class UserController extends BaseController {
     public function reactivateAccount(int $idUser) {
         // Soit le compte est dev/admin vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
-            if($this->userModel->getById($idUser == null)){
+            if ($this->userModel->getById($idUser == null)) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
             $this->userModel->setActive($idUser, 1);
@@ -217,7 +214,7 @@ class UserController extends BaseController {
      */
     public function updatePassword(int $idUser) {
         if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
-            if($this->userModel->getById($idUser) == null){
+            if ($this->userModel->getById($idUser) == null) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
             $validation =  \Config\Services::validation();
@@ -251,9 +248,9 @@ class UserController extends BaseController {
         }
     }
 
-    public function addProfilPicture(int $idUser) {
+    public function addImage(int $idUser) {
         if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
-            if($this->userModel->getById($idUser) == null){
+            if ($this->userModel->getById($idUser) == null) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
             $validation =  \Config\Services::validation();
@@ -297,11 +294,12 @@ class UserController extends BaseController {
 
     public function getAffinities(int $idUser) {
         if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
-            if($this->userModel->getById($idUser) == null){
+            if ($this->userModel->getById($idUser) == null) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+            } else {
+                $affinities = $this->userModel->getAffinities($idUser);
+                $this->send(HTTPCodes::OK, $affinities, self::AFFINITIES_FOUND);
             }
-            $affinities = $this->userModel->getAffinities($idUser);
-            $this->send(HTTPCodes::OK, $affinities, self::AFFINITIES_FOUND);
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }

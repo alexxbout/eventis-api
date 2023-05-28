@@ -63,7 +63,8 @@ class ParticipantController extends BaseController {
                 if ($id == -1) {
                     $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::PARTICIPANT_ADD_ERROR);
                 } else {
-                    $this->send(HTTPCodes::CREATED, ["id" => $id], self::PARTICIPANT_ADDED);
+                    $nbParticipants = count($this->participantModel->getAll($idEvent));
+                    $this->send(HTTPCodes::CREATED, ["idParticipant" => $id, "nbParticipants" => $nbParticipants], self::PARTICIPANT_ADDED);
                 }
             }
         } else {
@@ -80,9 +81,10 @@ class ParticipantController extends BaseController {
                 $status = $this->participantModel->remove($idEvent, $idUser);
 
                 if (!$status) {
-                    return $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::PARTICIPANT_REMOVE_ERROR);
+                    $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::PARTICIPANT_REMOVE_ERROR);
                 } else {
-                    $this->send(HTTPCodes::OK, null, self::PARTICIPANT_REMOVED);
+                    $nbParticipants = count($this->participantModel->getAll($idEvent));
+                    $this->send(HTTPCodes::OK, ["nbParticipants" => $nbParticipants], self::PARTICIPANT_REMOVED);
                 }
             }
         } else {
@@ -94,6 +96,6 @@ class ParticipantController extends BaseController {
         if ($this->userModel->getById($idUser) == null || $this->eventModel->getById($idEvent) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_DOESNT_EXIST);
         }
-        return $this->send(HTTPCodes::OK, ["data" => $this->participantModel->isParticipating($idEvent, $idUser)]);
+        return $this->send(HTTPCodes::OK, ["status" => $this->participantModel->isParticipating($idEvent, $idUser)]);
     }
 }

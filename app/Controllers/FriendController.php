@@ -24,7 +24,7 @@ class FriendController extends BaseController {
     private const CANNOT_BE_FRIEND_WITH_SELF             = "Impossible d'être ami avec soi-même";
     private const USERS_BLOCKED                          = "Utilisateurs bloqués";
     private const FRIEND_REQUEST_ALREADY_EXISTS          = "La demande d'ami existe déjà";
-    private const RESOURCE_ADDED                         = "Ressource ajoutée";
+    private const REQUEST_SENT                           = "Demande d'ami envoyée";
     private const ERROR_ASKING_FRIEND                    = "Erreur lors de la demande d'ami";
     private const NO_REQUEST_SENT                        = "Aucune demande envoyée";
     private const RESOURCE_REMOVED                       = "Ressource supprimée";
@@ -51,12 +51,12 @@ class FriendController extends BaseController {
     }
 
     public function getAll($idUser) {
-        if($this->user->isDeveloper() || $this->user->getId() == $idUser){
+        if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
             if ($this->userModel->getById($idUser) == null) {
                 return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
             } else {
                 $data = $this->friendModel->getAll($idUser);
-                if(empty($data)){
+                if (empty($data)) {
                     $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
                 } else {
                     $this->send(HTTPCodes::OK, $data, self::FRIENDS_OF_USER . $idUser);
@@ -68,19 +68,19 @@ class FriendController extends BaseController {
     }
 
     public function isFriend(int $idUser, int $idFriend) {
-        if($this->user->isDeveloper() || $this->user->getId() == $idUser){
+        if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
             if ($idUser != $idFriend) {
-                $this->send(HTTPCodes::OK, ["data" => $this->friendModel->isFriend($idUser, $idFriend)]);
+                $this->send(HTTPCodes::OK, ["friend" => $this->friendModel->isFriend($idUser, $idFriend)]);
             } else {
                 $this->send(HTTPCodes::BAD_REQUEST, null, self::CANNOT_ASK_SELF_FRIEND);
             }
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
-        }        
+        }
     }
 
     public function askFriend(int $idUser, $idFriend) {
-        if($this->user->isDeveloper() || $this->user->getId() == $idUser){
+        if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
             if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
                 return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
             }
@@ -98,7 +98,7 @@ class FriendController extends BaseController {
             if ($this->friendRequestModel->isPending($idUser, $idFriend) == null) {
                 $result = $this->friendRequestModel->askFriend($idUser, $idFriend);
                 if ($result) {
-                    $this->send(HTTPCodes::CREATED, null, self::RESOURCE_ADDED);
+                    $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
                 } else {
                     $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
                 }
@@ -133,7 +133,7 @@ class FriendController extends BaseController {
                     $result = $this->friendModel->add($idUser, $idFriend);
                     if ($result) {
                         $this->friendRequestModel->remove($idUser, $idFriend);
-                        $this->send(HTTPCodes::CREATED, null, self::RESOURCE_ADDED);
+                        $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
                     } else {
                         $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
                     }
@@ -146,7 +146,7 @@ class FriendController extends BaseController {
         } else {
             $result = $this->friendModel->add($idUser, $idFriend);
             if ($result) {
-                $this->send(HTTPCodes::CREATED, null, self::RESOURCE_ADDED);
+                $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
             } else {
                 $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
             }
@@ -214,7 +214,7 @@ class FriendController extends BaseController {
     }
 
 
-    public function isPending(int $idUser, $idUser2){
+    public function isPending(int $idUser, $idUser2) {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idUser2) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         }
@@ -224,19 +224,13 @@ class FriendController extends BaseController {
 
         if (!$this->user->isDeveloper()) {
             if (($this->user->getId() == $idUser || $this->user->getId() == $idUser2) && !$this->friendModel->isFriend($idUser, $idUser2)) {
-                if($this->friendModel->isPending($idUser, $idUser2)){
-                    $this->send(HTTPCodes::OK, null, self::USERS_PENDING_REQUESTS);
-                }else{
-                    $this->send(204, null, self::NO_PENDING_REQUESTS);
-                }
-                
+                $this->send(HTTPCodes::OK, ["pending" => $this->friendModel->isPending($idUser, $idUser2)], self::USERS_PENDING_REQUESTS);
             } else {
                 $this->send(HTTPCodes::FORBIDDEN, null, self::INSERTION_NOT_ALLOWED);
             }
         } else {
             $this->friendRequestModel->isPending($idUser, $idUser2);
-            $this->send(HTTPCodes::CREATED, null, self::RESOURCE_ADDED);
+            $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
         }
-
     }
 }
