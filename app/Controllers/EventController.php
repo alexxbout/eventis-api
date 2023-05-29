@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\EventModel;
+use App\Models\NotificationModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Utils\HTTPCodes;
@@ -34,6 +35,7 @@ class EventController extends BaseController {
     private const EVENT_PICTURE_PATH        = WRITEPATH . "uploads/images/events/";
 
     private EventModel $eventModel;
+    private NotificationModel $notificationModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
@@ -44,6 +46,25 @@ class EventController extends BaseController {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
             $data = $this->eventModel->getAll();
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_EVENTS);
+            }
+        } else { // Account should see ONLY non-canceled events
+            $data = $this->eventModel->getAllNotCanceled();
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_NON_CANCELED_EVENTS);
+            }
+        }
+    }
+
+    public function getAllTypes() {
+        // Check if account should see archived events
+        if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
+            $data = $this->eventModel->getAllTypes();
             if(empty($data)){
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
@@ -216,6 +237,10 @@ class EventController extends BaseController {
             $data->idFoyer = $this->user->getIdFoyer(); //creator = the person who makes the request
 
             $this->eventModel->add($data);
+
+            //create notif of event in all users of same region
+            //$idsDesUtilisateurs = $this->get
+            //$this->notificationModel->;
 
             $this->send(HTTPCodes::CREATED, $data, self::EVENT_ADDED);
         } else {

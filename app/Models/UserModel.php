@@ -104,21 +104,33 @@ class UserModel extends BaseModel {
     }
 
     public function getAffinities(int $idUser): array | null {
-        $query = $this->db->query(
-            "SELECT u.id, u.lastname, u.firstname
-            FROM user u
-            JOIN foyer f ON u.idFoyer = f.id
-            WHERE u.id <> ?
-            AND NOT EXISTS (
-                SELECT 1
-                FROM friend fr
-                WHERE (fr.idUser1 = ? AND fr.idUser2 = u.id)
-                OR (fr.idUser1 = u.id AND fr.idUser2 = ?)
-            )
-            AND f.id = (
-                SELECT idFoyer
-                FROM user
-                WHERE id = ?)", [$idUser, $idUser, $idUser, $idUser]);
+        $sql = "SELECT u.id as idUser
+                FROM user u
+                JOIN foyer f ON u.idFoyer = f.id
+                WHERE u.id <> :idUser:
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM friend fr
+                    WHERE (fr.idUser1 = :idUser: AND fr.idUser2 = u.id)
+                    OR (fr.idUser1 = u.id AND fr.idUser2 = :idUser:)
+                )
+                AND u.id NOT IN (
+                    SELECT idBlocked
+                    FROM blocked
+                    WHERE idUser = :idUser:
+                )
+                AND u.id NOT IN (
+                    SELECT idUser
+                    FROM blocked
+                    WHERE idBlocked = :idUser:
+                )
+                AND f.id = (
+                    SELECT idFoyer
+                    FROM user
+                    WHERE id = :idUser:
+                )";
+
+        $query = $this->db->query($sql, ["idUser" => $idUser]);
 
         return $query->getResultObject();
     }

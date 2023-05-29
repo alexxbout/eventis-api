@@ -2,10 +2,18 @@
 
 namespace App\Models;
 
+use CodeIgniter\Database\RawSql;
+use DateInterval;
+use DateTime;
+
 class EventModel extends BaseModel {
 
-    public function getAll(): array{
+    public function getAll(): array {
         return $this->db->table("event")->get()->getResultObject();
+    }
+
+    public function getAllTypes(): array {
+        return $this->db->table("event_categorie")->join("emoji", 'interest.id = event_categorie.id_emoji')->get()->getResultObject();
     }
 
     public function getAllNotCanceled(): array {
@@ -30,11 +38,29 @@ class EventModel extends BaseModel {
     }
 
     public function getByZip(string $zip): array {
-        return $this->db->table("event")->getWhere(["zip" => $zip])->getResultObject();
+        $date = new DateTime();
+
+        $date->modify("-7 day");
+
+        $sql = "zip = '$zip' AND canceled = 1 AND start >= '" . $date->format("Y-m-d H:i:s") . "'";
+
+        return $this->db->table("event")
+            ->orderBy("start", "ASC")
+            ->getWhere(new RawSql($sql))
+            ->getResultObject();
     }
 
     public function getByZipNotCanceled(string $zip): array {
-        return $this->db->table("event")->orderBy("start", "ASC")->getWhere(["zip" => $zip, "canceled" => 0])->getResultObject();
+        $date = new DateTime();
+
+        $date->modify("-7 day");
+
+        $sql = "zip = '$zip' AND canceled = 0 AND start >= '" . $date->format("Y-m-d H:i:s") . "'";
+
+        return $this->db->table("event")
+            ->orderBy("start", "ASC")
+            ->getWhere(new RawSql($sql))
+            ->getResultObject();
     }
 
     public function cancel(int $id, string $reason): bool {

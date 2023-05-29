@@ -85,6 +85,7 @@ class CodeController extends BaseController {
         if(!$valid) {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::CODE_USED);
         } else {
+            $this->codeModel->setUsed($data->id);
             return $this->send(HTTPCodes::OK, null, self::ONE_CODE);
         }
     }

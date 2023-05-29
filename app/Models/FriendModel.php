@@ -36,12 +36,12 @@ class FriendModel extends BaseModel {
 
     public function askFriend(int $idUser, int $idFriend): int {
         $data = [
-            "id"          => $this->getMax("friendrequest", "id") + 1,
+            "id"          => $this->getMax("friend_request", "id") + 1,
             "idRequester" => $idUser,
             "idRequested" => $idFriend,
         ];
 
-        $this->db->table("friendrequest")->insert($data);
+        $this->db->table("friend_request")->insert($data);
 
         if ($this->isLastQuerySuccessfull()) {
             return $data["id"];
@@ -62,7 +62,7 @@ class FriendModel extends BaseModel {
         ];
 
         $data = $this->db
-            ->table("friendrequest")
+            ->table("friend_request")
             ->groupStart()
             ->where($array)
             ->groupEnd()

@@ -8,6 +8,7 @@ use App\Models\FriendModel;
 use App\Models\UserModel;
 use App\Models\FriendRequestModel;
 use App\Models\BlockedModel;
+use App\Models\NotificationModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -17,6 +18,7 @@ class FriendController extends BaseController {
     private const NO_CONTENT                             = "Rien n'a été trouvé";
     private const USER_NOT_FOUND                         = "Utilisateur introuvable";
     private const FRIENDS_OF_USER                        = "Amis de ";
+    private const NOW_FRIENDS                            = "Tentative d'ajout d'ami réussi";
     private const ACCESS_OTHER_RELATIONS                 = "Tentative d'accès à d'autres relations";
     private const CANNOT_ASK_SELF_FRIEND                 = "Impossible de demander si quelqu'un est ami avec lui-même";
     private const USERS_ALREADY_FRIENDS                  = "Les utilisateurs sont déjà amis";
@@ -40,6 +42,7 @@ class FriendController extends BaseController {
     private UserModel $userModel;
     private FriendRequestModel $friendRequestModel;
     private BlockedModel $blockedModel;
+    private NotificationModel $notificationModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
@@ -48,6 +51,7 @@ class FriendController extends BaseController {
         $this->friendRequestModel = new FriendRequestModel();
         $this->userModel = new UserModel();
         $this->blockedModel = new BlockedModel();
+        $this->notificationModel = new NotificationModel();
     }
 
     public function getAll($idUser) {
@@ -84,7 +88,7 @@ class FriendController extends BaseController {
             if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
                 return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
             }
-            if ($this->friendModel->isFriend($idUser, $idFriend) != null) {
+            if ($this->friendModel->isFriend($idUser, $idFriend)) {
                 return $this->send(HTTPCodes::BAD_REQUEST, null, self::USERS_ALREADY_FRIENDS);
             }
             if ($idUser == $idFriend) {
@@ -98,6 +102,7 @@ class FriendController extends BaseController {
             if ($this->friendRequestModel->isPending($idUser, $idFriend) == null) {
                 $result = $this->friendRequestModel->askFriend($idUser, $idFriend);
                 if ($result) {
+                    $this->notificationModel->addFriendRequestNotification($idFriend, $idUser); //ORDER IS CORRECT $idFriend should receive the notif
                     $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
                 } else {
                     $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
@@ -114,7 +119,7 @@ class FriendController extends BaseController {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         }
-        if ($this->friendModel->isFriend($idUser, $idFriend) != null) {
+        if ($this->friendModel->isFriend($idUser, $idFriend)) {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::USERS_ALREADY_FRIENDS);
         }
         if ($idUser == $idFriend) {
@@ -133,7 +138,8 @@ class FriendController extends BaseController {
                     $result = $this->friendModel->add($idUser, $idFriend);
                     if ($result) {
                         $this->friendRequestModel->remove($idUser, $idFriend);
-                        $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
+                        $this->notificationModel->remove($idUser, $idFriend, 0); //A TESTER POUR ORDRE DE PARAMETRES
+                        $this->send(HTTPCodes::CREATED, null, self::NOW_FRIENDS);
                     } else {
                         $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
                     }
@@ -146,7 +152,7 @@ class FriendController extends BaseController {
         } else {
             $result = $this->friendModel->add($idUser, $idFriend);
             if ($result) {
-                $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
+                $this->send(HTTPCodes::CREATED, null, self::NOW_FRIENDS);
             } else {
                 $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
             }
@@ -196,7 +202,7 @@ class FriendController extends BaseController {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idFriend) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         }
-        if ($this->friendModel->isFriend($idUser, $idFriend) == null) {
+        if (!$this->friendModel->isFriend($idUser, $idFriend)) {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::USERS_NOT_FRIENDS);
         }
 
@@ -218,19 +224,21 @@ class FriendController extends BaseController {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idUser2) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         }
-        if ($this->friendModel->isFriend($idUser, $idUser2) == null) {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, self::USERS_NOT_FRIENDS);
+
+        if ($this->friendModel->isFriend($idUser, $idUser2)) {
+            return $this->send(HTTPCodes::BAD_REQUEST, null, self::USERS_ALREADY_FRIENDS);
         }
 
+        $pending = $this->friendModel->isPending($idUser, $idUser2);
+
         if (!$this->user->isDeveloper()) {
-            if (($this->user->getId() == $idUser || $this->user->getId() == $idUser2) && !$this->friendModel->isFriend($idUser, $idUser2)) {
-                $this->send(HTTPCodes::OK, ["pending" => $this->friendModel->isPending($idUser, $idUser2)], self::USERS_PENDING_REQUESTS);
+            if (($this->user->getId() == $idUser || $this->user->getId() == $idUser2)) {
+                $this->send(HTTPCodes::OK, ["pending" => $pending], $pending ? self::USERS_PENDING_REQUESTS : self::NO_PENDING_REQUESTS);
             } else {
-                $this->send(HTTPCodes::FORBIDDEN, null, self::INSERTION_NOT_ALLOWED);
+                $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
             }
         } else {
-            $this->friendRequestModel->isPending($idUser, $idUser2);
-            $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
+            $this->send(HTTPCodes::OK, ["pending" => $pending], $pending ? self::USERS_PENDING_REQUESTS : self::NO_PENDING_REQUESTS);
         }
     }
 }

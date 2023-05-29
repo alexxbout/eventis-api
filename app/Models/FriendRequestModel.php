@@ -6,12 +6,12 @@ class FriendRequestModel extends BaseModel {
 
     public function askFriend(int $idUser, int $idFriend): bool {
         $data = [
-            "id"          => $this->getMax("friendrequest", "id") + 1,
+            "id"          => $this->getMax("friend_request", "id") + 1,
             "idRequester" => $idUser,
             "idRequested" => $idFriend,
         ];
 
-        $this->db->table("friendrequest")->insert($data);
+        $this->db->table("friend_request")->insert($data);
 
         return $this->isLastQuerySuccessfull();
     }
@@ -28,7 +28,7 @@ class FriendRequestModel extends BaseModel {
         ];
 
         $data = $this->db
-            ->table("friendrequest")
+            ->table("friend_request")
             ->groupStart()
             ->where($array)
             ->groupEnd()
@@ -51,7 +51,7 @@ class FriendRequestModel extends BaseModel {
             "idRequested" => $idRequester
         ];
 
-        $this->db->table("friendrequest")->groupStart()
+        $this->db->table("friend_request")->groupStart()
             ->where($array)
             ->groupEnd()
             ->orGroupStart()
@@ -64,7 +64,7 @@ class FriendRequestModel extends BaseModel {
 
     public function isNotRequester($idRequested, $idRequester): bool {
         $array = ["idRequester" => $idRequester, "idRequested" => $idRequested];
-        $data = $this->db->table("friendrequest")->where($array)->get()->getRowArray();
+        $data = $this->db->table("friend_request")->where($array)->get()->getRowArray();
 
         return $data != null;
     }

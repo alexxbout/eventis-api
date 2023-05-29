@@ -298,7 +298,15 @@ class UserController extends BaseController {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             } else {
                 $affinities = $this->userModel->getAffinities($idUser);
-                $this->send(HTTPCodes::OK, $affinities, self::AFFINITIES_FOUND);
+
+                $data = array();
+
+                foreach ($affinities as $affinity) {
+                    $user = $this->userModel->getById($affinity->idUser);
+                    array_push($data, $user);
+                }
+
+                $this->send(HTTPCodes::OK, $data, self::AFFINITIES_FOUND);
             }
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
