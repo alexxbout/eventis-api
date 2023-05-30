@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use CodeIgniter\Database\RawSql;
-use DateInterval;
 use DateTime;
 
 class EventModel extends BaseModel {
@@ -13,7 +12,8 @@ class EventModel extends BaseModel {
     }
 
     public function getAllTypes(): array {
-        return $this->db->table("event_categorie")->join("emoji", "interest.id = event_categorie.idEmoji")->get()->getResultObject();
+        return $this->db->table("event_categorie")
+            ->get()->getResultObject();
     }
 
     public function getAllNotCanceled(): array {
@@ -23,9 +23,8 @@ class EventModel extends BaseModel {
     public function getById(int $id): object|null {
         return $this->db
             ->table("event")
-            ->select("event.*, emoji.code")
+            ->select("event.*, event_categorie.emoji")
             ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->join("emoji", "emoji.id = event_categorie.idEmoji")
             ->getWhere(["event.id" => $id])
             ->getRowObject();
     }
@@ -38,9 +37,8 @@ class EventModel extends BaseModel {
     public function getByIdNotCanceled(int $id): object |  null {
         return $this->db
             ->table("event")
-            ->select("event.*, emoji.code")
+            ->select("event.*, event_categorie.emoji")
             ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->join("emoji", "emoji.id = event_categorie.idEmoji")
             ->getWhere(["event.id" => $id, "canceled" => 0])
             ->getRowObject();
     }
@@ -48,9 +46,8 @@ class EventModel extends BaseModel {
     public function getByIdCanceled(int $id): array {
         return $this->db
             ->table("event")
-            ->select("event.*, emoji.code")
+            ->select("event.*, event_categorie.emoji")
             ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->join("emoji", "emoji.id = event_categorie.idEmoji")
             ->getWhere(["event.id" => $id, "canceled" => 1])
             ->getResultObject();
     }
@@ -64,9 +61,8 @@ class EventModel extends BaseModel {
 
         return $this->db->table("event")
             ->orderBy("start", "ASC")
-            ->select("event.*, emoji.code")
+            ->select("event.*, event_categorie.emoji")
             ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->join("emoji", "emoji.id = event_categorie.idEmoji")
             ->getWhere(new RawSql($sql))
             ->getResultObject();
     }
@@ -80,9 +76,8 @@ class EventModel extends BaseModel {
 
         return $this->db->table("event")
             ->orderBy("start", "ASC")
-            ->select("event.*, emoji.code")
+            ->select("event.*, event_categorie.emoji")
             ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->join("emoji", "emoji.id = event_categorie.idEmoji")
             ->getWhere(new RawSql($sql))
             ->getResultObject();
     }

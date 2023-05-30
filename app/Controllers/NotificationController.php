@@ -56,6 +56,11 @@ class NotificationController extends BaseController {
             $event_notif = $this->notificationModel->getEventNotifications($idUser);
             $data = new \stdClass();
             $data->friend_request = $friend_request;
+
+            foreach($data->friend_request as $friend_request){
+                $friend_request->user = $this->userModel->getById($friend_request->idAlt);
+            }
+
             $data->event_notif = $event_notif;
             if(empty($data->friend_request) && empty($data->event_notif)){
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);

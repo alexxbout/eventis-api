@@ -5,7 +5,7 @@ namespace App\Models;
 class InteretModel extends BaseModel {
 
     public function getInterestByUser(int $idUser): array {
-        return $this->db->table("user_interest")->where("idUser", $idUser)->join('interest', 'interest.id = user_interest.idInterest')->join('emoji', 'emoji.id = interest.idEmoji')->get()->getResultObject();
+        return $this->db->table("user_interest")->where("idUser", $idUser)->join('interest', 'interest.id = user_interest.idInterest')->join('emoji', 'emoji.id = interest.emoji')->get()->getResultObject();
     }
 
     public function isInterest(int $idUser, int $idInterest): bool {
