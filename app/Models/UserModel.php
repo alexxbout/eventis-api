@@ -97,7 +97,7 @@ class UserModel extends BaseModel {
         return $result == null ? null : $result->pic;
     }
 
-    public function setProfilPicture(int $id, string $path): bool {
+    public function setProfilPicture(int $id, string|null $path): bool {
         $this->db->table("user")->update(["pic" => $path], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();

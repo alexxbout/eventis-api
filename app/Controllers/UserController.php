@@ -30,6 +30,7 @@ class UserController extends BaseController {
     private const NEW_PASSWORD_SAME_AS_OLD = "Le nouveau mot de passe est identique à l'ancien";
     private const FILE_ALREADY_MOVED       = "Le fichier a déjà été déplacé";
     private const IMAGE_UPLOADED           = "Image téléchargée";
+    private const IMAGE_REMOVED            = "Image supprimée";
     private const AFFINITIES_FOUND         = "Affinités trouvées";
 
     private const PROFIL_PICTURE_PATH      = WRITEPATH . "uploads/images/users/";
@@ -287,6 +288,20 @@ class UserController extends BaseController {
 
                 $this->send(HTTPCodes::OK, ["file" => $newName], self::IMAGE_UPLOADED);
             }
+        } else {
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
+        }
+    }
+
+    public function removeImage(int $idUser) {
+        if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
+            if ($this->userModel->getById($idUser) == null) {
+                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+            }
+
+            $this->userModel->setProfilPicture($idUser, null);
+
+            $this->send(HTTPCodes::OK, null, self::IMAGE_REMOVED);
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
         }

@@ -55,7 +55,8 @@ $routes->group("api", static function ($routes) {
             $routes->get("(:num)",            "UserController::getById/$1");
             $routes->post("",                 "UserController::add");
             $routes->put("(:num)",            "UserController::update/$1");
-            $routes->post("image/(:num)",      "UserController::addImage/$1");
+            $routes->post("image/(:num)",     "UserController::addImage/$1");
+            $routes->delete("image/(:num)",   "UserController::removeImage/$1");
             $routes->put("deactivate/(:num)", "UserController::deactiveAccount/$1");
             $routes->put("reactivate/(:num)", "UserController::reactivateAccount/$1");
             $routes->put("password/(:num)",   "UserController::updatePassword/$1");
