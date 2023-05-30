@@ -28,6 +28,7 @@ class NotificationController extends BaseController {
     
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
+        $this->notificationModel = new NotificationModel();
         $this->friendModel = new FriendModel();
         $this->userModel = new userModel();
     }
@@ -51,10 +52,12 @@ class NotificationController extends BaseController {
 
     public function getNotifications($idUser) {
         if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
-            $data1 = $this->notificationModel->getFriendRequestNotifications($idUser);
-            $data2 = $this->notificationModel->getEventNotifications($idUser);
-            $data = array_merge($data1, $data2);
-            if(empty($data)){
+            $friend_request = $this->notificationModel->getFriendRequestNotifications($idUser);
+            $event_notif = $this->notificationModel->getEventNotifications($idUser);
+            $data = new \stdClass();
+            $data->friend_request = $friend_request;
+            $data->event_notif = $event_notif;
+            if(empty($data->friend_request) && empty($data->event_notif)){
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::ALL_NOTIFS);

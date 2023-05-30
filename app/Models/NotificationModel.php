@@ -15,36 +15,19 @@ class NotificationModel extends BaseModel {
         return $this->db->table("notification")->getWhere(["idUser" => $idUser, "idNotifType" => 0])->getResultObject();
     }
 
-    public function addFriendRequestNotification(int $idUser, int $idFriend): bool {
+    public function addNotification(int $idUser, int $idAlt, int $idNotifType): bool {
         $id = $this->getMax("notification", "id") + 1;
         $time = date("Y-m-d H:i:s");
         $data = [
             "id"          => $id,
             "idUser"      => $idUser,
-            "idAlt"       => $idFriend,
-            "idNotifType" => 0,
+            "idAlt"       => $idAlt,
+            "idNotifType" => $idNotifType,
             "created"     => $time
         ];
         $this->db->table("notification")->insert($data);
         $this->db->insertID();
         
-        return $this->isLastQuerySuccessfull();
-    }
-
-    // Peut-être à supprimer pour garder qu'une seule fonction générique
-    public function addNewEventNotification(int $idUser, int $idEvent): bool {
-        $id = $this->getMax("notification", "id") + 1;
-        $time = date("Y-m-d H:i:s");
-        $data = [
-            "id"          => $id,
-            "idUser"      => $idUser,
-            "idAlt"       => $idEvent,
-            "idNotifType" => 1,
-            "created"     => $time
-        ];
-        $this->db->table("notification")->insert($data);
-        $this->db->insertID();
-
         return $this->isLastQuerySuccessfull();
     }
 

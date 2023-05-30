@@ -61,6 +61,7 @@ $routes->group("api", static function ($routes) {
             $routes->put("reactivate/(:num)", "UserController::reactivateAccount/$1");
             $routes->put("password/(:num)",   "UserController::updatePassword/$1");
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");
+            $routes->get("zip/(:num)",         "UserController::getByZip/$1");
             //interests
             $routes->get("(:num)/interest",      "InteretController::getInterestByUser/$1");
             $routes->post("(:num)/interest/add/(:num)",      "InteretController::add/$1/$2");
@@ -84,11 +85,11 @@ $routes->group("api", static function ($routes) {
                 $routes->post("(:num)/(:num)",   "BlockedController::add/$1/$2");
                 $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2");
             });
-
-            $routes->group("notifications", static function ($routes) {
-                $routes->get("(:num)",           "NotificationController::getNotifications/$1");
-            }); 
         });
+
+        $routes->group("notifications", static function ($routes) {
+            $routes->get("(:num)",           "NotificationController::getNotifications/$1");
+        }); 
 
         $routes->group("role", static function ($routes) {
             $routes->get("", "RoleController::getAll");

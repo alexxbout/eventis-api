@@ -134,4 +134,12 @@ class UserModel extends BaseModel {
 
         return $query->getResultObject();
     }
+
+    public function getUsersByZip(string $zip): array | null{
+        return $query = $this->db->table('user')
+        ->select('user.*')
+        ->join('foyer', 'user.idFoyer = foyer.id')
+        ->where('LEFT(foyer.zip, 2)', $zip)
+        ->get()->getResultObject();
+    }
 }

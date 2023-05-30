@@ -102,7 +102,7 @@ class FriendController extends BaseController {
             if ($this->friendRequestModel->isPending($idUser, $idFriend) == null) {
                 $result = $this->friendRequestModel->askFriend($idUser, $idFriend);
                 if ($result) {
-                    $this->notificationModel->addFriendRequestNotification($idFriend, $idUser); //ORDER IS CORRECT $idFriend should receive the notif
+                    $this->notificationModel->addNotification($idFriend, $idUser, 0);
                     $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
                 } else {
                     $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
@@ -138,7 +138,7 @@ class FriendController extends BaseController {
                     $result = $this->friendModel->add($idUser, $idFriend);
                     if ($result) {
                         $this->friendRequestModel->remove($idUser, $idFriend);
-                        $this->notificationModel->remove($idUser, $idFriend, 0); //A TESTER POUR ORDRE DE PARAMETRES
+                        $this->notificationModel->remove($idUser, $idFriend, 0);
                         $this->send(HTTPCodes::CREATED, null, self::NOW_FRIENDS);
                     } else {
                         $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
@@ -173,6 +173,7 @@ class FriendController extends BaseController {
 
                 if ($this->friendRequestModel->isPending($idUser, $idFriend) != null) {
                     $result = $this->friendRequestModel->remove($idUser, $idFriend);
+                    $result = $result && $this->notificationModel->remove($idUser, $idFriend, 0);
                     if ($result) {
                         $this->send(HTTPCodes::OK, null, self::RESOURCE_REMOVED);
                     } else {

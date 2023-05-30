@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\EventModel;
+use App\Models\UserModel;
 use App\Models\NotificationModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -35,11 +36,14 @@ class EventController extends BaseController {
     private const EVENT_PICTURE_PATH        = WRITEPATH . "uploads/images/events/";
 
     private EventModel $eventModel;
+    private UserModel $userModel;
     private NotificationModel $notificationModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
         $this->eventModel = new EventModel();
+        $this->userModel = new UserModel();
+        $this->notificationModel = new NotificationModel();
     }
 
     public function getAll() {
@@ -239,8 +243,10 @@ class EventController extends BaseController {
             $this->eventModel->add($data);
 
             //create notif of event in all users of same region
-            //$idsDesUtilisateurs = $this->get
-            //$this->notificationModel->;
+            $regionalUsers = $this->userModel->getUsersByZip($data->zip);
+            foreach($regionalUsers as $user){
+                $this->notificationModel->addNotification($user->id, $data->id, 1); //$idUser(s), $idEvent, 1=typeEvent
+            }
 
             $this->send(HTTPCodes::CREATED, $data, self::EVENT_ADDED);
         } else {

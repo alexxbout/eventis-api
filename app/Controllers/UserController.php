@@ -87,6 +87,20 @@ class UserController extends BaseController {
         }
     }
 
+    public function getByZip(int $zip) {
+        if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
+            
+            $data = $this->userModel->getUsersByZip($zip);
+            if (empty($data)) {
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_USERS_OF_FOYER . $zip);
+            }
+        } else {
+            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
+        }
+    }
+
     public function add() {
         if ($this->user->isDeveloper()) {
             $validation =  \Config\Services::validation();
