@@ -173,8 +173,10 @@ class FriendController extends BaseController {
 
                 if ($this->friendRequestModel->isPending($idUser, $idFriend) != null) {
                     $result = $this->friendRequestModel->remove($idUser, $idFriend);
-                    $result = $result && $this->notificationModel->remove($idUser, $idFriend, 0);
-                    if ($result) {
+                    $resultNotif = $this->notificationModel->remove($idUser, $idFriend, 0);
+                    $resultNotif2 = $this->notificationModel->remove($idFriend, $idUser, 0);
+
+                    if (($resultNotif || $resultNotif2) && $result) {
                         $this->send(HTTPCodes::OK, null, self::RESOURCE_REMOVED);
                     } else {
                         $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_REMOVING_FRIEND_REQUEST);

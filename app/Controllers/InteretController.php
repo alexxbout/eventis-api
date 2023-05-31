@@ -27,6 +27,7 @@ class InteretController extends BaseController {
     private const INSERTION_NOT_ALLOWED                  = "Insertion non autorisée";
     private const INVALID_ROLE                           = "Rôle invalide";
     private const REQUEST_FAILED                         = "La requète a échouée";
+    private const USER_NOT_USER = "Vous ne pouvez pas ajouter de centre d'intérêts à un autre utilisateur";
 
 
     private InteretModel $interetModel;
@@ -48,9 +49,8 @@ class InteretController extends BaseController {
         }
     }
 
-
     public function getInterestsByUser($idUser) {
-        if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
+        if ($this->user->isDeveloper() || $this->user->isEducator() || $this->user->isUser()) {
             if ($this->userModel->getById($idUser) == null) {
                 return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
             } else {
@@ -70,11 +70,12 @@ class InteretController extends BaseController {
         if ($this->userModel->getById($idUser) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         }
-        if ($this->interetModel->isInterest($idUser, $idInteret)) {
-            return $this->send(HTTPCodes::BAD_REQUEST, null, self::USER_ALREADY_INTERESTED);
-        }
+
         if (!$this->user->isDeveloper()) {
             if ($this->user->getId() == $idUser) {
+                if ($this->interetModel->isInterest($idUser, $idInteret)) {
+                    return $this->send(HTTPCodes::BAD_REQUEST, null, self::USER_ALREADY_INTERESTED);
+                }
                 $result = $this->interetModel->add($idUser, $idInteret);
                 if ($result) {
                     $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
@@ -82,9 +83,12 @@ class InteretController extends BaseController {
                     $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::REQUEST_FAILED);
                 }
             } else {
-                $this->send(HTTPCodes::FORBIDDEN, null, self::USER_ALREADY_INTERESTED);
+                $this->send(HTTPCodes::FORBIDDEN, null, self::USER_NOT_USER);
             }
         } else {
+            if ($this->interetModel->isInterest($idUser, $idInteret)) {
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::USER_ALREADY_INTERESTED);
+            }
             $result = $this->interetModel->add($idUser, $idInteret);
             if ($result) {
                 $this->send(HTTPCodes::CREATED, null, self::REQUEST_SENT);
