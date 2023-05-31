@@ -63,9 +63,9 @@ $routes->group("api", static function ($routes) {
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");
             $routes->get("zip/(:num)",         "UserController::getByZip/$1");
             //interests
-            $routes->get("(:num)/interest",      "InteretController::getInterestByUser/$1");
+            $routes->get("(:num)/interest",                  "InteretController::getInterestsByUser/$1");
             $routes->post("(:num)/interest/add/(:num)",      "InteretController::add/$1/$2");
-            $routes->post("(:num)/interest/remove/(:num)",      "InteretController::remove/$1/$2");
+            $routes->delete("(:num)/interest/remove/(:num)", "InteretController::remove/$1/$2");
 
             // Friends
             $routes->get("(:num)/friend",                  "FriendController::getAll/$1");

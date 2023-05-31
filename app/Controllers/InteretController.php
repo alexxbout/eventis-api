@@ -14,6 +14,7 @@ use Psr\Log\LoggerInterface;
 
 class InteretController extends BaseController {
 
+    private const SUCCESS                                = "Centres d'interets trouvés";
     private const NO_CONTENT                             = "Rien n'a été trouvé";
     private const USER_NOT_FOUND                         = "Utilisateur introuvable";
     private const ACCESS_OTHER_INTEREST                  = "Tentative d'accès aux centres d'interets des autres";
@@ -34,6 +35,7 @@ class InteretController extends BaseController {
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
 
+        $this->interetModel = new InteretModel();
         $this->userModel = new UserModel();
     }
 
@@ -47,7 +49,7 @@ class InteretController extends BaseController {
     }
 
 
-    public function getInterestByUser($idUser) {
+    public function getInterestsByUser($idUser) {
         if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
             if ($this->userModel->getById($idUser) == null) {
                 return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
@@ -56,7 +58,7 @@ class InteretController extends BaseController {
                 if (empty($data)) {
                     $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
                 } else {
-                    $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, $data, self::REQUEST_FAILED);
+                    $this->send(HTTPCodes::OK, $data, self::SUCCESS);
                 }
             }
         } else {

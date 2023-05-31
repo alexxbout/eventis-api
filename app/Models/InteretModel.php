@@ -5,7 +5,11 @@ namespace App\Models;
 class InteretModel extends BaseModel {
 
     public function getInterestByUser(int $idUser): array {
-        return $this->db->table("user_interest")->where("idUser", $idUser)->join('interest', 'interest.id = user_interest.idInterest')->join('emoji', 'emoji.id = interest.emoji')->get()->getResultObject();
+        return $this->db->table("user_interest")
+        ->where("idUser", $idUser)
+        ->join('interest', 'interest.id = user_interest.idInterest')
+        ->get()
+        ->getResultObject();
     }
 
     public function isInterest(int $idUser, int $idInterest): bool {
@@ -20,7 +24,6 @@ class InteretModel extends BaseModel {
 
     public function add(int $idUser, int $idInterest): bool {
         $data = [
-            "id"          => $this->getMax("user_interest", "id") + 1,
             "idUser" => $idUser,
             "idInterest" => $idInterest
         ];
