@@ -62,10 +62,11 @@ $routes->group("api", static function ($routes) {
             $routes->put("password/(:num)",   "UserController::updatePassword/$1");
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");
             $routes->get("zip/(:num)",         "UserController::getByZip/$1");
-            //interests
-            $routes->get("(:num)/interest",                  "InteretController::getInterestsByUser/$1");
-            $routes->post("(:num)/interest/add/(:num)",      "InteretController::add/$1/$2");
-            $routes->delete("(:num)/interest/remove/(:num)", "InteretController::remove/$1/$2");
+            
+            // Interests
+            $routes->get("(:num)/interest",           "InteretController::getInterestsByUser/$1");
+            $routes->post("(:num)/interest/(:num)",   "InteretController::add/$1/$2");
+            $routes->delete("(:num)/interest/(:num)", "InteretController::remove/$1/$2");
 
             // Friends
             $routes->get("(:num)/friend",                  "FriendController::getAll/$1");
@@ -85,6 +86,12 @@ $routes->group("api", static function ($routes) {
                 $routes->post("(:num)/(:num)",   "BlockedController::add/$1/$2");
                 $routes->delete("(:num)/(:num)", "BlockedController::remove/$1/$2");
             });
+        });
+
+        // Interests
+        $routes->group("interest", static function ($routes) {
+            $routes->get("", "InteretController::getAll");
+            // TODO : routes pour ajouter et "supprimer" un interet
         });
 
         $routes->group("notifications", static function ($routes) {
@@ -122,7 +129,6 @@ $routes->group("api", static function ($routes) {
             $routes->put("cancel/(:num)",   "EventController::cancel/$1");
             $routes->put("uncancel/(:num)", "EventController::uncancel/$1");
             $routes->post("image/(:num)",    "EventController::addImage/$1");
-            
 
             // Participants
             $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2");

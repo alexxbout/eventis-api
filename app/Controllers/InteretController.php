@@ -14,21 +14,20 @@ use Psr\Log\LoggerInterface;
 
 class InteretController extends BaseController {
 
-    private const SUCCESS                                = "Centres d'interets trouvés";
-    private const NO_CONTENT                             = "Rien n'a été trouvé";
-    private const USER_NOT_FOUND                         = "Utilisateur introuvable";
-    private const ACCESS_OTHER_INTEREST                  = "Tentative d'accès aux centres d'interets des autres";
-    private const USER_ALREADY_INTERESTED                = "L'utilisateur possède déjà ce centre d'intérêt";
-    private const USER_NOT_INTERESTED                    = "L'utilisateur ne possède pas ce centre d'intérêt";
-    private const REQUEST_SENT                           = "Envoyée";
-    private const NO_REQUEST_SENT                        = "Aucune demande envoyée";
-    private const RESOURCE_REMOVED                       = "Ressource supprimée";
-    private const SUPPRESSION_NOT_ALLOWED                = "Suppression non autorisée";
-    private const INSERTION_NOT_ALLOWED                  = "Insertion non autorisée";
-    private const INVALID_ROLE                           = "Rôle invalide";
-    private const REQUEST_FAILED                         = "La requète a échouée";
-    private const USER_NOT_USER = "Vous ne pouvez pas ajouter de centre d'intérêts à un autre utilisateur";
-
+    private const SUCCESS                 = "Centres d'interets trouvés";
+    private const NO_CONTENT              = "Rien n'a été trouvé";
+    private const USER_NOT_FOUND          = "Utilisateur introuvable";
+    private const ACCESS_OTHER_INTEREST   = "Tentative d'accès aux centres d'interets des autres";
+    private const USER_ALREADY_INTERESTED = "L'utilisateur possède déjà ce centre d'intérêt";
+    private const USER_NOT_INTERESTED     = "L'utilisateur ne possède pas ce centre d'intérêt";
+    private const REQUEST_SENT            = "Envoyée";
+    private const NO_REQUEST_SENT         = "Aucune demande envoyée";
+    private const RESOURCE_REMOVED        = "Ressource supprimée";
+    private const SUPPRESSION_NOT_ALLOWED = "Suppression non autorisée";
+    private const INSERTION_NOT_ALLOWED   = "Insertion non autorisée";
+    private const INVALID_ROLE            = "Rôle invalide";
+    private const REQUEST_FAILED          = "La requète a échouée";
+    private const USER_NOT_USER           = "Vous ne pouvez pas ajouter de centre d'intérêts à un autre utilisateur";
 
     private InteretModel $interetModel;
     private UserModel $userModel;
@@ -45,7 +44,7 @@ class InteretController extends BaseController {
         if (empty($data)) {
             $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
         } else {
-            $this->send(HTTPCodes::OK, $data, self::REQUEST_SENT);
+            $this->send(HTTPCodes::OK, $data, self::SUCCESS);
         }
     }
 
