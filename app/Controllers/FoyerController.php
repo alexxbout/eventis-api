@@ -8,7 +8,8 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
-class FoyerController extends BaseController {
+class FoyerController extends BaseController
+{
 
     private const NO_CONTENT                = "Rien n'a été trouvé";
     private const ALL_FOYERS                = "Tous les foyers";
@@ -20,42 +21,57 @@ class FoyerController extends BaseController {
 
     private FoyerModel $foyerModel;
 
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    {
         parent::initController($request, $response, $logger);
 
         $this->foyerModel = new FoyerModel();
     }
 
-    public function getAll() {
-        $data = $this->foyerModel->getAll();
-        if(empty($data)){
-            $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+    public function getAll()
+    {
+        if ($this->user->isAdmin() || $this->user->isDeveloper() || $this->user->isEducator()) {
+            $data = $this->foyerModel->getAll();
+            if (empty($data)) {
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_FOYERS);
+            }
         } else {
-            $this->send(HTTPCodes::OK, $data, self::ALL_FOYERS);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
     }
 
-    public function getAllByZip(int $zip) {
-        $data = $this->foyerModel->getByZip($zip);
-        if(empty($data)){
-            $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+    public function getAllByZip(int $zip)
+    {
+        if ($this->user->isAdmin() || $this->user->isDeveloper() || $this->user->isEducator()) {
+            $data = $this->foyerModel->getByZip($zip);
+            if (empty($data)) {
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::ALL_FOYERS_BY_ZIP . $zip);
+            }
         } else {
-            $this->send(HTTPCodes::OK, $data, self::ALL_FOYERS_BY_ZIP . $zip);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
-        
     }
 
-    public function getById(int $idFoyer) {
-        $data = $this->foyerModel->getById($idFoyer);
-        if(empty($data)){
-            $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+    public function getById(int $idFoyer)
+    {
+        if ($this->user->isAdmin() || $this->user->isDeveloper() || $this->user->isEducator()) {
+            $data = $this->foyerModel->getById($idFoyer);
+            if (empty($data)) {
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::FOYER_BY_ID . $idFoyer);
+            }
         } else {
-            $this->send(HTTPCodes::OK, $data, self::FOYER_BY_ID . $idFoyer);
+            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }
-        
     }
 
-    public function add() {
+    public function add()
+    {
         if ($this->user->isAdmin() || $this->user->isDeveloper()) {
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("foyer_add_validation");
