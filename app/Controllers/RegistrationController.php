@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 class RegistrationController extends BaseController {
 
     private const REGISTRATION_ERROR = "Erreur lors de l'ajout de l'inscription";
-    private const NO_CONTENT                    = "Rien n'a été trouvé";
+    private const NO_CONTENT         = "Rien n'a été trouvé";
     private const CODE_DOESNT_EXIST  = "Le code n'existe pas";
     private const INVALID_CODE       = "Code invalide";
     private const VALIDATION_ERROR   = "Erreur de validation";

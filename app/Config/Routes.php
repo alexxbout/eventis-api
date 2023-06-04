@@ -64,9 +64,9 @@ $routes->group("api", static function ($routes) {
             $routes->get("zip/(:num)",         "UserController::getByZip/$1");
             
             // Interests
-            $routes->get("(:num)/interest",           "InteretController::getInterestsByUser/$1");
-            $routes->post("(:num)/interest/(:num)",   "InteretController::add/$1/$2");
-            $routes->delete("(:num)/interest/(:num)", "InteretController::remove/$1/$2");
+            $routes->get("(:num)/interest",           "InterestController::getInterestsByUser/$1");
+            $routes->post("(:num)/interest/(:num)",   "InterestController::add/$1/$2");
+            $routes->delete("(:num)/interest/(:num)", "InterestController::remove/$1/$2");
 
             // Friends
             $routes->get("(:num)/friend",                  "FriendController::getAll/$1");
@@ -90,8 +90,7 @@ $routes->group("api", static function ($routes) {
 
         // Interests
         $routes->group("interest", static function ($routes) {
-            $routes->get("", "InteretController::getAll");
-            // TODO : routes pour ajouter et "supprimer" un interet
+            $routes->get("", "InterestController::getAll");
         });
 
         $routes->group("notifications", static function ($routes) {

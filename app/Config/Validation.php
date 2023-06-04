@@ -111,7 +111,8 @@ class Validation extends BaseConfig {
     // CODE
     // --------------------------------------------------------------------
     public $code_add_validation = [
-        "idFoyer" => "required|integer",
+        "idFoyer" => "permit_empty|integer",
+        "idRole"  => "permit_empty|integer",
         "expire"  => "required|valid_date[Y-m-d H:i:s]"
     ];
 
