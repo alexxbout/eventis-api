@@ -5,7 +5,7 @@ namespace App\Models;
 class FoyerModel extends BaseModel {
 
     public function getAll(): array {
-        return $this->db->table("foyer")->get()->getResultObject();
+        return $this->db->table("foyer")->select(["id", "city", "zip", "address"])->get()->getResultObject();
     }
 
     public function getById(int $id): object|null {
@@ -13,7 +13,7 @@ class FoyerModel extends BaseModel {
     }
 
     public function getByZip(int $zip): array {
-        return $this->db->table("foyer")->getWhere(["zip" => $zip])->getResultObject();
+        return $this->db->table("foyer")->select(["id", "city", "zip", "address"])->getWhere(["zip" => $zip])->getResultObject();
     }
 
     public function add(object $data): int {
