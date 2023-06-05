@@ -5,8 +5,8 @@ namespace App\Models;
 class FriendModel extends BaseModel {
 
     public function getAll(int $idUser): array {
-        $dataIdUser1 = $this->db->table("friend")->where("idUser1", $idUser)->get()->getResultObject();
-        $dataIdUser2 = $this->db->table("friend")->orWhere("idUser2", $idUser)->get()->getResultObject();
+        $dataIdUser1 = $this->db->table("friend")->select('idUser2')->where("idUser1", $idUser)->get()->getResultObject();
+        $dataIdUser2 = $this->db->table("friend")->select('idUser1')->orWhere("idUser2", $idUser)->get()->getResultObject();
         return array_merge($dataIdUser1, $dataIdUser2);
     }
 
