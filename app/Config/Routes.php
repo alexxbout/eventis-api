@@ -80,6 +80,9 @@ $routes->group("api", static function ($routes) {
             // Affinities
             $routes->get("(:num)/affinities",               "UserController::getAffinities/$1");
 
+            // Search
+            $routes->get("search/(:alphanum)",             "UserController::search/$1");
+
             $routes->group("blocked", static function ($routes) {
                 $routes->get("(:num)",           "BlockedController::getAll/$1");
                 $routes->get("(:num)/(:num)",    "BlockedController::isBlocked/$1/$2");

@@ -2,29 +2,36 @@
 
 namespace App\Models;
 
-class UserModel extends BaseModel {
+class UserModel extends BaseModel
+{
 
-    public function getAll(): array {
+    public function getAll(): array
+    {
         return $this->db->table("user")->get()->getResultObject();
     }
 
-    public function getById(int $id): object|null {
+    public function getById(int $id): object|null
+    {
         return $this->db->table("user")->getWhere(["id" => $id])->getRowObject();
     }
 
-    public function getByIdFoyer(int $idFoyer): array {
+    public function getByIdFoyer(int $idFoyer): array
+    {
         return $this->db->table("user")->getWhere(["idFoyer" => $idFoyer])->getResultObject();
     }
 
-    public function getByIdRole(int $idRole): array {
+    public function getByIdRole(int $idRole): array
+    {
         return $this->db->table("user")->getWhere(["idRole" => $idRole])->getResultObject();
     }
 
-    public function getByIdRef(int $idRef): array {
+    public function getByIdRef(int $idRef): array
+    {
         return $this->db->table("user")->getWhere(["idRef" => $idRef])->getResultObject();
     }
 
-    public function getByLogin(string $login): object|null {
+    public function getByLogin(string $login): object|null
+    {
         return $this->db->table("user")->getWhere(["login" => $login])->getRowObject();
     }
 
@@ -41,7 +48,8 @@ class UserModel extends BaseModel {
      * 
      * @return int ID of the newly added user or -1 if an error occurred
      */
-    public function add(string $lastname, string $firstname, string $login, string $password, int $idRole, int $idFoyer): int {
+    public function add(string $lastname, string $firstname, string $login, string $password, int $idRole, int $idFoyer): int
+    {
         $data = [
             "id"        => $this->getMax("user", "id") + 1,
             "lastname"  => $lastname,
@@ -61,49 +69,57 @@ class UserModel extends BaseModel {
         }
     }
 
-    public function updateData(int $idUser, object $data): bool {
+    public function updateData(int $idUser, object $data): bool
+    {
         $this->db->table("user")->update($data, ["id" => $idUser]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function updateLastLogin(int $id): bool {
+    public function updateLastLogin(int $id): bool
+    {
         $this->db->table("user")->update(["lastLogin" => date("Y-m-d H:i:s")], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function updateLastLogout(int $id): bool {
+    public function updateLastLogout(int $id): bool
+    {
         $this->db->table("user")->update(["lastLogout" => date("Y-m-d H:i:s")], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function updatePassword(int $id, string $password): bool {
+    public function updatePassword(int $id, string $password): bool
+    {
         $this->db->table("user")->update(["password" => $password], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function setActive(int $id, int $value): bool {
+    public function setActive(int $id, int $value): bool
+    {
         $this->db->table("user")->update(["active" => $value], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function getProfilPicture(int $id): string | null {
+    public function getProfilPicture(int $id): string | null
+    {
         $result = $this->db->table("user")->select("pic")->getWhere(["id" => $id])->getRow();
 
         return $result == null ? null : $result->pic;
     }
 
-    public function setProfilPicture(int $id, string|null $path): bool {
+    public function setProfilPicture(int $id, string|null $path): bool
+    {
         $this->db->table("user")->update(["pic" => $path], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function getAffinities(int $idUser): array | null {
+    public function getAffinities(int $idUser): array | null
+    {
         $sql = "SELECT u.id as idUser
                 FROM user u
                 JOIN foyer f ON u.idFoyer = f.id
@@ -135,11 +151,28 @@ class UserModel extends BaseModel {
         return $query->getResultObject();
     }
 
-    public function getUsersByZip(string $zip): array | null{
+    public function getUsersByZip(string $zip): array | null
+    {
         return $query = $this->db->table('user')
-        ->select('user.*')
-        ->join('foyer', 'user.idFoyer = foyer.id')
-        ->where('LEFT(foyer.zip, 2)', $zip)
-        ->get()->getResultObject();
+            ->select('user.*')
+            ->join('foyer', 'user.idFoyer = foyer.id')
+            ->where('LEFT(foyer.zip, 2)', $zip)
+            ->get()->getResultObject();
+    }
+
+    public function searchUsers(string $name): array
+    {
+        $name = strtolower($name);
+        return $this->db->table("user")
+            ->select('id, ', 'lastname', 'firstname', 'pseudo')
+            ->groupStart()
+            ->orLike('LOWER(firstname)', $name)
+            ->orLike('LOWER(lastname)', $name)
+            ->orLike('LOWER(CONCAT(firstname, " ", lastname))', $name)
+            ->orLike('LOWER(CONCAT(lastname, " ", firstname))', $name)
+            ->orLike('LOWER(pseudo)', $name)
+            ->groupEnd()
+            ->get()
+            ->getResultObject();
     }
 }

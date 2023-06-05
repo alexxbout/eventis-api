@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 class UserController extends BaseController {
 
     private const ALL_USERS                = "Tous les utilisateurs";
+    private const SEARCH_RESULTS           = "Resultats de la recherche";
     private const USER_WITH_ID             = "Utilisateur ";
     private const NO_CONTENT               = "Rien n'a été trouvé";
     private const ID_USER_DOESNT_EXIST     = "Utilisateur inconnu";
@@ -339,6 +340,15 @@ class UserController extends BaseController {
             }
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
+        }
+    }
+
+    public function search(string $name){
+        $data = $this->userModel->searchUsers($name);
+        if(empty($data)){
+            $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+        } else {
+            $this->send(HTTPCodes::OK, $data, self::SEARCH_RESULTS);
         }
     }
 }
