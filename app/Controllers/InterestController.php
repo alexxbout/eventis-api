@@ -6,13 +6,11 @@ use App\Utils\HTTPCodes;
 
 use App\Models\InteretModel;
 use App\Models\UserModel;
-// use App\Models\FriendRequestModel;
-// use App\Models\BlockedModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
-class InteretController extends BaseController {
+class InterestController extends BaseController {
 
     private const SUCCESS                 = "Centres d'interets trouvés";
     private const NO_CONTENT              = "Rien n'a été trouvé";

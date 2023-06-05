@@ -120,35 +120,41 @@ class UserModel extends BaseModel
 
     public function getAffinities(int $idUser): array | null
     {
-        $sql = "SELECT u.id as idUser
-                FROM user u
-                JOIN foyer f ON u.idFoyer = f.id
-                WHERE u.id <> :idUser:
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM friend fr
-                    WHERE (fr.idUser1 = :idUser: AND fr.idUser2 = u.id)
-                    OR (fr.idUser1 = u.id AND fr.idUser2 = :idUser:)
-                )
-                AND u.id NOT IN (
-                    SELECT idBlocked
-                    FROM blocked
-                    WHERE idUser = :idUser:
-                )
-                AND u.id NOT IN (
-                    SELECT idUser
-                    FROM blocked
-                    WHERE idBlocked = :idUser:
-                )
-                AND f.id = (
-                    SELECT idFoyer
-                    FROM user
-                    WHERE id = :idUser:
-                )";
 
-        $query = $this->db->query($sql, ["idUser" => $idUser]);
 
-        return $query->getResultObject();
+        $subquery = $this->db->table('friend fr')
+            ->select('1')
+            ->where('fr.idUser1', $idUser)
+            ->where('fr.idUser2 = u.id', null, false)
+            ->orWhere('fr.idUser1 = u.id', null, false)
+            ->where('fr.idUser2', $idUser)
+            ->limit(1)
+            ->getCompiledSelect();
+
+        $query = $this->db->table('user u')
+            ->select('u.id as idUser, u.lastname, u.firstname, u.login, u.pseudo, u.idRole, u.idFoyer')
+            ->join('foyer f', 'u.idFoyer = f.id')
+            ->where('u.id <>', $idUser)
+            ->where("NOT EXISTS ($subquery)", null, false)
+            ->whereNotIn('u.id', function ($builder) use ($idUser) {
+                $builder->select('idBlocked')
+                    ->from('blocked')
+                    ->where('idUser', $idUser);
+            })
+            ->whereNotIn('u.id', function ($builder) use ($idUser) {
+                $builder->select('idUser')
+                    ->from('blocked')
+                    ->where('idBlocked', $idUser);
+            })
+            ->where('f.id', function ($builder) use ($idUser) {
+                $builder->select('idFoyer')
+                    ->from('user')
+                    ->where('id', $idUser);
+            });
+
+        $result = $query->get()->getResult();
+
+        return $result;
     }
 
     public function getUsersByZip(string $zip): array | null

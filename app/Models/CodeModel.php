@@ -9,11 +9,11 @@ class CodeModel extends BaseModel {
     }
 
     public function getAllByFoyer(int $idFoyer): array {
-        return $this->db->table("code")->select(["id", "code", "idRole", "idFoyer"])->getWhere(["idFoyer" => $idFoyer])->getResultObject();
+        return $this->db->table("code")->getWhere(["idFoyer" => $idFoyer])->getResultObject();
     }
 
     public function getByCode(string $code): object|null {
-        return $this->db->table("code")->select(["id", "code", "idRole", "idFoyer"])->getWhere(["code" => $code])->getFirstRow();
+        return $this->db->table("code")->getWhere(["code" => $code])->getFirstRow();
     }
 
     public function checkExists(string $code): bool {
@@ -52,6 +52,6 @@ class CodeModel extends BaseModel {
     }
 
     private function getById(int $id): object|null {
-        return $this->db->table("code")->select(["id", "code", "idRole", "idFoyer"])->getWhere(["id" => $id])->getFirstRow();
+        return $this->db->table("code")->getWhere(["id" => $id])->getFirstRow();
     }
 }
