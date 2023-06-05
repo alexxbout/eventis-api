@@ -331,7 +331,7 @@ class UserController extends BaseController {
                 $data = array();
 
                 foreach ($affinities as $affinity) {
-                    $user = $this->userModel->getById($affinity->idUser);
+                    $user = $this->userModel->getByIdAffinities($affinity->idUser);
                     array_push($data, $user);
                 }
 

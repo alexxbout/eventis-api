@@ -15,6 +15,11 @@ class UserModel extends BaseModel
         return $this->db->table("user")->getWhere(["id" => $id])->getRowObject();
     }
 
+    public function getByIdAffinities(int $id): object|null
+    {
+        return $this->db->table("user")->select('id, lastname,firstname,login,pseudo,idRole,idFoyer,pic')->getWhere(["id" => $id])->getRowObject();
+    }
+
     public function getByIdFoyer(int $idFoyer): array
     {
         return $this->db->table("user")->getWhere(["idFoyer" => $idFoyer])->getResultObject();
@@ -120,8 +125,6 @@ class UserModel extends BaseModel
 
     public function getAffinities(int $idUser): array | null
     {
-
-
         $subquery = $this->db->table('friend fr')
             ->select('1')
             ->where('fr.idUser1', $idUser)
@@ -132,7 +135,7 @@ class UserModel extends BaseModel
             ->getCompiledSelect();
 
         $query = $this->db->table('user u')
-            ->select('u.id as idUser, u.lastname, u.firstname, u.login, u.pseudo, u.idRole, u.idFoyer')
+            ->select("u.id as idUser")
             ->join('foyer f', 'u.idFoyer = f.id')
             ->where('u.id <>', $idUser)
             ->where("NOT EXISTS ($subquery)", null, false)
@@ -154,6 +157,7 @@ class UserModel extends BaseModel
 
         $result = $query->get()->getResult();
 
+        log_message("error", $this->db->getLastQuery());
         return $result;
     }
 
