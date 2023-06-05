@@ -2,6 +2,8 @@
 
 namespace Config;
 
+use App\Controllers\SearchController;
+
 // Create a new instance of our RouteCollection class.
 $routes = Services::routes();
 
@@ -135,6 +137,8 @@ $routes->group("api", static function ($routes) {
             $routes->get("(:num)/participant",           "ParticipantController::getAll/$1");
             $routes->get("(:num)/participant/(:num)",    "ParticipantController::isParticipating/$1/$2");
         });
+
+        $routes->get("search/(:any)", 'SearchController::getSearch/$1');
     });
 });
 
