@@ -25,10 +25,11 @@ class SearchController extends BaseController
 
     public function getSearch(string $value)
     {
-        if (strlen($value) < 3) {
+        if (strlen($value) < 2) {
             return;
         } else {
-            $data = $this->searchModel->search($value);
+            $id = $this->user->getId();
+            $data = $this->searchModel->search($value,$id);
             if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
