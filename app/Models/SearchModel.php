@@ -19,6 +19,7 @@ class SearchModel extends BaseModel
             ->orLike("CONCAT(u.lastname, ' ', u.firstname)", $search, "both")
             ->orLike("CONCAT(u.firstname, ' ', u.lastname)", $search, "both")
         ->groupEnd()
+        ->limit(5)
         ->get()
         ->getResultObject();
     }
