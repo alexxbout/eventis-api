@@ -18,6 +18,8 @@ class EventController extends BaseController {
     private const EVENT_BY_ID               = "Evénement d'id ";
     private const EVENT_BY_ID_NOT_CANCELED  = "Evénement non annulé d'id ";
     private const EVENT_BY_ZIP              = "Evénements du code postal ";
+    private const EVENT_BY_ZIP_AND_DATE              = "Evénements du code postal ";
+    private const EVENT_BY_ZIP_AND_DATE2             = " pour le ";
     private const EVENT_BY_ZIP_NOT_CANCELED = "Evénements non annulés du code postal ";
     private const EVENT_DOES_NOT_EXIST      = "L'événement n'existe pas";
     private const EVENT_ALREADY_CANCELED    = "L'événement est déjà annulé";
@@ -123,6 +125,24 @@ class EventController extends BaseController {
             }
         }
     }
+
+
+    public function getByDayAndZip(int $date,string $zip) {
+        // Check if account should see archived events
+        if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator() || $this->user->isUser()) {
+            $dateSearch = date("Y-m-d", $date);
+            $data = $this->eventModel->getByDayAndZip($dateSearch,$zip);
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $msg= self::EVENT_BY_ZIP . $zip . self::EVENT_BY_ZIP_AND_DATE2 . $dateSearch;
+                $this->send(HTTPCodes::OK, $data, $msg);
+            }
+        }
+    }
+
+
+    
 
     public function cancel($idEvent) {
         // Account can cancel event

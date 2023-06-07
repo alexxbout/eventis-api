@@ -95,6 +95,22 @@ class EventModel extends BaseModel
         return $result;
     }
 
+    public function getByDayAndZip(string $date, string $zip): array
+    {
+        $query = $this->db->table("event")
+            ->orderBy("start", "ASC")
+            ->select("event.*, event_categorie.emoji")
+            ->join("event_categorie", "event_categorie.id = event.idCategorie")
+            ->where("zip", $zip)
+            ->where("canceled", 0)
+            ->where("start", $date);
+
+        $result = $query->get()->getResultObject();
+
+        return $result;
+    }
+
+
     public function cancel(int $id, string $reason): bool
     {
         $this->db->table("event")->update(["canceled" => true, "reason" => $reason], ["id" => $id]);

@@ -125,6 +125,7 @@ $routes->group("api", static function ($routes) {
             $routes->get("zip/(:alphanum)", "EventController::getByZip/$1");
             $routes->get("(:num)",          "EventController::getById/$1");
             $routes->get("categories",    "EventController::getAllTypes");
+            $routes->get("cal/(:num)/(:alphanum)",    "EventController::getByDayAndZip/$1/$2");
             $routes->post("",               "EventController::add");
             $routes->put("(:num)",          "EventController::updateData/$1");
             $routes->put("cancel/(:num)",   "EventController::cancel/$1");
