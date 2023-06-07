@@ -59,16 +59,16 @@ class UserController extends BaseController {
     }
 
     public function getById(int $id) {
-        if ($this->user->isDeveloper() || $this->user->isAdmin()) {
+        // if ($this->user->isDeveloper() || $this->user->isAdmin()) {
             $data = $this->userModel->getById($id);
             if ($data == null) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::USER_WITH_ID . $id);
             }
-        } else {
-            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
-        }
+        // } else {
+        //     $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
+        // }
     }
 
     public function getByIdFoyer(int $idFoyer) {
