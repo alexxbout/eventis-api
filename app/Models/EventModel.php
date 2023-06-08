@@ -5,27 +5,22 @@ namespace App\Models;
 use CodeIgniter\Database\RawSql;
 use DateTime;
 
-class EventModel extends BaseModel
-{
+class EventModel extends BaseModel {
 
-    public function getAll(): array
-    {
+    public function getAll(): array {
         return $this->db->table("event")->get()->getResultObject();
     }
 
-    public function getAllTypes(): array
-    {
+    public function getAllTypes(): array {
         return $this->db->table("event_categorie")
             ->get()->getResultObject();
     }
 
-    public function getAllNotCanceled(): array
-    {
+    public function getAllNotCanceled(): array {
         return $this->db->table("event")->getWhere(["canceled" => 0])->getResultObject();
     }
 
-    public function getById(int $id): object|null
-    {
+    public function getById(int $id): object|null {
         return $this->db
             ->table("event")
             ->select("event.*, event_categorie.emoji")
@@ -34,14 +29,12 @@ class EventModel extends BaseModel
             ->getRowObject();
     }
 
-    public function getIdFoyerByIdEvent(int $idEvent): int
-    {
+    public function getIdFoyerByIdEvent(int $idEvent): int {
         $result = $this->db->table("event")->select("idFoyer")->getWhere(["id" => $idEvent])->getRow();
         return $result == null ? -1 : $result;
     }
 
-    public function getByIdNotCanceled(int $id): object |  null
-    {
+    public function getByIdNotCanceled(int $id): object |  null {
         return $this->db
             ->table("event")
             ->select("event.*, event_categorie.emoji")
@@ -50,8 +43,7 @@ class EventModel extends BaseModel
             ->getRowObject();
     }
 
-    public function getByIdCanceled(int $id): array
-    {
+    public function getByIdCanceled(int $id): array {
         return $this->db
             ->table("event")
             ->select("event.*, event_categorie.emoji")
@@ -60,8 +52,7 @@ class EventModel extends BaseModel
             ->getResultObject();
     }
 
-    public function getByZip(string $zip): array
-    {
+    public function getByZip(string $zip): array {
         $date = new DateTime();
         $date->modify("-7 day");
 
@@ -77,8 +68,7 @@ class EventModel extends BaseModel
         return $result;
     }
 
-    public function getByZipNotCanceled(string $zip): array
-    {
+    public function getByZipNotCanceled(string $zip): array {
         $date = new DateTime();
         $date->modify("-7 day");
 
@@ -95,8 +85,7 @@ class EventModel extends BaseModel
         return $result;
     }
 
-    public function getByDayAndZip(string $date, string $zip): array
-    {
+    public function getByDayAndZip(string $date, string $zip): array {
         $query = $this->db->table("event")
             ->orderBy("start", "ASC")
             ->select("event.*, event_categorie.emoji")
@@ -110,30 +99,38 @@ class EventModel extends BaseModel
         return $result;
     }
 
+    public function getEventForTime($timelapse): array {
+        $date = date('Y-m-d');
+        $lapse = "+" . $timelapse . " months";
+        $endDate = date('Y-m-d', strtotime($lapse));
 
-    public function cancel(int $id, string $reason): bool
-    {
+        return $this->db->table('event')
+            ->select('DATE(start) AS start')
+            ->distinct()
+            ->where('start >=', $date)
+            ->where('start <', $endDate)
+            ->get()->getResultObject();
+    }
+
+    public function cancel(int $id, string $reason): bool {
         $this->db->table("event")->update(["canceled" => true, "reason" => $reason], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function uncancel(int $id): bool
-    {
+    public function uncancel(int $id): bool {
         $this->db->table("event")->update(["canceled" => false, "reason" => null], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function updateData(int $id, object $data): bool
-    {
+    public function updateData(int $id, object $data): bool {
         $this->db->table("event")->update($data, ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function add(object $data): int
-    {
+    public function add(object $data): int {
         $data->id = $this->getMax("event", "id") + 1;
         $this->db->table("event")->insert($data);
         $this->db->insertID();
@@ -145,15 +142,13 @@ class EventModel extends BaseModel
         }
     }
 
-    public function addImage(int $id, string $image): bool
-    {
+    public function addImage(int $id, string $image): bool {
         $this->db->table("event")->update(["pic" => $image], ["id" => $id]);
 
         return $this->isLastQuerySuccessfull();
     }
 
-    public function getImage(int $id): string | null
-    {
+    public function getImage(int $id): string | null {
         $result = $this->db->table("event")->select("pic")->getWhere(["id" => $id])->getRow();
         return $result == null ? null : $result->pic;
     }

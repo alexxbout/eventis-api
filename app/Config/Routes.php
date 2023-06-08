@@ -121,16 +121,17 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("event", static function ($routes) {
-            $routes->get("",                "EventController::getAll");
-            $routes->get("zip/(:alphanum)", "EventController::getByZip/$1");
-            $routes->get("(:num)",          "EventController::getById/$1");
-            $routes->get("categories",    "EventController::getAllTypes");
-            $routes->get("cal/(:num)/(:alphanum)",    "EventController::getByDayAndZip/$1/$2");
-            $routes->post("",               "EventController::add");
-            $routes->put("(:num)",          "EventController::updateData/$1");
-            $routes->put("cancel/(:num)",   "EventController::cancel/$1");
-            $routes->put("uncancel/(:num)", "EventController::uncancel/$1");
-            $routes->post("image/(:num)",    "EventController::addImage/$1");
+            $routes->get("",                       "EventController::getAll");
+            $routes->get("zip/(:alphanum)",        "EventController::getByZip/$1");
+            $routes->get("(:num)",                 "EventController::getById/$1");
+            $routes->get("categories",             "EventController::getAllTypes");
+            $routes->get("cal/(:num)/(:alphanum)", "EventController::getByDayAndZip/$1/$2");
+            $routes->get("cal/(:num)",             "EventController::getByTime/$1");
+            $routes->post("",                      "EventController::add");
+            $routes->put("(:num)",                 "EventController::updateData/$1");
+            $routes->put("cancel/(:num)",          "EventController::cancel/$1");
+            $routes->put("uncancel/(:num)",        "EventController::uncancel/$1");
+            $routes->post("image/(:num)",          "EventController::addImage/$1");
 
             // Participants
             $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2");

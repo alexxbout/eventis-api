@@ -18,8 +18,7 @@ class EventController extends BaseController {
     private const EVENT_BY_ID               = "Evénement d'id ";
     private const EVENT_BY_ID_NOT_CANCELED  = "Evénement non annulé d'id ";
     private const EVENT_BY_ZIP              = "Evénements du code postal ";
-    private const EVENT_BY_ZIP_AND_DATE              = "Evénements du code postal ";
-    private const EVENT_BY_ZIP_AND_DATE2             = " pour le ";
+    private const EVENT_BY_ZIP_AND_DATE     = "Evénements du code postal ";
     private const EVENT_BY_ZIP_NOT_CANCELED = "Evénements non annulés du code postal ";
     private const EVENT_DOES_NOT_EXIST      = "L'événement n'existe pas";
     private const EVENT_ALREADY_CANCELED    = "L'événement est déjà annulé";
@@ -28,7 +27,8 @@ class EventController extends BaseController {
     private const EVENT_UNCANCELED          = "L'événement a été restauré";
     private const EVENT_UPDATED             = "L'événement a été mis à jour";
     private const EVENT_ADDED               = "L'événement a été ajouté";
-    private const INVALID_ROLE               = "Rôle invalide";
+    private const EVENT_BY_TIME             = "Evénements sur x mois";
+    private const INVALID_ROLE              = "Rôle invalide";
 
     private const FILE_ALREADY_MOVED        = "Le fichier a déjà été déplacé";
     private const IMAGE_UPLOADED            = "L'image a été téléchargée";
@@ -52,14 +52,14 @@ class EventController extends BaseController {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
             $data = $this->eventModel->getAll();
-            if(empty($data)){
+            if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::ALL_EVENTS);
             }
         } else { // Account should see ONLY non-canceled events
             $data = $this->eventModel->getAllNotCanceled();
-            if(empty($data)){
+            if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::ALL_NON_CANCELED_EVENTS);
@@ -71,14 +71,14 @@ class EventController extends BaseController {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
             $data = $this->eventModel->getAllTypes();
-            if(empty($data)){
+            if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::ALL_EVENTS);
             }
         } else { // Account should see ONLY non-canceled events
             $data = $this->eventModel->getAllNotCanceled();
-            if(empty($data)){
+            if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::ALL_NON_CANCELED_EVENTS);
@@ -90,20 +90,18 @@ class EventController extends BaseController {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
             $data = $this->eventModel->getById($id);
-            if($data == null){
+            if ($data == null) {
                 $this->send(HTTPCodes::NOT_FOUND, $data, self::EVENT_DOES_NOT_EXIST);
-            }
-            else{
+            } else {
                 $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ID . $id);
             }
         } else { // Account should see ONLY non-canceled event
             $data = $this->eventModel->getByIdNotCanceled($id);
-            if($data == null){
+            if ($data == null) {
                 $this->send(HTTPCodes::NOT_FOUND, $data, self::EVENT_DOES_NOT_EXIST);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ID_NOT_CANCELED . $id);
             }
-           
         }
     }
 
@@ -111,14 +109,14 @@ class EventController extends BaseController {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
             $data = $this->eventModel->getByZip($zip);
-            if(empty($data)){
+            if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP . $zip);
             }
         } else { // Account should see ONLY non-canceled events
             $data = $this->eventModel->getByZipNotCanceled($zip);
-            if(empty($data)){
+            if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
                 $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP_NOT_CANCELED . $zip);
@@ -126,23 +124,30 @@ class EventController extends BaseController {
         }
     }
 
+    public function getByDayAndZip(int $date, string $zip) {
+        $date = date("Y-m-d", $date / 1000);
+        $data = $this->eventModel->getByDayAndZip($date, $zip);
 
-    public function getByDayAndZip(int $date,string $zip) {
-        // Check if account should see archived events
-        if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator() || $this->user->isUser()) {
-            $dateSearch = date("Y-m-d", $date);
-            $data = $this->eventModel->getByDayAndZip($dateSearch,$zip);
-            if(empty($data)){
-                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
-            } else {
-                $msg= self::EVENT_BY_ZIP . $zip . self::EVENT_BY_ZIP_AND_DATE2 . $dateSearch;
-                $this->send(HTTPCodes::OK, $data, $msg);
-            }
+        if (empty($data)) {
+            $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+        } else {
+            $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP . $zip . self::EVENT_BY_ZIP_AND_DATE . $date);
         }
     }
 
+    public function getByTime(int $time) {
+        $data = $this->eventModel->getEventForTime($time);
 
-    
+        $data = array_map(function($object) {
+            return $object->start;
+        }, $data);
+
+        if (empty($data)) {
+            $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+        } else {
+            $this->send(HTTPCodes::OK, $data, self::EVENT_BY_TIME . $time);
+        }
+    }
 
     public function cancel($idEvent) {
         // Account can cancel event
@@ -264,7 +269,7 @@ class EventController extends BaseController {
 
             //create notif of event in all users of same region
             $regionalUsers = $this->userModel->getUsersByZip($data->zip);
-            foreach($regionalUsers as $user){
+            foreach ($regionalUsers as $user) {
                 $this->notificationModel->addNotification($user->id, $data->id, 1); //$idUser(s), $idEvent, 1=typeEvent
             }
 
