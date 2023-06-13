@@ -60,16 +60,16 @@ class UserController extends BaseController {
     }
 
     public function getById(int $id) {
-        if ($this->user->isDeveloper() || $this->user->isAdmin()) {
-            $data = $this->userModel->getById($id);
-            if ($data == null) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
-            } else {
-                $this->send(HTTPCodes::OK, $data, self::USER_WITH_ID . $id);
-            }
+        // if ($this->user->isDeveloper() || $this->user->isAdmin()) {
+        $data = $this->userModel->getById($id);
+        if ($data == null) {
+            $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
         } else {
-            $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
+            $this->send(HTTPCodes::OK, $data, self::USER_WITH_ID . $id);
         }
+        // } else {
+        //     $this->send(HTTPCodes::FORBIDDEN, null, self::FORBIDDEN);
+        // }
     }
 
     public function getByIdFoyer(int $idFoyer) {
@@ -90,7 +90,7 @@ class UserController extends BaseController {
 
     public function getByZip(int $zip) {
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            
+
             $data = $this->userModel->getUsersByZip($zip);
             if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
@@ -152,21 +152,15 @@ class UserController extends BaseController {
 
             $data = $this->request->getJSON();
 
-            // Supprimer le mot de passe et l'ID du corps de la requête
-            if (isset($data->password)) {
-                unset($data->password); // Nous ne voulons pas mettre à jour le mot de passe avec cette méthode
+            unset($data->password, $data->id, $data->idFoyer, $data->idRole, $data->login);
+
+            if (empty($data->lastname)) {
+                unset($data->lastname);
             }
 
-            if (isset($data->id)) {
-                unset($data->id); // Nous ne voulons pas mettre à jour l'ID avec cette méthode
+            if (empty($data->firstname)) {
+                unset($data->firstname);
             }
-
-            if (isset($data->idFoyer)) {
-                unset($data->idFoyer); // Nous ne voulons pas mettre à jour l'ID avec cette méthode
-            }
-
-            // Vérifier si le nom de famille et le prénom ne sont pas vides
-            // TODO
 
             $this->userModel->updateData($idUser, $data);
 
@@ -231,8 +225,9 @@ class UserController extends BaseController {
     public function updatePassword(int $idUser) {
         if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
             if ($this->userModel->getById($idUser) == null) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
+            
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("user_update_password_validation");
 
@@ -247,10 +242,10 @@ class UserController extends BaseController {
                 return $this->send(HTTPCodes::BAD_REQUEST, null, self::NEW_PASSWORD_SAME_AS_OLD);
             }
 
-            $user = $this->userModel->getById($data->id);
+            $oldPassword = $this->userModel->getPassword($data->id);
 
             // Vérifier si l'ancien mot de passe est correct
-            if (!password_verify($data->oldPassword, $user->password)) {
+            if (!password_verify($data->oldPassword, $oldPassword)) {
                 return $this->send(HTTPCodes::BAD_REQUEST, null, self::OLD_PASSWORD_INCORRECT);
             }
 
@@ -332,7 +327,7 @@ class UserController extends BaseController {
                 $data = array();
 
                 foreach ($affinities as $affinity) {
-                    $user = $this->userModel->getById($affinity->idUser);
+                    $user = $this->userModel->getByIdAffinities($affinity->idUser);
                     array_push($data, $user);
                 }
 

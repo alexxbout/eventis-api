@@ -54,32 +54,62 @@ class EventModel extends BaseModel {
 
     public function getByZip(string $zip): array {
         $date = new DateTime();
-
         $date->modify("-7 day");
 
-        $sql = "zip = '$zip' AND canceled = 1 AND start >= '" . $date->format("Y-m-d H:i:s") . "'";
-
-        return $this->db->table("event")
+        $query = $this->db->table("event")
             ->orderBy("start", "ASC")
             ->select("event.*, event_categorie.emoji")
             ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->getWhere(new RawSql($sql))
-            ->getResultObject();
+            ->where("zip", $zip)
+            ->where("start >=", $date->format("Y-m-d H:i:s"));
+
+        $result = $query->get()->getResultObject();
+
+        return $result;
     }
 
     public function getByZipNotCanceled(string $zip): array {
         $date = new DateTime();
-
         $date->modify("-7 day");
 
-        $sql = "zip = '$zip' AND canceled = 0 AND start >= '" . $date->format("Y-m-d H:i:s") . "'";
-
-        return $this->db->table("event")
+        $query = $this->db->table("event")
             ->orderBy("start", "ASC")
             ->select("event.*, event_categorie.emoji")
             ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->getWhere(new RawSql($sql))
-            ->getResultObject();
+            ->where("zip", $zip)
+            ->where("canceled", 0)
+            ->where("start >=", $date->format("Y-m-d H:i:s"));
+
+        $result = $query->get()->getResultObject();
+
+        return $result;
+    }
+
+    public function getByDayAndZip(string $date, string $zip): array {
+        $query = $this->db->table("event")
+            ->orderBy("start", "ASC")
+            ->select("event.*, event_categorie.emoji")
+            ->join("event_categorie", "event_categorie.id = event.idCategorie")
+            ->where("zip", $zip)
+            ->where("canceled", 0)
+            ->where("start", $date);
+
+        $result = $query->get()->getResultObject();
+
+        return $result;
+    }
+
+    public function getEventForTime($timelapse): array {
+        $date = date('Y-m-d');
+        $lapse = "+" . $timelapse . " months";
+        $endDate = date('Y-m-d', strtotime($lapse));
+
+        return $this->db->table('event')
+            ->select('DATE(start) AS start')
+            ->distinct()
+            ->where('start >=', $date)
+            ->where('start <', $endDate)
+            ->get()->getResultObject();
     }
 
     public function cancel(int $id, string $reason): bool {

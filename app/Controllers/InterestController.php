@@ -47,19 +47,15 @@ class InterestController extends BaseController {
     }
 
     public function getInterestsByUser($idUser) {
-        if ($this->user->isDeveloper() || $this->user->isEducator() || $this->user->isUser()) {
-            if ($this->userModel->getById($idUser) == null) {
-                return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
-            } else {
-                $data = $this->interetModel->getInterestByUser($idUser);
-                if (empty($data)) {
-                    $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
-                } else {
-                    $this->send(HTTPCodes::OK, $data, self::SUCCESS);
-                }
-            }
+        if ($this->userModel->getById($idUser) == null) {
+            return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         } else {
-            $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
+            $data = $this->interetModel->getInterestByUser($idUser);
+            if (empty($data)) {
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::SUCCESS);
+            }
         }
     }
 

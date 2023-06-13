@@ -66,7 +66,7 @@ class Validation extends BaseConfig {
 
     public $user_update_password_validation = [
         "id"          => "required|integer",
-        "oldPassword" => "required|regex_match[" . Regex::PASSWORD . "]",
+        "oldPassword" => "required",
         "newPassword" => "required|regex_match[" . Regex::PASSWORD . "]"
     ];
 

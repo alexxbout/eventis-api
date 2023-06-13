@@ -2,6 +2,8 @@
 
 namespace Config;
 
+use App\Controllers\SearchController;
+
 // Create a new instance of our RouteCollection class.
 $routes = Services::routes();
 
@@ -57,6 +59,10 @@ $routes->group("api", static function ($routes) {
             $routes->put("(:num)/conversation/(:num)/(:num)",   "MessageController::markAsRead/$1/$2/$3"); 
             $routes->get("(:num)/conversation/(:num)/(:num)",   "MessageController::getConversation/$1/$2/$3"); //$2 = $idFriend     $3 = $idConversation
         });
+        
+        $routes->group("emoji", static function ($routes) {
+            $routes->get("", "EmojiController::getAll");
+        });
 
         $routes->group("user", static function ($routes) {
             $routes->get("",                  "UserController::getAll");
@@ -69,7 +75,7 @@ $routes->group("api", static function ($routes) {
             $routes->put("reactivate/(:num)", "UserController::reactivateAccount/$1");
             $routes->put("password/(:num)",   "UserController::updatePassword/$1");
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");
-            $routes->get("zip/(:num)",         "UserController::getByZip/$1");
+            $routes->get("zip/(:num)",        "UserController::getByZip/$1");
             
             // Interests
             $routes->get("(:num)/interest",           "InterestController::getInterestsByUser/$1");
@@ -130,15 +136,17 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("event", static function ($routes) {
-            $routes->get("",                "EventController::getAll");
-            $routes->get("zip/(:alphanum)", "EventController::getByZip/$1");
-            $routes->get("(:num)",          "EventController::getById/$1");
-            $routes->get("categories",    "EventController::getAllTypes");
-            $routes->post("",               "EventController::add");
-            $routes->put("(:num)",          "EventController::updateData/$1");
-            $routes->put("cancel/(:num)",   "EventController::cancel/$1");
-            $routes->put("uncancel/(:num)", "EventController::uncancel/$1");
-            $routes->post("image/(:num)",    "EventController::addImage/$1");
+            $routes->get("",                       "EventController::getAll");
+            $routes->get("zip/(:alphanum)",        "EventController::getByZip/$1");
+            $routes->get("(:num)",                 "EventController::getById/$1");
+            $routes->get("categories",             "EventController::getAllTypes");
+            $routes->get("cal/(:num)/(:alphanum)", "EventController::getByDayAndZip/$1/$2");
+            $routes->get("cal/(:num)",             "EventController::getByTime/$1");
+            $routes->post("",                      "EventController::add");
+            $routes->put("(:num)",                 "EventController::updateData/$1");
+            $routes->put("cancel/(:num)",          "EventController::cancel/$1");
+            $routes->put("uncancel/(:num)",        "EventController::uncancel/$1");
+            $routes->post("image/(:num)",          "EventController::addImage/$1");
 
             // Participants
             $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2");
@@ -146,6 +154,8 @@ $routes->group("api", static function ($routes) {
             $routes->get("(:num)/participant",           "ParticipantController::getAll/$1");
             $routes->get("(:num)/participant/(:num)",    "ParticipantController::isParticipating/$1/$2");
         });
+
+        $routes->get("search/(:any)", 'SearchController::getSearch/$1');
     });
 });
 
