@@ -1,15 +1,38 @@
-
-Ce projet à été porté par Alexandre Boutinaud, Emma Le Brenn, Hoël Girard et Derek Victor entre le 19 mai 2023 et le 16 juin 2023. 
-Durant cette periode, nous avons developpé une application web VueJS ainsi qu’une API REST (PHP CodeIgniter 4) associée à une base de données.
-Le besoin traité par ce projet est à la  fois réel et nécessaire dans le contexte du projet de fin de Licence. Diversia est avant tout une application web destinée aux personnes en situation de handicap résidant dans des foyers d'accompagnement et de prise en charge. 
-Ce projet est réalisé à la demande d’utilisateurs d’un foyer, et répond à une demande sans réponse jusqu’à aujourd'hui. 
-L’application intègre différents concepts tels que l'authentification des utilisateurs, la mise en place de rôles, la gestion d'événements, de localisation, de relation entre les utilisateurs et la notion de structure d’organisation (foyers). 
+Pour fonctionner, l'application necessite:
+une base de données MySQL,
+l'application VueJS,
+l'API CodeIgniter.
 
 
-Langages et frameworks: 
-API: PHP 8.0 et CodeIgniter 4
-Application web: VueJS 3, Axios pour les appels à l’API
-Base de données: SQL
 
 
-Le code est privé et est la propriété exclusive des membres actifs du projet cités au début de la préface. 
+Pour faire fonctionner ces projets, il est necessaire de disposer de composer (PHP)
+et de node (JS)
+
+Installation des prérequis: 
+XAMPP: https://www.apachefriends.org/index.html
+Composer : https://getcomposer.org/download/
+Initialisation du depot git:
+git init
+git clone <reposetory (SSH or HTTPS)>
+
+Import de la base de données:
+- Necessite MySQL (fourni avec XAMPP) et phpMyAdmin
+- Importer le script fourni
+- En cas de soucis, remplacer l'encodage des tables dans le script par: utf8mb4_unicode_ci
+
+Pour l'API:
+- Cloner le depot,
+- Éxecuter : composer install
+- Copier le fichier env, le renommer en .env et le mettre à jour
+- Lancer l'API: php spark serve
+
+Pour l'application:
+- Cloner le depot
+- Éxecuter : npm install
+- Lancer l'appli en developement: npm run dev
+
+Dans les deux cas, le fichier d'environement .env est a editer afin de faire correspondre les adresses de la base de données, de l'API et de l'application.
+Les tests de l'API on été réalisés sur API Talend Tester, et sont privés.
+
+Extension Chrome Talend Tester : https://chrome.google.com/webstore/detail/talend-api-tester-free-ed/aejoelaoggembcahagimdiliamlcdmfm
