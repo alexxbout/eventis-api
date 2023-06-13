@@ -120,8 +120,6 @@ class UserModel extends BaseModel
 
     public function getAffinities(int $idUser): array | null
     {
-
-
         $subquery = $this->db->table('friend fr')
             ->select('1')
             ->where('fr.idUser1', $idUser)

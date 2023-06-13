@@ -50,6 +50,14 @@ $routes->group("api", static function ($routes) {
     });
 
     $routes->group("v1", static function ($routes) {
+
+        $routes->group("inbox", static function ($routes){
+            $routes->get("(:num)",                              "ConversationController::getAllConversations/$1"); //$1 = $idUser
+            $routes->post("(:num)/conversation/(:num)/(:num)",  "MessageController::sendMessage/$1/$2/$3");
+            $routes->put("(:num)/conversation/(:num)/(:num)",   "MessageController::markAsRead/$1/$2/$3"); 
+            $routes->get("(:num)/conversation/(:num)/(:num)",   "MessageController::getConversation/$1/$2/$3"); //$2 = $idFriend     $3 = $idConversation
+        });
+
         $routes->group("user", static function ($routes) {
             $routes->get("",                  "UserController::getAll");
             $routes->get("(:num)",            "UserController::getById/$1");

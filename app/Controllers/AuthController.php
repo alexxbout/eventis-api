@@ -65,7 +65,7 @@ class AuthController extends BaseController {
         }
 
         // Mettre à jour lastLogin
-        $this->userModel->updateLastLogin($user->id);
+        //$this->userModel->updateLastLogin($user->id);
 
         // Expiration du token : 24h en production, 1 semaine en développement
         $exp = getenv("CI_ENVIRONMENT") === "production" ? $this->expiration_prod : $this->expiration_dev;

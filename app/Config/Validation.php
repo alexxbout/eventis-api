@@ -135,4 +135,14 @@ class Validation extends BaseConfig {
         "zip"     => "required|max_length[5]",
         "address" => "required|max_length[50]"
     ];
+
+    // --------------------------------------------------------------------
+    // MESSAGE
+    // --------------------------------------------------------------------
+    public $conversation_add_validation = [
+        "idSender"      => "required|integer",
+        "idReceiver"    => "required|integer",
+        "content"       => "required",
+        "sentAt"        => "required|valid_date[Y-m-d H:i:s]"
+    ];
 }
