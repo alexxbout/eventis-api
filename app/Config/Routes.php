@@ -52,6 +52,11 @@ $routes->group("api", static function ($routes) {
     });
 
     $routes->group("v1", static function ($routes) {
+
+        $routes->group("emoji", static function ($routes) {
+            $routes->get("", "EmojiController::getAll");
+        });
+
         $routes->group("user", static function ($routes) {
             $routes->get("",                  "UserController::getAll");
             $routes->get("(:num)",            "UserController::getById/$1");
@@ -63,7 +68,7 @@ $routes->group("api", static function ($routes) {
             $routes->put("reactivate/(:num)", "UserController::reactivateAccount/$1");
             $routes->put("password/(:num)",   "UserController::updatePassword/$1");
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");
-            $routes->get("zip/(:num)",         "UserController::getByZip/$1");
+            $routes->get("zip/(:num)",        "UserController::getByZip/$1");
             
             // Interests
             $routes->get("(:num)/interest",           "InterestController::getInterestsByUser/$1");
