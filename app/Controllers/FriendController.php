@@ -222,26 +222,27 @@ class FriendController extends BaseController {
         }
     }
 
-
-    public function isPending(int $idUser, $idUser2) {
-        if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idUser2) == null) {
+    public function isPending(int $idRequester, int $idRequested) {
+        if ($this->userModel->getById($idRequester) == null || $this->userModel->getById($idRequested) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         }
 
-        if ($this->friendModel->isFriend($idUser, $idUser2)) {
+        if ($this->friendModel->isFriend($idRequester, $idRequested)) {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::USERS_ALREADY_FRIENDS);
         }
 
-        $pending = $this->friendModel->isPending($idUser, $idUser2);
+        $data = $this->friendModel->isPending($idRequester, $idRequested);
+
+        $isActive = isset($data);
 
         if (!$this->user->isDeveloper()) {
-            if (($this->user->getId() == $idUser || $this->user->getId() == $idUser2)) {
-                $this->send(HTTPCodes::OK, ["pending" => $pending], $pending ? self::USERS_PENDING_REQUESTS : self::NO_PENDING_REQUESTS);
+            if (($this->user->getId() == $idRequester || $this->user->getId() == $idRequested)) {
+                $this->send(HTTPCodes::OK, ["pending" => $isActive, "value" => $data], $isActive ? self::USERS_PENDING_REQUESTS : self::NO_PENDING_REQUESTS);
             } else {
                 $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
             }
         } else {
-            $this->send(HTTPCodes::OK, ["pending" => $pending], $pending ? self::USERS_PENDING_REQUESTS : self::NO_PENDING_REQUESTS);
+            $this->send(HTTPCodes::OK, ["pending" => $isActive, "value" => $data], $isActive ? self::USERS_PENDING_REQUESTS : self::NO_PENDING_REQUESTS);
         }
     }
 }

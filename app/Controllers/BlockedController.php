@@ -10,11 +10,10 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
-class BlockedController extends BaseController
-{
+class BlockedController extends BaseController {
 
     private const ALL                     = "Tous les utilisateurs bloqués";
-    private const NO_CONTENT                = "Rien n'a été trouvé";
+    private const NO_CONTENT              = "Rien n'a été trouvé";
     private const BLOCKED_USER            = "Utilisateur bloqué";
     private const USER_ALREADY_BLOCKED    = "Utilisateur déjà bloqué";
     private const CANNOT_BLOCK_YOURSELF   = "Vous ne pouvez pas vous bloquer vous-même";
@@ -23,16 +22,14 @@ class BlockedController extends BaseController
     private const USER_NOT_BLOCKED        = "Utilisateur n'était pas bloqué";
     private const NOT_YOUR_ACC            = "Vous ne pouvez pas gérer le compte de quelqu'un d'autre";
     private const USER_DOESNT_EXIST       = "Utilisateur n'existe pas";
-    private const USER_SAME_ID = "Les deux utilisateurs fournis sont les mêmes ";
-    private const INVALID_ROLE                           = "Rôle invalide";
-
+    private const USER_SAME_ID            = "Les deux utilisateurs fournis sont les mêmes ";
+    private const INVALID_ROLE            = "Rôle invalide";
 
     private BlockedModel $blockedModel;
     private FriendModel $friendModel;
     private UserModel $userModel;
 
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
-    {
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
 
         $this->blockedModel = new BlockedModel();
@@ -40,8 +37,7 @@ class BlockedController extends BaseController
         $this->userModel = new UserModel();
     }
 
-    public function getAll(int $idUser)
-    {
+    public function getAll(int $idUser) {
         //dev peut tout voir, autres utilisateurs ne voient que leurs propres listes bloquees
         if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
             $exists = $this->blockedModel->getAll($idUser);
@@ -55,8 +51,7 @@ class BlockedController extends BaseController
         }
     }
 
-    public function add(int $idUser, int $idBlocked)
-    {
+    public function add(int $idUser, int $idBlocked) {
         if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
             if ($this->userModel->getById($idBlocked) == null) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::USER_DOESNT_EXIST);
@@ -82,8 +77,7 @@ class BlockedController extends BaseController
         }
     }
 
-    public function remove(int $idUser, int $idBlocked)
-    {
+    public function remove(int $idUser, int $idBlocked) {
         if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
             if ($this->userModel->getById($idBlocked) == NULL) {
                 $this->send(HTTPCodes::NOT_FOUND, null, self::USER_DOESNT_EXIST);
@@ -104,17 +98,15 @@ class BlockedController extends BaseController
         }
     }
 
-    public function isBlocked(int $idUser, int $idUser2)
-    {
+    public function isBlocked(int $idUser, int $idUser2) {
         if ($this->userModel->getById($idUser) == null || $this->userModel->getById($idUser2) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_DOESNT_EXIST);
         } else if ($idUser == $idUser2) {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::USER_SAME_ID);
         }
 
-
         if ($this->user->isDeveloper() || $this->user->getId() == $idUser) {
-            return $this->send(HTTPCodes::OK, ["data" => $this->blockedModel->isBlocked($idUser, $idUser2)]);
+            return $this->send(HTTPCodes::OK, ["blocked" => $this->blockedModel->isBlocked($idUser, $idUser2)]);
         } else {
             $this->send(HTTPCodes::FORBIDDEN, null, self::INVALID_ROLE);
         }

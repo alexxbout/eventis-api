@@ -62,7 +62,7 @@ class FriendModel extends BaseModel {
         }
     }
 
-    public function isPending(int $idRequeted, int $idRequester): bool {
+    public function isPending(int $idRequeted, int $idRequester): object | null {
         $array = [
             "idRequester" => $idRequeted,
             "idRequested" => $idRequester
@@ -81,9 +81,9 @@ class FriendModel extends BaseModel {
             ->orGroupStart()
             ->where($array2)
             ->groupEnd()
-            ->get()->getRowArray();
+            ->get()->getRowObject();
 
-        return $data != null;
+        return $data;
     }
 
     public function add(int $idUser, int $idFriend): bool {
