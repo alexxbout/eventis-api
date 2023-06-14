@@ -101,10 +101,7 @@ class UserModel extends BaseModel {
         return $this->isLastQuerySuccessfull();
     }
 
-    public function getAffinities(int $idUser): array | null
-    {
-
-
+    public function getAffinities(int $idUser): array | null {
         $subquery = $this->db->table('friend fr')
             ->select('1')
             ->where('fr.idUser1', $idUser)
@@ -149,8 +146,7 @@ class UserModel extends BaseModel {
             ->get()->getResultObject();
     }
 
-    public function searchUsers(string $name): array
-    {
+    public function searchUsers(string $name): array {
         $name = strtolower($name);
         return $this->db->table("user")
             ->select('id, ', 'lastname', 'firstname', 'pseudo')
@@ -163,5 +159,11 @@ class UserModel extends BaseModel {
             ->groupEnd()
             ->get()
             ->getResultObject();
+    }
+
+    public function isPseudoAvailable(int $idUser, string $pseudo): bool {
+        $result = $this->db->table("user")->select("1")->getWhere(["pseudo" => $pseudo, "id !=" => $idUser])->getRow();
+
+        return $result == null;
     }
 }

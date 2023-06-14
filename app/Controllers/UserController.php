@@ -33,6 +33,7 @@ class UserController extends BaseController {
     private const IMAGE_UPLOADED           = "Image téléchargée";
     private const IMAGE_REMOVED            = "Image supprimée";
     private const AFFINITIES_FOUND         = "Affinités trouvées";
+    private const PSEUDO_ALREADY_TAKEN     = "Ce pseudo est déjà pris";
 
     private const PROFIL_PICTURE_PATH      = WRITEPATH . "uploads/images/users/";
 
@@ -75,8 +76,9 @@ class UserController extends BaseController {
     public function getByIdFoyer(int $idFoyer) {
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
             if ($this->foyerModel->getById($idFoyer) == null) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_FOYER_DOESNT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::ID_FOYER_DOESNT_EXIST);
             }
+
             $data = $this->userModel->getByIdFoyer($idFoyer);
             if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
@@ -108,15 +110,13 @@ class UserController extends BaseController {
             $validation->setRuleGroup("user_add_validation");
 
             if (!$validation->withRequest($this->request)->run()) {
-                $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
-                return;
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::VALIDATION_ERROR, $validation->getErrors());
             }
             $data = $this->request->getJSON();
 
             // Vérifier si l'idFoyer existe
             if ($this->foyerModel->getById($data->idFoyer) === null) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_FOYER_DOESNT_EXIST);
-                return;
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::ID_FOYER_DOESNT_EXIST);
             }
 
             $login = UtilsCredentials::getValidRandomLogin($data->lastname, $data->firstname);
@@ -141,8 +141,9 @@ class UserController extends BaseController {
         // Vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
             if ($this->userModel->getById($idUser == null)) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
+
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("user_update_data_validation");
 
@@ -151,6 +152,11 @@ class UserController extends BaseController {
             }
 
             $data = $this->request->getJSON();
+
+            // Check if the pseudo is already taken
+            if (!$this->userModel->isPseudoAvailable($idUser, $data->pseudo)) {
+                return $this->send(HTTPCodes::BAD_REQUEST, null, self::PSEUDO_ALREADY_TAKEN);
+            }
 
             unset($data->password, $data->id, $data->idFoyer, $data->idRole, $data->login);
 
@@ -183,8 +189,9 @@ class UserController extends BaseController {
         // Vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
             if ($this->userModel->getById($idUser == null)) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
+
             $this->userModel->setActive($idUser, 0);
 
             $this->send(HTTPCodes::OK, null, self::USER_DEACTIVATED);
@@ -204,8 +211,9 @@ class UserController extends BaseController {
         // Soit le compte est dev/admin vérifier si l'idUser correspond à l'ID de l'utilisateur ou si l'utilisateur est un développeur ou un administrateur
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $idUser == $this->user->getId()) {
             if ($this->userModel->getById($idUser == null)) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
+
             $this->userModel->setActive($idUser, 1);
 
             $this->send(HTTPCodes::OK, null, self::USER_ACTIVATED);
@@ -262,7 +270,7 @@ class UserController extends BaseController {
     public function addImage(int $idUser) {
         if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
             if ($this->userModel->getById($idUser) == null) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
             $validation =  \Config\Services::validation();
             $validation->setRuleGroup("addImage_validation");
@@ -306,7 +314,7 @@ class UserController extends BaseController {
     public function removeImage(int $idUser) {
         if ($this->user->isDeveloper() || $idUser == $this->user->getId()) {
             if ($this->userModel->getById($idUser) == null) {
-                $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
+                return $this->send(HTTPCodes::NOT_FOUND, null, self::ID_USER_DOESNT_EXIST);
             }
 
             $this->userModel->setProfilPicture($idUser, null);
