@@ -8,9 +8,7 @@ use DateTime;
 
 class MessageModel extends BaseModel
 {
-
-    //version A
-    public function getConversation(int $id1, int $id2, int $idConversation): array {
+    public function getOldMessages(int $id1, int $id2, int $idConversation, string $date, int $offset = 0): array {
         return $this->db->table("message")
             ->select("idSender, idReceiver, content, sentAt")
             ->where("idConversation", $idConversation)
@@ -22,15 +20,15 @@ class MessageModel extends BaseModel
             ->where("idSender", $id2)
             ->orWhere("idReceiver", $id2)
             ->groupEnd()
+            ->where("sentAt <", date('Y-m-d H:i:s', strtotime($date)))
             ->orderBy("sentAt", "DESC")
             ->limit(20)
+            ->offset($offset * 20)
             ->get()
             ->getResultObject();
     }
 
-    //version B
-    /*public function getConversation($id1, $id2, $idConversation, $multiple): array {
-        $nbMsg = $multiple * 20;
+    public function getNewMessages(int $id1, int $id2, int $idConversation, string $date): array {
         return $this->db->table("message")
             ->select("idSender, idReceiver, content, sentAt")
             ->where("idConversation", $idConversation)
@@ -42,11 +40,11 @@ class MessageModel extends BaseModel
             ->where("idSender", $id2)
             ->orWhere("idReceiver", $id2)
             ->groupEnd()
-            ->orderBy("sentAt", "DESC")
-            ->limit($nbMsg)
+            ->where("sentAt >", date('Y-m-d H:i:s', strtotime($date)))
+            ->orderBy("sentAt", "ASC")
             ->get()
             ->getResultObject();
-    }*/
+    } 
 
     public function markAsRead(int $idUser, int $idFriend, int $idConversation): bool {
         $this->db->table("message")
@@ -55,7 +53,7 @@ class MessageModel extends BaseModel
         ->where("idConversation", $idConversation)
         ->update(["unread" => 0]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function add(object $message): bool {
@@ -64,7 +62,7 @@ class MessageModel extends BaseModel
 
         $this->db->table("message")->insert($message);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function countUnreadMessages(int $idUser, int $idFriend, int $idConversation): int {

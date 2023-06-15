@@ -17,7 +17,7 @@ class ParticipantModel extends BaseModel {
 
         $this->db->table("participant")->insert($data);
 
-        if (!$this->isLastQuerySuccessfull()) {
+        if (!$this->isLastQuerySuccessful()) {
             return -1;
         }
 
@@ -27,7 +27,7 @@ class ParticipantModel extends BaseModel {
     public function remove(int $idEvent, int $idUser): bool {
         $this->db->table("participant")->delete(["idEvent" => $idEvent, "idUser" => $idUser]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function isParticipating(int $idEvent, int $idUser): bool {

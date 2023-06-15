@@ -20,7 +20,7 @@ class FoyerModel extends BaseModel {
         $data->id = $this->getMax("foyer", "id") + 1;
         $this->db->table("foyer")->insert($data);
 
-        if ($this->isLastQuerySuccessfull()) {
+        if ($this->isLastQuerySuccessful()) {
             return $data->id;
         } else {
             return -1;

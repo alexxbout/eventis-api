@@ -13,7 +13,7 @@ class FriendRequestModel extends BaseModel {
 
         $this->db->table("friend_request")->insert($data);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function isPending(int $idRequeted, int $idRequester): array | null {
@@ -59,7 +59,7 @@ class FriendRequestModel extends BaseModel {
             ->groupEnd()
             ->delete();
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function isNotRequester($idRequested, $idRequester): bool {

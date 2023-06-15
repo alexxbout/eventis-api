@@ -34,7 +34,7 @@ class BlockedModel extends BaseModel {
 
         $this->db->table("blocked")->insert($data);
 
-        if ($this->isLastQuerySuccessfull()) {
+        if ($this->isLastQuerySuccessful()) {
             return $data["id"];
         } else {
             return -1;
@@ -44,6 +44,6 @@ class BlockedModel extends BaseModel {
     public function remove(int $idUser, int $idBlocked): int {
         $this->db->table("blocked")->delete(["idBlocked" => $idBlocked, "idUser" => $idUser]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 }

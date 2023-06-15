@@ -55,7 +55,7 @@ class FriendModel extends BaseModel {
 
         $this->db->table("friend_request")->insert($data);
 
-        if ($this->isLastQuerySuccessfull()) {
+        if ($this->isLastQuerySuccessful()) {
             return $data["id"];
         } else {
             return -1;
@@ -96,7 +96,7 @@ class FriendModel extends BaseModel {
 
         $this->db->table("friend")->insert($data);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function remove(int $idUser, int $idFriend): bool {
@@ -112,6 +112,6 @@ class FriendModel extends BaseModel {
             ->groupEnd()
             ->delete();
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 }

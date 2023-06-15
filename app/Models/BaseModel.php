@@ -17,7 +17,7 @@ class BaseModel extends Model {
         return $max === null ? -1 : $max;
     }
 
-    protected function isLastQuerySuccessfull(): bool {
+    protected function isLastQuerySuccessful(): bool {
         return $this->db->affectedRows() > 0;
     }
 }

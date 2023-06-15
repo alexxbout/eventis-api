@@ -28,16 +28,16 @@ class NotificationModel extends BaseModel {
         $this->db->table("notification")->insert($data);
         $this->db->insertID();
         
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function remove(int $idUser, int $idAlt, int $idNotifType): bool{
         $this->db->table("notification")->delete(["idUser" => $idUser, "idAlt" => $idAlt, "idNotifType" => $idNotifType]);
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function removeNotification(int $id): bool{
         $this->db->table("notification")->delete(["id" => $id]);
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 }

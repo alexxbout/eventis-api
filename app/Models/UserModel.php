@@ -64,7 +64,7 @@ class UserModel extends BaseModel {
 
         $this->db->table("user")->insert($data);
 
-        if ($this->isLastQuerySuccessfull()) {
+        if ($this->isLastQuerySuccessful()) {
             return $data["id"];
         } else {
             return -1;
@@ -74,19 +74,19 @@ class UserModel extends BaseModel {
     public function updateData(int $idUser, object $data): bool {
         $this->db->table("user")->update($data, ["id" => $idUser]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function updatePassword(int $id, string $password): bool {
         $this->db->table("user")->update(["password" => $password], ["id" => $id]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function setActive(int $id, int $value): bool {
         $this->db->table("user")->update(["active" => $value], ["id" => $id]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function getProfilPicture(int $id): string | null {
@@ -98,19 +98,16 @@ class UserModel extends BaseModel {
     public function setProfilPicture(int $id, string|null $path): bool {
         $this->db->table("user")->update(["pic" => $path], ["id" => $id]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
-    public function getAffinities(int $idUser): array | null
-    {
-
-
-        $subquery = $this->db->table('friend fr')
-            ->select('1')
-            ->where('fr.idUser1', $idUser)
-            ->where('fr.idUser2 = u.id', null, false)
-            ->orWhere('fr.idUser1 = u.id', null, false)
-            ->where('fr.idUser2', $idUser)
+    public function getAffinities(int $idUser): array | null {
+        $subquery = $this->db->table("friend fr")
+            ->select("1")
+            ->where("fr.idUser1", $idUser)
+            ->where("fr.idUser2 = u.id", null, false)
+            ->orWhere("fr.idUser1 = u.id", null, false)
+            ->where("fr.idUser2", $idUser)
             ->limit(1)
             ->getCompiledSelect();
 
@@ -147,21 +144,5 @@ class UserModel extends BaseModel {
             ->join("foyer", "user.idFoyer = foyer.id")
             ->where("LEFT(foyer.zip, 2)", $zip)
             ->get()->getResultObject();
-    }
-
-    public function searchUsers(string $name): array
-    {
-        $name = strtolower($name);
-        return $this->db->table("user")
-            ->select('id, ', 'lastname', 'firstname', 'pseudo')
-            ->groupStart()
-            ->orLike('LOWER(firstname)', $name)
-            ->orLike('LOWER(lastname)', $name)
-            ->orLike('LOWER(CONCAT(firstname, " ", lastname))', $name)
-            ->orLike('LOWER(CONCAT(lastname, " ", firstname))', $name)
-            ->orLike('LOWER(pseudo)', $name)
-            ->groupEnd()
-            ->get()
-            ->getResultObject();
     }
 }
