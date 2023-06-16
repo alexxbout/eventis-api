@@ -30,14 +30,14 @@ class InteretModel extends BaseModel {
 
         $this->db->table("user_interest")->insert($data);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function remove(int $idUser, int $idInterest): bool {
         $array = ["idUser" => $idUser, "idInterest" => $idInterest];
         $this->db->table("user_interest")->where($array)->delete();
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function getAll(): array {

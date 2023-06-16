@@ -17,7 +17,7 @@ class RegistrationModel extends BaseModel {
 
         $this->db->table("registration")->insert($data);
 
-        if ($this->isLastQuerySuccessfull()) {
+        if ($this->isLastQuerySuccessful()) {
             return $data["id"];
         } else {
             return -1;

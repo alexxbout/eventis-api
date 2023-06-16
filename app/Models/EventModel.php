@@ -115,19 +115,19 @@ class EventModel extends BaseModel {
     public function cancel(int $id, string $reason): bool {
         $this->db->table("event")->update(["canceled" => true, "reason" => $reason], ["id" => $id]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function uncancel(int $id): bool {
         $this->db->table("event")->update(["canceled" => false, "reason" => null], ["id" => $id]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function updateData(int $id, object $data): bool {
         $this->db->table("event")->update($data, ["id" => $id]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function add(object $data): int {
@@ -135,7 +135,7 @@ class EventModel extends BaseModel {
         $this->db->table("event")->insert($data);
         $this->db->insertID();
 
-        if ($this->isLastQuerySuccessfull()) {
+        if ($this->isLastQuerySuccessful()) {
             return $data->id;
         } else {
             return -1;
@@ -145,7 +145,7 @@ class EventModel extends BaseModel {
     public function addImage(int $id, string $image): bool {
         $this->db->table("event")->update(["pic" => $image], ["id" => $id]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function getImage(int $id): string | null {

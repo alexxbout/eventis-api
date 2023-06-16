@@ -8,6 +8,7 @@ use App\Utils\HTTPCodes;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use DateTime;
 
 class MessageController extends BaseController{
 
@@ -31,9 +32,10 @@ class MessageController extends BaseController{
         $this->conversationModel = new \App\Models\ConversationModel();
     }
 
-    public function getConversation($idUser, $idFriend, $idConversation){
+    public function getOldMessages(int $idUser, int $idFriend, int $idConversation, int $date, int $offset){
         if($this->user->getId() == $idUser){
-            $data = $this->messageModel->getConversation($idUser, $idFriend, $idConversation);
+            $date = date("Y-m-d", $date / 1000);
+            $data = $this->messageModel->getOldMessages($idUser, $idFriend, $idConversation, $date, $offset);
             if(empty($data)){
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
@@ -44,8 +46,37 @@ class MessageController extends BaseController{
         }
     }
 
-    //j'ai mis ca pour que on puisse l'utiliser SOIT dans la fonction au dessus SOIT a chaque fois que l'appli veut (ce qui est meilleur)
-    public function markAsRead($idUser, $idFriend, $idConversation){
+    public function getNewMessages(int $idUser, int $idFriend, int $idConversation, int $date){
+        if($this->user->getId() == $idUser){
+            $date = date("Y-m-d", $date / 1000);
+            log_message('debug', $date);
+            $data = $this->messageModel->getNewMessages($idUser, $idFriend, $idConversation, $date);
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::CONVERSATION_GET);
+            }
+        } else {
+            $this->send(HTTPCodes::FORBIDDEN, null, self::NOT_YOU);
+        }
+    }
+
+    /*
+    public function getConversation(int $idUser, int $idFriend, int $idConversation, int $date, int $offset){
+        if($this->user->getId() == $idUser){
+            $date = date("Y-m-d", $date / 1000);
+            $data = $this->messageModel->getOldMessages($idUser, $idFriend, $idConversation, $date, $offset);
+            if(empty($data)){
+                $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
+            } else {
+                $this->send(HTTPCodes::OK, $data, self::CONVERSATION_GET);
+            }
+        } else {
+            $this->send(HTTPCodes::FORBIDDEN, null, self::NOT_YOU);
+        }
+    }*/
+
+    public function markAsRead(int $idUser, int $idFriend, int $idConversation){
         if($this->user->getId() == $idUser){
             $success = $this->messageModel->markAsRead($idUser, $idFriend, $idConversation);
             if($success){
@@ -58,9 +89,9 @@ class MessageController extends BaseController{
         }
     }
 
-    public function sendMessage($idUser, $idFriend, $idConversation){
+    public function sendMessage(int $idUser, int $idFriend, int $idConversation){
         if($this->user->getId() == $idUser && $this->friendModel->isFriend($idUser, $idFriend)){
-            $message = $this->request->getJSON(); //message->content = the content of the message???
+            $message = $this->request->getJSON();
             $message->idSender = $idUser;
             $message->idReceiver = $idFriend;
             $message->idConversation = $idConversation;
@@ -81,7 +112,7 @@ class MessageController extends BaseController{
     }
 
     //pas sur si necessaire ou si bien formatter
-    public function nbDeUnread($idUser, $idFriend, $idConversation){
+    public function nbDeUnread(int $idUser, int $idFriend, int $idConversation){
         if($this->user->getId() == $idUser){
             return $this->messageModel->unreadCheck($idUser, $idFriend, $idConversation);
         } else {

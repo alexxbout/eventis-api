@@ -7,6 +7,7 @@ use App\Utils\HTTPCodes;
 use App\Models\FriendModel;
 use App\Models\UserModel;
 use App\Models\FriendRequestModel;
+use App\Models\ConversationModel;
 use App\Models\BlockedModel;
 use App\Models\NotificationModel;
 use CodeIgniter\HTTP\RequestInterface;
@@ -43,6 +44,7 @@ class FriendController extends BaseController {
     private FriendRequestModel $friendRequestModel;
     private BlockedModel $blockedModel;
     private NotificationModel $notificationModel;
+    private ConversationModel $conversationModel;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
@@ -139,6 +141,11 @@ class FriendController extends BaseController {
                     if ($result) {
                         $this->friendRequestModel->remove($idUser, $idFriend);
                         $this->notificationModel->remove($idUser, $idFriend, 0);
+                        if($this->conversationModel->conversationExists($idUser, $idFriend)){
+                            $this->conversationModel->createConversation($idUser, $idFriend);
+                        } else {
+                            $this->conversationModel->unhideConversation($idUser, $idFriend);
+                        }
                         $this->send(HTTPCodes::CREATED, null, self::NOW_FRIENDS);
                     } else {
                         $this->send(HTTPCodes::INTERNAL_SERVER_ERROR, null, self::ERROR_ASKING_FRIEND);
@@ -212,6 +219,7 @@ class FriendController extends BaseController {
         if (!$this->user->isDeveloper()) {
             if (($this->user->getId() == $idUser || $this->user->getId() == $idFriend) && $this->friendModel->isFriend($idUser, $idFriend)) {
                 $this->friendModel->remove($idUser, $idFriend);
+                $this->conversationModel->hideConversation($idUser, $idFriend);
                 $this->send(HTTPCodes::OK, null, self::RESOURCE_REMOVED);
             } else {
                 $this->send(HTTPCodes::FORBIDDEN, null, self::SUPPRESSION_NOT_ALLOWED);

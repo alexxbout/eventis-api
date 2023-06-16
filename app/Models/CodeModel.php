@@ -23,7 +23,7 @@ class CodeModel extends BaseModel {
     public function setUsed(int $id): bool {
         $this->db->table("code")->update(["used" => 1], ["id" => $id]);
 
-        return $this->isLastQuerySuccessfull();
+        return $this->isLastQuerySuccessful();
     }
 
     public function add(string $code, int $idFoyer, int $idCreator, int $idRole, string $expire): int {
@@ -38,7 +38,7 @@ class CodeModel extends BaseModel {
 
         $this->db->table("code")->insert($data);
 
-        if ($this->isLastQuerySuccessfull()) {
+        if ($this->isLastQuerySuccessful()) {
             return $data["id"];
         } else {
             return -1;
