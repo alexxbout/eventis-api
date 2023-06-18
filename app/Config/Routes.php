@@ -45,7 +45,7 @@ $routes->group("api", static function ($routes) {
     $routes->group("auth", static function ($routes) {
         $routes->post("login",    "AuthController::login");
         $routes->post("register", "RegistrationController::register");
-    
+
         $routes->get("code/(:alphanum)",  "CodeController::getByCode/$1");
     });
 
@@ -54,7 +54,7 @@ $routes->group("api", static function ($routes) {
         $routes->group("inbox", static function ($routes){
             $routes->get("(:num)",                                            "ConversationController::getAllConversations/$1"); //$1 = $idUser
             $routes->post("(:num)/conversation/(:num)/(:num)",                "MessageController::sendMessage/$1/$2/$3");
-            $routes->put("(:num)/conversation/(:num)/(:num)",                 "MessageController::markAsRead/$1/$2/$3"); 
+            $routes->put("(:num)/conversation/(:num)/(:num)",                 "MessageController::markAsRead/$1/$2/$3");
             $routes->get("(:num)/conversation/(:num)/(:num)/(:num)/(:num)",   "MessageController::getOldMessages/$1/$2/$3/$4/$5"); //$2=$idFriend; $3=$idConversation; $4=datetime; $5=offset
             $routes->get("(:num)/conversation/(:num)/(:num)/(:num)",          "MessageController::getNewMessages/$1/$2/$3/$4"); //$2=$idFriend; $3=$idConversation; $4=datetime
         });
@@ -71,7 +71,7 @@ $routes->group("api", static function ($routes) {
             $routes->put("password/(:num)",   "UserController::updatePassword/$1");
             $routes->get("foyer/(:num)",      "UserController::getByIdFoyer/$1");
             $routes->get("zip/(:num)",         "UserController::getByZip/$1");
-            
+
             // Interests
             $routes->get("(:num)/interest",           "InterestController::getInterestsByUser/$1");
             $routes->post("(:num)/interest/(:num)",   "InterestController::add/$1/$2");
@@ -107,7 +107,7 @@ $routes->group("api", static function ($routes) {
 
         $routes->group("notifications", static function ($routes) {
             $routes->get("(:num)",           "NotificationController::getNotifications/$1");
-        }); 
+        });
 
         $routes->group("role", static function ($routes) {
             $routes->get("", "RoleController::getAll");
@@ -131,15 +131,17 @@ $routes->group("api", static function ($routes) {
         });
 
         $routes->group("event", static function ($routes) {
-            $routes->get("",                "EventController::getAll");
-            $routes->get("zip/(:alphanum)", "EventController::getByZip/$1");
-            $routes->get("(:num)",          "EventController::getById/$1");
-            $routes->get("categories",    "EventController::getAllTypes");
-            $routes->post("",               "EventController::add");
-            $routes->put("(:num)",          "EventController::updateData/$1");
-            $routes->put("cancel/(:num)",   "EventController::cancel/$1");
-            $routes->put("uncancel/(:num)", "EventController::uncancel/$1");
-            $routes->post("image/(:num)",    "EventController::addImage/$1");
+            $routes->get("",                       "EventController::getAll");
+            $routes->get("dpt/(:alphanum)",        "EventController::getByDepartment/$1");
+            $routes->get("(:num)",                 "EventController::getById/$1");
+            $routes->get("categories",             "EventController::getAllTypes");
+            $routes->get("cal/(:num)/(:alphanum)", "EventController::getByDayAndDepartment/$1/$2");
+            $routes->get("cal/(:num)",             "EventController::getByTime/$1");
+            $routes->post("",                      "EventController::add");
+            $routes->put("(:num)",                 "EventController::updateData/$1");
+            $routes->put("cancel/(:num)",          "EventController::cancel/$1");
+            $routes->put("uncancel/(:num)",        "EventController::uncancel/$1");
+            $routes->post("image/(:num)",          "EventController::addImage/$1");
 
             // Participants
             $routes->post("(:num)/participant/(:num)",   "ParticipantController::add/$1/$2");

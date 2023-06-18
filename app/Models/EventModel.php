@@ -12,19 +12,19 @@ class EventModel extends BaseModel {
     }
 
     public function getAllTypes(): array {
-        return $this->db->table("event_categorie")
+        return $this->db->table("event_category")
             ->get()->getResultObject();
     }
 
-    public function getAllNotCanceled(): array {
+    public function getAllNC(): array {
         return $this->db->table("event")->getWhere(["canceled" => 0])->getResultObject();
     }
 
     public function getById(int $id): object|null {
         return $this->db
             ->table("event")
-            ->select("event.*, event_categorie.emoji")
-            ->join("event_categorie", "event_categorie.id = event.idCategorie")
+            ->select("event.*, event_category.emoji")
+            ->join("event_category", "event_category.id = event.idCategory")
             ->getWhere(["event.id" => $id])
             ->getRowObject();
     }
@@ -34,11 +34,11 @@ class EventModel extends BaseModel {
         return $result == null ? -1 : $result;
     }
 
-    public function getByIdNotCanceled(int $id): object |  null {
+    public function getByIdNC(int $id): object |  null {
         return $this->db
             ->table("event")
-            ->select("event.*, event_categorie.emoji")
-            ->join("event_categorie", "event_categorie.id = event.idCategorie")
+            ->select("event.*, event_category.emoji")
+            ->join("event_category", "event_category.id = event.idCategory")
             ->getWhere(["event.id" => $id, "canceled" => 0])
             ->getRowObject();
     }
@@ -46,21 +46,21 @@ class EventModel extends BaseModel {
     public function getByIdCanceled(int $id): array {
         return $this->db
             ->table("event")
-            ->select("event.*, event_categorie.emoji")
-            ->join("event_categorie", "event_categorie.id = event.idCategorie")
+            ->select("event.*, event_category.emoji")
+            ->join("event_category", "event_category.id = event.idCategory")
             ->getWhere(["event.id" => $id, "canceled" => 1])
             ->getResultObject();
     }
 
-    public function getByZip(string $zip): array {
+    public function getByDepartment(string $dpt): array {
         $date = new DateTime();
         $date->modify("-7 day");
 
         $query = $this->db->table("event")
             ->orderBy("start", "ASC")
-            ->select("event.*, event_categorie.emoji")
-            ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->where("zip", $zip)
+            ->select("event.*, event_category.emoji")
+            ->join("event_category", "event_category.id = event.idCategory")
+            ->where("department", $dpt)
             ->where("start >=", $date->format("Y-m-d H:i:s"));
 
         $result = $query->get()->getResultObject();
@@ -68,15 +68,15 @@ class EventModel extends BaseModel {
         return $result;
     }
 
-    public function getByZipNotCanceled(string $zip): array {
+    public function getByDepartmentNC(string $dpt): array {
         $date = new DateTime();
         $date->modify("-7 day");
 
         $query = $this->db->table("event")
             ->orderBy("start", "ASC")
-            ->select("event.*, event_categorie.emoji")
-            ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->where("zip", $zip)
+            ->select("event.*, event_category.emoji")
+            ->join("event_category", "event_category.id = event.idCategory")
+            ->where("department", $dpt)
             ->where("canceled", 0)
             ->where("start >=", $date->format("Y-m-d H:i:s"));
 
@@ -85,12 +85,12 @@ class EventModel extends BaseModel {
         return $result;
     }
 
-    public function getByDayAndZip(string $date, string $zip): array {
+    public function getByDayAndDepartment(string $date, string $dpt): array {
         $query = $this->db->table("event")
             ->orderBy("start", "ASC")
-            ->select("event.*, event_categorie.emoji")
-            ->join("event_categorie", "event_categorie.id = event.idCategorie")
-            ->where("zip", $zip)
+            ->select("event.*, event_category.emoji")
+            ->join("event_category", "event_category.id = event.idCategory")
+            ->where("department", $dpt)
             ->where("canceled", 0)
             ->where("start", $date);
 

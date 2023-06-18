@@ -58,7 +58,7 @@ class EventController extends BaseController {
                 $this->send(HTTPCodes::OK, $data, self::ALL_EVENTS);
             }
         } else { // Account should see ONLY non-canceled events
-            $data = $this->eventModel->getAllNotCanceled();
+            $data = $this->eventModel->getAllNC();
             if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
@@ -77,7 +77,7 @@ class EventController extends BaseController {
                 $this->send(HTTPCodes::OK, $data, self::ALL_EVENTS);
             }
         } else { // Account should see ONLY non-canceled events
-            $data = $this->eventModel->getAllNotCanceled();
+            $data = $this->eventModel->getAllNC();
             if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
@@ -96,7 +96,7 @@ class EventController extends BaseController {
                 $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ID . $id);
             }
         } else { // Account should see ONLY non-canceled event
-            $data = $this->eventModel->getByIdNotCanceled($id);
+            $data = $this->eventModel->getByIdNC($id);
             if ($data == null) {
                 $this->send(HTTPCodes::NOT_FOUND, $data, self::EVENT_DOES_NOT_EXIST);
             } else {
@@ -105,33 +105,33 @@ class EventController extends BaseController {
         }
     }
 
-    public function getByZip(string $zip) {
+    public function getByDepartment(string $dpt) {
         // Check if account should see archived events
         if ($this->user->isDeveloper() || $this->user->isAdmin() || $this->user->isEducator()) {
-            $data = $this->eventModel->getByZip($zip);
+            $data = $this->eventModel->getByDepartment($dpt);
             if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
-                $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP . $zip);
+                $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP . $dpt);
             }
         } else { // Account should see ONLY non-canceled events
-            $data = $this->eventModel->getByZipNotCanceled($zip);
+            $data = $this->eventModel->getByDepartmentNC($dpt);
             if (empty($data)) {
                 $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
             } else {
-                $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP_NOT_CANCELED . $zip);
+                $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP_NOT_CANCELED . $dpt);
             }
         }
     }
 
-    public function getByDayAndZip(int $date, string $zip) {
+    public function getByDayAndDepartment(int $date, string $dpt) {
         $date = date("Y-m-d", $date / 1000);
-        $data = $this->eventModel->getByDayAndZip($date, $zip);
+        $data = $this->eventModel->getByDayAndDepartment($date, $dpt);
 
         if (empty($data)) {
             $this->send(HTTPCodes::NO_CONTENT, $data, self::NO_CONTENT);
         } else {
-            $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP . $zip . self::EVENT_BY_ZIP_AND_DATE . $date);
+            $this->send(HTTPCodes::OK, $data, self::EVENT_BY_ZIP . $dpt . self::EVENT_BY_ZIP_AND_DATE . $date);
         }
     }
 
@@ -268,7 +268,8 @@ class EventController extends BaseController {
             $this->eventModel->add($data);
 
             //create notif of event in all users of same region
-            $regionalUsers = $this->userModel->getUsersByZip($data->zip);
+            $regionalUsers = $this->userModel->getUsersByZip
+            ($data->zip);
             foreach ($regionalUsers as $user) {
                 $this->notificationModel->addNotification($user->id, $data->id, 1); //$idUser(s), $idEvent, 1=typeEvent
             }

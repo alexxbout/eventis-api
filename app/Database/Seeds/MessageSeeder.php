@@ -10,6 +10,6 @@ class MessageSeeder extends Seeder {
 
     $data = [[]];
 
-    $this->db->table("message")->insertBatch($data);
+    // $this->db->table("message")->insertBatch($data);
   }
 }
