@@ -49,7 +49,7 @@ class CreateEventTable extends Migration {
         "constraint" => 20,
         "collation" => "utf8mb4_general_ci",
       ],
-      "idCategorie" => [
+      "idCategory" => [
         "type" => "INT",
       ],
       "description" => [
@@ -66,7 +66,7 @@ class CreateEventTable extends Migration {
 
     $this->forge->addKey("id", true);
     $this->forge->addForeignKey("idFoyer", "foyer", "id", "RESTRICT", "RESTRICT");
-    $this->forge->addForeignKey("idCategorie", "categorie", "id", "RESTRICT", "RESTRICT");
+    $this->forge->addForeignKey("idCategory", "category", "id", "RESTRICT", "RESTRICT");
     $this->forge->createTable("event");
 
     $this->db->enableForeignKeyChecks();

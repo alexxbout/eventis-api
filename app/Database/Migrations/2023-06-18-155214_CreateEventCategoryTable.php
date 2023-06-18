@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateEventCategorieTable extends Migration {
+class CreateEventCategoryTable extends Migration {
   public function up() {
     $this->db->disableForeignKeyChecks();
 
@@ -27,12 +27,12 @@ class CreateEventCategorieTable extends Migration {
     $this->forge->addKey("id", true);
     $this->forge->addForeignKey("emoji", "emoji", "code", "RESTRICT", "RESTRICT");
     $this->forge->addUniqueKey("name");
-    $this->forge->createTable("event_categorie");
+    $this->forge->createTable("event_category");
 
     $this->db->enableForeignKeyChecks();
   }
 
   public function down() {
-    $this->forge->dropTable("event_categorie");
+    $this->forge->dropTable("event_category");
   }
 }
