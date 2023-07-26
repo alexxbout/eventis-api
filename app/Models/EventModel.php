@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use CodeIgniter\Database\RawSql;
 use DateTime;
 
 class EventModel extends BaseModel {
@@ -31,7 +30,7 @@ class EventModel extends BaseModel {
 
     public function getIdFoyerByIdEvent(int $idEvent): int {
         $result = $this->db->table("event")->select("idFoyer")->getWhere(["id" => $idEvent])->getRow();
-        return $result == null ? -1 : $result;
+        return $result == null ? -1 : $result->idFoyer;
     }
 
     public function getByIdNC(int $id): object |  null {
@@ -43,13 +42,13 @@ class EventModel extends BaseModel {
             ->getRowObject();
     }
 
-    public function getByIdCanceled(int $id): array {
+    public function getByIdCanceled(int $id): object {
         return $this->db
             ->table("event")
             ->select("event.*, event_category.emoji")
             ->join("event_category", "event_category.id = event.idCategory")
             ->getWhere(["event.id" => $id, "canceled" => 1])
-            ->getResultObject();
+            ->getRow();
     }
 
     public function getByDepartment(string $dpt): array {
@@ -99,16 +98,16 @@ class EventModel extends BaseModel {
         return $result;
     }
 
-    public function getEventForTime($timelapse): array {
-        $date = date('Y-m-d');
-        $lapse = "+" . $timelapse . " months";
-        $endDate = date('Y-m-d', strtotime($lapse));
+    public function getDistinctDates(int $coveredMonths): array {
+        $date = date("Y-m-d");
+        $endDate = date("Y-m-d", strtotime("+ $coveredMonths months"));
 
-        return $this->db->table('event')
-            ->select('DATE(start) AS start')
+        return $this->db->table("event")
+            ->select("DATE(start) AS start")
             ->distinct()
-            ->where('start >=', $date)
-            ->where('start <', $endDate)
+            ->where("start >=", $date)
+            ->where("start <=", $endDate)
+            ->orderBy("start", "ASC")
             ->get()->getResultObject();
     }
 

@@ -51,7 +51,7 @@ class CodeModel extends BaseModel {
         return $data != null && $data->expire > date("Y-m-d H:i:s") && $data->used == 0;
     }
 
-    private function getById(int $id): object|null {
+    public function getById(int $id): object|null {
         return $this->db->table("code")->getWhere(["id" => $id])->getFirstRow();
     }
 }

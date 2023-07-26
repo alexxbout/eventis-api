@@ -12,7 +12,7 @@ class InteretModel extends BaseModel {
         ->getResultObject();
     }
 
-    public function isInterest(int $idUser, int $idInterest): bool {
+    public function hasInterest(int $idUser, int $idInterest): bool {
         $array = [
             "idUser" => $idUser,
             "idInterest" => $idInterest

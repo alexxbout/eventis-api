@@ -41,7 +41,7 @@ class BlockedModel extends BaseModel {
         }
     }
 
-    public function remove(int $idUser, int $idBlocked): int {
+    public function remove(int $idUser, int $idBlocked): bool {
         $this->db->table("blocked")->delete(["idBlocked" => $idBlocked, "idUser" => $idUser]);
 
         return $this->isLastQuerySuccessful();

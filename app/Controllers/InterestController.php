@@ -66,7 +66,7 @@ class InterestController extends BaseController {
 
         if (!$this->user->isDeveloper()) {
             if ($this->user->getId() == $idUser) {
-                if ($this->interetModel->isInterest($idUser, $idInteret)) {
+                if ($this->interetModel->hasInterest($idUser, $idInteret)) {
                     return $this->send(HTTPCodes::BAD_REQUEST, null, self::USER_ALREADY_INTERESTED);
                 }
                 $result = $this->interetModel->add($idUser, $idInteret);
@@ -79,7 +79,7 @@ class InterestController extends BaseController {
                 $this->send(HTTPCodes::FORBIDDEN, null, self::USER_NOT_USER);
             }
         } else {
-            if ($this->interetModel->isInterest($idUser, $idInteret)) {
+            if ($this->interetModel->hasInterest($idUser, $idInteret)) {
                 return $this->send(HTTPCodes::BAD_REQUEST, null, self::USER_ALREADY_INTERESTED);
             }
             $result = $this->interetModel->add($idUser, $idInteret);
@@ -95,12 +95,12 @@ class InterestController extends BaseController {
         if ($this->userModel->getById($idUser) == null) {
             return $this->send(HTTPCodes::NOT_FOUND, null, self::USER_NOT_FOUND);
         }
-        if (!$this->interetModel->isInterest($idUser, $idInteret)) {
+        if (!$this->interetModel->hasInterest($idUser, $idInteret)) {
             return $this->send(HTTPCodes::BAD_REQUEST, null, self::USER_NOT_INTERESTED);
         }
 
         if (!$this->user->isDeveloper()) {
-            if (($this->user->getId() == $idUser) && $this->interetModel->isInterest($idUser, $idInteret)) {
+            if (($this->user->getId() == $idUser) && $this->interetModel->hasInterest($idUser, $idInteret)) {
                 $result = $this->interetModel->remove($idUser, $idInteret);
                 if ($result) {
                     $this->send(HTTPCodes::OK, null, self::RESOURCE_REMOVED);

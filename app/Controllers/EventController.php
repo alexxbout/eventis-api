@@ -136,7 +136,7 @@ class EventController extends BaseController {
     }
 
     public function getByTime(int $time) {
-        $data = $this->eventModel->getEventForTime($time);
+        $data = $this->eventModel->getDistinctDates($time);
 
         $data = array_map(function($object) {
             return $object->start;

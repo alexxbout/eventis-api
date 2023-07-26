@@ -21,7 +21,7 @@ class EventSeeder extends Seeder {
         "title" => "Fête de la musique",
         "idCategory" => 6,
         "description" => "Venez à cette fête de la musique, on va s'éclater !",
-        "pic" => null
+        "pic" => "this/is/a/test/path"
       ],
       [
         "id" => 2,
@@ -71,8 +71,8 @@ class EventSeeder extends Seeder {
         "department" => "44",
         "address" => "3 rue de la paix",
         "city" => "Nantes",
-        "canceled" => 0,
-        "reason" => null,
+        "canceled" => 1,
+        "reason" => "Pas assez de participants",
         "start" => date("Y-m-d", strtotime("+1 months")),
         "title" => "Soirée jeux vidéo",
         "idCategory" => 5,

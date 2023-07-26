@@ -2,10 +2,7 @@
 namespace App\Controllers;
 
 use App\Utils\HTTPCodes;
-use App\Models\FriendModel;
 use App\Models\UserModel;
-use App\Models\FriendRequestModel;
-use App\Models\BlockedModel;
 use App\Models\NotificationModel;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -23,13 +20,11 @@ class NotificationController extends BaseController {
     private const FRIEND_REQ_NOTIFS = "Liste de notifications de requetes d'amis";
 
     private NotificationModel $notificationModel;
-    private FriendModel $friendModel;
     private UserModel $userModel;
     
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger) {
         parent::initController($request, $response, $logger);
         $this->notificationModel = new NotificationModel();
-        $this->friendModel = new FriendModel();
         $this->userModel = new userModel();
     }
 
