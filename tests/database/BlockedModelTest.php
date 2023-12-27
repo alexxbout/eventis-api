@@ -3,7 +3,7 @@
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\DatabaseTestTrait;
 
-final class BlockedModelTest extends CIUnitTestCase {
+class BlockedModelTest extends CIUnitTestCase {
 
   use DatabaseTestTrait;
 
